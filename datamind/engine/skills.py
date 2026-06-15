@@ -109,6 +109,9 @@ class SkillParser:
         if has_workflow and not phases:
             raise ValueError("Skill must have at least one phase")
 
+        if phases and phases[-1].type == "GATE":
+            raise ValueError("Final phase must not be a GATE")
+
         seen: set[str] = set()
         for p in phases:
             if p.id in seen:

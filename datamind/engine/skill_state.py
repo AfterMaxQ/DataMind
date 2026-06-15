@@ -281,4 +281,5 @@ class SkillStateMachine:
             self.state.completed_at = datetime.now(timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%SZ"
             )
+            self.state.result = "pass"
             return ""

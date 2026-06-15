@@ -197,6 +197,7 @@ class TestFullWorkflow:
         assert next_id == ""  # workflow complete
 
         assert sm.state.completed_at is not None
+        assert sm.state.result == "pass"
         for ph in ["analyze", "gate-approve", "execute", "gate-result"]:
             assert sm.state.phases[ph] == PhaseStatus.COMPLETE.value
 

@@ -12,6 +12,7 @@
 4. **Execute** (AUTO) — Generate and run a cleaning script (scripts/clean_*.py) that applies the approved strategy
 5. **Validate** (AUTO) — Compare before/after statistics, verify no data loss, check output integrity
 6. **Gate: Result** (GATE) — Show validation results to the human for final sign-off
+7. **Archive** (AUTO) — Archive session artifacts, scripts, and reports for traceability
 
 ## Outputs
 

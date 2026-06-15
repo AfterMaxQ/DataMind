@@ -17,6 +17,7 @@ SAMPLE_SKILL_MD = """# Data Cleaning
 4. **Execute** (AUTO) - Generate and run cleaning script
 5. **Validate** (AUTO) - Check output statistics and report
 6. **Gate: Result** (GATE) - Show before/after for human sign-off
+7. **Archive** (AUTO) - Archive results and clean up session artifacts
 
 ## Outputs
 
@@ -35,13 +36,15 @@ def test_parse_skill_md_purpose():
 def test_parse_skill_md_steps():
     parser = SkillParser()
     skill = parser.parse(SAMPLE_SKILL_MD)
-    assert len(skill.steps) == 6
+    assert len(skill.steps) == 7
     assert skill.steps[0].step_type == "AUTO"
     assert skill.steps[0].name == "Analyze"
     assert skill.steps[2].step_type == "GATE"
     assert skill.steps[2].name == "Approve"
     assert skill.steps[5].step_type == "GATE"
     assert skill.steps[5].name == "Result"
+    assert skill.steps[6].step_type == "AUTO"
+    assert skill.steps[6].name == "Archive"
 
 
 def test_parse_skill_md_inputs():
@@ -70,7 +73,7 @@ def test_load_skill_from_directory(tmp_project):
     svc = SkillService(skills_dir=str(skills_dir), lineage_svc=None, cognition_svc=None, assembly_svc=None)
     skill = svc.load_skill("data-cleaning")
     assert skill.name == "Data Cleaning"
-    assert len(skill.steps) == 6
+    assert len(skill.steps) == 7
 
 
 def test_get_current_step_first(tmp_project):
@@ -94,6 +97,7 @@ def test_is_gate_step(tmp_project):
 
 1. **Do X** (AUTO) - Do stuff
 2. **Gate: Confirm** (GATE) - Wait for human
+3. **Finalize** (AUTO) - Complete the workflow
 """)
     svc = SkillService(str(skills_dir), None, None, None)
     skill = svc.load_skill("test")
@@ -155,7 +159,7 @@ def test_phase_extraction_from_skill_md():
     """SkillParser extracts SkillPhase objects with correct fields."""
     parser = SkillParser()
     skill = parser.parse(SAMPLE_SKILL_MD)
-    assert len(skill.phases) == 6
+    assert len(skill.phases) == 7
 
     # First phase
     p0 = skill.phases[0]
@@ -169,11 +173,17 @@ def test_phase_extraction_from_skill_md():
     assert p2.name == "Approve"
     assert p2.type == "GATE"
 
-    # Last gate phase
+    # Gate phase (index 5)
     p5 = skill.phases[5]
     assert p5.id == "gate-result"
     assert p5.name == "Result"
     assert p5.type == "GATE"
+
+    # Final phase (AUTO, not GATE)
+    p6 = skill.phases[6]
+    assert p6.id == "archive"
+    assert p6.name == "Archive"
+    assert p6.type == "AUTO"
 
 
 def test_duplicate_phase_ids_rejected():
@@ -239,6 +249,22 @@ def test_phase_id_generation_kebab_case():
     assert skill.phases[3].id == "execute"  # "Execute"
     assert skill.phases[4].id == "validate"  # "Validate"
     assert skill.phases[5].id == "gate-result"  # "Gate: Result"
+    assert skill.phases[6].id == "archive"  # "Archive"
+
+
+def test_final_phase_must_not_be_gate():
+    """Skills ending with a GATE phase must raise ValueError."""
+    gate_final_md = """# Bad Skill
+**Purpose:** Test final phase gate rejection.
+
+## Workflow
+
+1. **Do Stuff** (AUTO) - Some work
+2. **Gate: Final** (GATE) - Last phase is a gate, not allowed
+"""
+    parser = SkillParser()
+    with pytest.raises(ValueError, match="Final phase must not be a GATE"):
+        parser.parse(gate_final_md)
 
 
 def test_parser_backward_compatible():
@@ -246,11 +272,11 @@ def test_parser_backward_compatible():
     parser = SkillParser()
     skill = parser.parse(SAMPLE_SKILL_MD)
     # steps list still populated
-    assert len(skill.steps) == 6
+    assert len(skill.steps) == 7
     assert skill.steps[0].name == "Analyze"
     assert skill.steps[0].step_type == "AUTO"
     # phases list also populated
-    assert len(skill.phases) == 6
+    assert len(skill.phases) == 7
     assert skill.phases[0].id == "analyze"
 
 

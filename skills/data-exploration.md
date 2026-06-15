@@ -10,6 +10,7 @@
 2. **Explore Patterns** (AUTO) — Compute correlations, distributions, outliers, generate exploratory charts
 3. **Generate Visualizations** (AUTO) — Create standard EDA visualizations (histograms, box plots, scatter matrix)
 4. **Gate: Review Findings** (GATE) — Present findings and charts to human for review and direction
+5. **Archive** (AUTO) — Archive exploration results and charts for traceability
 
 ## Outputs
 
