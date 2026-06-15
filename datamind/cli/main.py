@@ -16,9 +16,9 @@ def cli():
 @click.option("--name", default=None, help="Project name")
 def init(project_root, name):
     """Initialize a DataMind project at PROJECT_ROOT."""
-    config = {}
+    config = None
     if name:
-        config["project_name"] = name
+        config = {"project_name": name}
     try:
         paths = initialize_project(project_root, config)
     except FileNotFoundError as e:
