@@ -16,6 +16,8 @@ dependencies = [
     "openpyxl>=3.1",
     "pyyaml>=6.0",
     "httpx>=0.25",
+    "openai>=1.0",
+    "sse-starlette>=1.8",
 ]
 
 [project.optional-dependencies]
