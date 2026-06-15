@@ -119,6 +119,16 @@ LLM_DEFAULT_TIMEOUT = 60
 LLM_DEFAULT_API_BASE = "https://api.openai.com/v1"
 LLM_RETRYABLE_STATUSES = {429, 502, 503, 504}
 
+# Default cost rates per 1K tokens (input, output) for common models.
+# Used by UsageTracker when no custom rates are provided.
+LLM_DEFAULT_COST_RATES = {
+    "gpt-4o": {"input": 0.0025, "output": 0.01},
+    "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
+    "gpt-4": {"input": 0.03, "output": 0.06},
+    "gpt-4-turbo": {"input": 0.01, "output": 0.03},
+    "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},
+}
+
 
 # ---------------------------------------------------------------------------
 # Environment variable resolution
