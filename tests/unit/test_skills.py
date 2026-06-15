@@ -1,4 +1,5 @@
 """Tests for SkillService."""
+from pathlib import Path
 from datamind.engine.skills import SkillParser, SkillDefinition, SkillStep
 
 
@@ -126,3 +127,20 @@ def test_load_missing_skill(tmp_project):
     svc = SkillService(str(skills_dir), None, None, None)
     with pytest.raises(FileNotFoundError):
         svc.load_skill("nonexistent")
+
+
+def test_all_builtin_skills_parse():
+    """Verify all built-in SKILL.md files parse without errors."""
+    skills_dir = Path("skills")
+    assert skills_dir.exists(), "skills/ directory not found"
+    parser = SkillParser()
+    skill_count = 0
+    for skill_path in sorted(skills_dir.glob("*.md")):
+        skill = parser.parse_file(str(skill_path))
+        assert skill.name, f"{skill_path.name}: missing name"
+        assert skill.purpose, f"{skill_path.name}: missing purpose"
+        assert len(skill.steps) > 0, f"{skill_path.name}: missing steps"
+        gate_steps = [s for s in skill.steps if s.step_type == "GATE"]
+        assert len(gate_steps) > 0, f"{skill_path.name}: missing GATE steps"
+        skill_count += 1
+    assert skill_count >= 5, f"Expected at least 5 skills, found {skill_count}"
