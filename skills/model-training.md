@@ -6,11 +6,13 @@
 
 ## Workflow
 
-1. **Load Features** (AUTO) — Load features, split train/test, establish baseline metrics
-2. **Baseline** (AUTO) — Train a simple baseline model and record performance
-3. **Tune** (AUTO) — Perform hyperparameter tuning with cross-validation
-4. **Gate: Select Model** (GATE) — Present candidate models and metrics for human selection
-5. **Evaluate** (AUTO) — Run final evaluation on test set, generate report
+1. **Prepare Data** (AUTO) — Load features, split train/test, establish baseline metrics
+2. **Select Models** (AUTO) — Identify candidate models suitable for the problem type
+3. **Gate: Model Choice** (GATE) — Present candidate models and rationale for human selection
+4. **Train** (AUTO) — Train selected models with cross-validation
+5. **Evaluate** (AUTO) — Run final evaluation on test set, generate performance report
+6. **Gate: Results** (GATE) — Present evaluation results for human sign-off
+7. **Archive** (AUTO) — Archive model artifacts and reports for traceability
 
 ## Outputs
 
