@@ -144,3 +144,168 @@ def test_all_builtin_skills_parse():
         assert len(gate_steps) > 0, f"{skill_path.name}: missing GATE steps"
         skill_count += 1
     assert skill_count >= 5, f"Expected at least 5 skills, found {skill_count}"
+
+
+# ---------------------------------------------------------------------------
+# Phase extraction tests (SkillParser v2)
+# ---------------------------------------------------------------------------
+
+
+def test_phase_extraction_from_skill_md():
+    """SkillParser extracts SkillPhase objects with correct fields."""
+    parser = SkillParser()
+    skill = parser.parse(SAMPLE_SKILL_MD)
+    assert len(skill.phases) == 6
+
+    # First phase
+    p0 = skill.phases[0]
+    assert p0.id == "analyze"
+    assert p0.name == "Analyze"
+    assert p0.type == "AUTO"
+
+    # Gate phase (index 2)
+    p2 = skill.phases[2]
+    assert p2.id == "gate-approve"
+    assert p2.name == "Approve"
+    assert p2.type == "GATE"
+
+    # Last gate phase
+    p5 = skill.phases[5]
+    assert p5.id == "gate-result"
+    assert p5.name == "Result"
+    assert p5.type == "GATE"
+
+
+def test_duplicate_phase_ids_rejected():
+    """Duplicate phase ids raise ValueError."""
+    duplicate_md = """# Test
+**Purpose:** Testing.
+
+## Workflow
+
+1. **Do Stuff** (AUTO) - First
+2. **Do Stuff** (AUTO) - Same name different desc
+"""
+    parser = SkillParser()
+    with pytest.raises(ValueError, match="Duplicate"):
+        parser.parse(duplicate_md)
+
+
+def test_empty_phases_rejected():
+    """Skills with no phases raise ValueError."""
+    empty_md = """# Empty Skill
+**Purpose:** Nothing here.
+
+## Workflow
+
+"""
+    parser = SkillParser()
+    with pytest.raises(ValueError, match="at least one"):
+        parser.parse(empty_md)
+
+
+def test_gate_type_identification():
+    """GATE type is correctly identified from (GATE) tag and Gate: prefix."""
+    gate_md = """# Gate Test
+**Purpose:** Test gate detection.
+
+## Workflow
+
+1. **Auto Step** (AUTO) - Just runs
+2. **Gate: Confirm** (GATE) - Needs human
+3. **Gate: Review** (GATE) - Also needs human
+4. **Finalize** (AUTO) - Cleanup
+"""
+    parser = SkillParser()
+    skill = parser.parse(gate_md)
+    assert skill.phases[0].type == "AUTO"
+    assert skill.phases[1].type == "GATE"
+    assert skill.phases[2].type == "GATE"
+    assert skill.phases[3].type == "AUTO"
+
+    # Names should have "Gate: " stripped
+    assert skill.phases[1].name == "Confirm"
+    assert skill.phases[2].name == "Review"
+
+
+def test_phase_id_generation_kebab_case():
+    """Phase IDs are kebab-case: lowercase, spaces replaced with hyphens."""
+    parser = SkillParser()
+    skill = parser.parse(SAMPLE_SKILL_MD)
+
+    assert skill.phases[0].id == "analyze"  # "Analyze"
+    assert skill.phases[1].id == "propose-strategy"  # "Propose Strategy"
+    assert skill.phases[2].id == "gate-approve"  # "Gate: Approve"
+    assert skill.phases[3].id == "execute"  # "Execute"
+    assert skill.phases[4].id == "validate"  # "Validate"
+    assert skill.phases[5].id == "gate-result"  # "Gate: Result"
+
+
+def test_parser_backward_compatible():
+    """Existing skills still parse with steps populated (backward compat)."""
+    parser = SkillParser()
+    skill = parser.parse(SAMPLE_SKILL_MD)
+    # steps list still populated
+    assert len(skill.steps) == 6
+    assert skill.steps[0].name == "Analyze"
+    assert skill.steps[0].step_type == "AUTO"
+    # phases list also populated
+    assert len(skill.phases) == 6
+    assert skill.phases[0].id == "analyze"
+
+
+# ---------------------------------------------------------------------------
+# SkillSession tests
+# ---------------------------------------------------------------------------
+
+from datamind.engine.skill_state import SkillPhase
+from datamind.engine.skills import SkillSession
+
+
+def test_skill_session_create(tmp_project):
+    """SkillSession.create() creates a time-stamped session directory."""
+    from datamind.engine.skills import SkillSession
+
+    phases = [
+        SkillPhase(id="analyze", name="Analyze", type="AUTO", description="Analyze"),
+        SkillPhase(id="execute", name="Execute", type="AUTO", description="Execute"),
+    ]
+    sessions_base = str(tmp_project / "sessions")
+    sm = SkillSession.create("data-cleaning", "sales.csv", sessions_base, phases)
+
+    assert sm is not None
+    assert sm.state.skill == "data-cleaning"
+    assert sm.state.target == "sales.csv"
+    assert sm.state.phase == "analyze"
+    assert sm.state.phases["analyze"] == "in_progress"
+
+    # Directory created with timestamp
+    session_path = Path(sessions_base)
+    dirs = list(session_path.iterdir())
+    assert len(dirs) == 1
+    assert "data-cleaning" in dirs[0].name
+    assert "sales" in dirs[0].name
+
+
+def test_skill_session_resume(tmp_project):
+    """SkillSession.resume() loads a previously saved session."""
+    phases = [
+        SkillPhase(id="analyze", name="Analyze", type="AUTO", description="Analyze"),
+        SkillPhase(id="execute", name="Execute", type="AUTO", description="Execute"),
+    ]
+    sessions_base = str(tmp_project / "sessions")
+    sm = SkillSession.create("data-cleaning", "sales.csv", sessions_base, phases)
+
+    # Complete first phase
+    sm.complete_phase("analyze", artifact_path="phase-1.md")
+    sm.save(str(Path(sessions_base) / list(Path(sessions_base).iterdir())[0].name / ".skill.yaml"))
+
+    # Resume
+    session_dir = str(list(Path(sessions_base).iterdir())[0])
+    restored = SkillSession.resume(session_dir)
+
+    assert restored is not None
+    assert restored.state.skill == "data-cleaning"
+    assert restored.state.phase == "execute"
+    assert restored.state.phases["analyze"] == "complete"
+    assert restored.state.phases["execute"] == "in_progress"

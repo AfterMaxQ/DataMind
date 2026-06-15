@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from datamind.engine.skill_state import SkillPhase, SkillStateMachine
+
 
 @dataclass
 class SkillStep:
@@ -18,11 +20,16 @@ class SkillDefinition:
     purpose: str = ""
     inputs: str = ""
     steps: list[SkillStep] = field(default_factory=list)
+    phases: list[SkillPhase] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
 
 
 class SkillParser:
-    """Parse SKILL.md files into SkillDefinition objects."""
+    """Parse SKILL.md files into SkillDefinition objects.
+
+    Extracts both legacy :class:`SkillStep` objects (backward compatible) and
+    new :class:`SkillPhase` objects with kebab-case ids and type classification.
+    """
 
     STEP_RE = re.compile(r"^\d+\.\s+\*\*(.+?)\*\*\s*\((\w+)\)\s*[-—]\s*(.+)$", re.MULTILINE)
 
@@ -41,16 +48,29 @@ class SkillParser:
         if inputs_match:
             skill.inputs = inputs_match.group(1).strip()
 
+        # Parse steps (backward compatible) and phases (new)
         for match in self.STEP_RE.finditer(content):
-            step_name = match.group(1).strip()
+            raw_name = match.group(1).strip()
             step_type_raw = match.group(2).strip().upper()
             description = match.group(3).strip()
-            if step_type_raw == "GATE" or "GATE" in step_name.upper():
+
+            # Determine type and generate display name
+            if step_type_raw == "GATE" or "GATE" in raw_name.upper():
                 step_type = "GATE"
-                step_name = re.sub(r"^Gate:\s*", "", step_name)
+                display_name = re.sub(r"^Gate:\s*", "", raw_name)
             else:
                 step_type = "AUTO"
-            skill.steps.append(SkillStep(name=step_name, step_type=step_type, description=description))
+                display_name = raw_name
+
+            # Phase ID uses raw name (keeps "gate-" prefix for GATE phases)
+            phase_id = self._to_phase_id(raw_name)
+
+            skill.steps.append(SkillStep(name=display_name, step_type=step_type, description=description))
+            skill.phases.append(
+                SkillPhase(id=phase_id, name=display_name, type=step_type, description=description)
+            )
+
+        self._validate_phases(skill.phases, content)
 
         outputs_match = re.search(r"\*\*Outputs?\*\*\s*\n((?:\s*[-*]\s*.+\n?)*)", content, re.MULTILINE)
         if outputs_match:
@@ -58,6 +78,42 @@ class SkillParser:
             skill.outputs = [re.sub(r"^\s*[-*]\s*", "", line).strip() for line in outputs_text.strip().split("\n") if line.strip()]
 
         return skill
+
+    # ------------------------------------------------------------------
+    # Phase helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _to_phase_id(name: str) -> str:
+        """Convert a human-readable phase name to a kebab-case id.
+
+        ``"Propose Strategy"`` becomes ``"propose-strategy"``.
+        ``"Gate: Approve"`` becomes ``"gate-approve"``.
+        """
+        clean = name.strip().lower()
+        clean = re.sub(r"[^a-z0-9\s-]", "", clean)
+        clean = re.sub(r"\s+", "-", clean)
+        clean = re.sub(r"-{2,}", "-", clean)
+        return clean.strip("-")
+
+    @staticmethod
+    def _validate_phases(phases: list[SkillPhase], content: str = "") -> None:
+        """Validate the extracted phase list.
+
+        Raises:
+            ValueError: If there are duplicate ids, or if a Workflow section
+                exists but contains no phases.
+        """
+        has_workflow = bool(re.search(r"^##\s+Workflow", content, re.MULTILINE | re.IGNORECASE))
+
+        if has_workflow and not phases:
+            raise ValueError("Skill must have at least one phase")
+
+        seen: set[str] = set()
+        for p in phases:
+            if p.id in seen:
+                raise ValueError(f"Duplicate phase id: '{p.id}'")
+            seen.add(p.id)
 
     def parse_file(self, file_path: str) -> SkillDefinition:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -102,3 +158,43 @@ class SkillService:
 
     def compose_pipeline(self, skill_names: list[str]) -> list[SkillDefinition]:
         return [self.load_skill(name) for name in skill_names]
+
+
+class SkillSession:
+    """Convenience wrapper around :class:`SkillStateMachine` for session management.
+
+    Provides factory methods to create and resume skill execution sessions.
+    """
+
+    @staticmethod
+    def create(
+        skill_name: str,
+        target: str,
+        session_dir_base: str,
+        phases: list[SkillPhase],
+    ) -> SkillStateMachine:
+        """Create a new timestamped session directory and initialise state.
+
+        Args:
+            skill_name: Name of the skill (e.g. ``"data-cleaning"``).
+            target: Target data file or resource (e.g. ``"sales.csv"``).
+            session_dir_base: Parent directory for session subdirectories.
+            phases: Ordered list of :class:`SkillPhase` definitions.
+
+        Returns:
+            A ready-to-use :class:`SkillStateMachine`.
+        """
+        return SkillStateMachine.create_session(skill_name, target, phases, session_dir_base)
+
+    @staticmethod
+    def resume(session_dir: str) -> SkillStateMachine:
+        """Resume an existing session from its ``.skill.yaml`` file.
+
+        Args:
+            session_dir: Path to the session directory containing ``.skill.yaml``.
+
+        Returns:
+            The restored :class:`SkillStateMachine`.
+        """
+        yaml_path = Path(session_dir) / ".skill.yaml"
+        return SkillStateMachine.load(str(yaml_path))
