@@ -8,6 +8,8 @@ tdd_mode: tdd
 isolation: worktree
 verify_mode: null
 auto_transition: true
+build_command: pytest -q
+verify_command: pytest -q
 base_ref: 2808165382b9928d6e386bbe789fb4de46b896c7
 design_doc: docs/superpowers/specs/2026-06-15-datamind-engine-v2-design.md
 plan: docs/superpowers/plans/2026-06-15-datamind-engine-v2.md
