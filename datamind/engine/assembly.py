@@ -39,6 +39,16 @@ class AssemblyService:
             lines.append(f"- {disc['finding']}")
         return self._write("HISTORY.md", "\n".join(lines))
 
+    def refresh_all(self, project_name: str, dataset_names: list[str], datasets_info: list[dict]) -> dict[str, Path]:
+        """Generate all context files from L1 + L2 data. Returns path mapping."""
+        decisions = self._cognition.get_recent_decisions(50)
+        discoveries = self._cognition.get_recent_discoveries(50)
+        return {
+            "PROJECT.md": self.generate_project_md(project_name, dataset_names),
+            "DATASETS.md": self.generate_datasets_md(datasets_info),
+            "HISTORY.md": self.generate_history_md(decisions, discoveries),
+        }
+
     def _write(self, name: str, content: str) -> Path:
         path = self.context_dir / name
         path.write_text(content, encoding="utf-8")
