@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datamind-studio"
+version = "0.1.0"
+description = "AI-native data science research system"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.0",
+    "fastapi>=0.104",
+    "uvicorn[standard]>=0.24",
+    "pandas>=2.0",
+    "pyarrow>=14.0",
+    "openpyxl>=3.1",
+    "pyyaml>=6.0",
+    "httpx>=0.25",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "httpx>=0.25",
+    "black>=23.0",
+    "ruff>=0.1",
+]
+
+[project.scripts]
+datamind = "datamind.cli.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "unit: Unit tests (no I/O)",
+    "integration: Integration tests (real files)",
+    "e2e: End-to-end snapshot tests",
+    "slow: Slow tests",
+]
