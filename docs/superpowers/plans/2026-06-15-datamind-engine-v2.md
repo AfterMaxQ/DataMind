@@ -63,9 +63,9 @@ base-ref: 2808165382b9928d6e386bbe789fb4de46b896c7
 
 ## Phase 8: End-to-End Validation
 
-- [ ] **T8.1** — E2E test: full skill execution (data-cleaning) through all phases with MockLLMClient
-- [ ] **T8.2** — E2E test: interrupt/resume recovery — simulate context loss, verify `.skill.yaml` read and continue
-- [ ] **T8.3** — Run full test suite, ensure 100% pass rate
+- [x] **T8.1** — E2E test: full skill execution (data-cleaning) through all phases with MockLLMClient
+- [x] **T8.2** — E2E test: interrupt/resume recovery — simulate context loss, verify `.skill.yaml` read and continue
+- [x] **T8.3** — Run full test suite, ensure 100% pass rate
 
 ---
 

@@ -55,6 +55,6 @@
 
 ## Phase 8: End-to-End Validation
 
-- [ ] **T8.1** — E2E test: full skill execution (data-cleaning) through all phases including gate pause/resume
-- [ ] **T8.2** — E2E test: interrupt/resume recovery — simulate context loss, verify AI can read `.skill.yaml` and continue
-- [ ] **T8.3** — Run full test suite, ensure 100% pass rate
+- [x] **T8.1** — E2E test: full skill execution (data-cleaning) through all phases including gate pause/resume
+- [x] **T8.2** — E2E test: interrupt/resume recovery — simulate context loss, verify AI can read `.skill.yaml` and continue
+- [x] **T8.3** — Run full test suite, ensure 100% pass rate
