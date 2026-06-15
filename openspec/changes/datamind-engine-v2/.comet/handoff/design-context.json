@@ -1,0 +1,18 @@
+{
+  "change": "datamind-engine-v2",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "c0d0530a65bbfd782dd5b39d0527794a3755b2b55be9f19d416d3c3320e777dc",
+  "files": [
+    { "path": "openspec/changes/datamind-engine-v2/proposal.md", "sha256": "94f1379b3e60d6655657ee5876b192c681eccc84d7821ea2bbe395137e7db2a0" },
+    { "path": "openspec/changes/datamind-engine-v2/design.md", "sha256": "31fbf1cc7c7e53613583f9363ec254a1b8cad0f9eb9090e749d421df644b056c" },
+    { "path": "openspec/changes/datamind-engine-v2/tasks.md", "sha256": "be917e8cafd6601d50e473a963a78c897117212e7add917d7a2232e940e75aac" },
+    { "path": "openspec/changes/datamind-engine-v2/specs/agent-execution/spec.md", "sha256": "753298d47e315167a460b5540d2a44ba9956116ca21b34b076cd23560e28c0f3" },
+    { "path": "openspec/changes/datamind-engine-v2/specs/context-assembly/spec.md", "sha256": "618aeb74033becd984205021449fcf8ca69286bfd4ca802a642b6f87f40ace53" },
+    { "path": "openspec/changes/datamind-engine-v2/specs/data-lineage/spec.md", "sha256": "7ee44b8774892ada9a9157577231cf6ff3bc0396cb524c9ad630d03535b11e4a" },
+    { "path": "openspec/changes/datamind-engine-v2/specs/llm-integration/spec.md", "sha256": "cdf57b3f1ff5d4f98a0fae4e7baadb7a90ef7b38b6291868fac0d5286ee10c51" },
+    { "path": "openspec/changes/datamind-engine-v2/specs/skill-system/spec.md", "sha256": "991f19265d871a5d46d6ac8cd1924f2a9a26719d33cf74708814f999b3e67bc0" }
+  ]
+}
