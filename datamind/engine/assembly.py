@@ -28,6 +28,17 @@ class AssemblyService:
             lines.append("")
         return self._write("DATASETS.md", "\n".join(lines))
 
+    def generate_history_md(self, decisions: list[dict], discoveries: list[dict]) -> Path:
+        lines = ["# History", ""]
+        lines.append("## Decisions")
+        for d in decisions:
+            lines.append(f"- {d['what']}: {d['why']}")
+        lines.append("")
+        lines.append("## Discoveries")
+        for disc in discoveries:
+            lines.append(f"- {disc['finding']}")
+        return self._write("HISTORY.md", "\n".join(lines))
+
     def _write(self, name: str, content: str) -> Path:
         path = self.context_dir / name
         path.write_text(content, encoding="utf-8")
