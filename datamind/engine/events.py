@@ -11,9 +11,12 @@ class ExecutionLog:
 
     def __init__(self, executions_dir: str):
         self.dir = Path(executions_dir)
+        self._counter = 0
 
     def _now(self) -> str:
-        return datetime.now(timezone.utc).isoformat()
+        self._counter += 1
+        ts = datetime.now(timezone.utc).isoformat()
+        return f"{ts}#{self._counter:06d}"
 
     def _new_id(self) -> str:
         return str(uuid.uuid4())
