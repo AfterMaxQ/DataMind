@@ -35,7 +35,6 @@ def test_generate_datasets_md(tmp_project):
 
 def test_pack_manifest_priority_order():
     result = pack_manifest(
-        context_dir="/tmp/dummy",
         project_md_content="# Project",
         datasets_md_content="# Datasets",
         history_md_content="# History" * 100,
@@ -48,9 +47,8 @@ def test_pack_manifest_priority_order():
 
 
 def test_pack_manifest_truncates_when_over_budget():
-    section = "# A section " + "word " * 5000
+    section = "# A section " + "word " * 50000
     result = pack_manifest(
-        context_dir="/tmp/dummy",
         project_md_content="# P1 short",
         datasets_md_content="# P1 also short",
         history_md_content=section,
@@ -58,7 +56,7 @@ def test_pack_manifest_truncates_when_over_budget():
         params_md_content=section,
         checkpoint_md_content="# P4 checkpoint",
     )
-    assert len(result) < 50000
+    assert "[TRUNCATED" in result
 
 
 def test_estimate_tokens():

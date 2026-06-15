@@ -1,6 +1,7 @@
 """AssemblyService — context file generation and priority-ordered packing (Layer 3)."""
 
 from pathlib import Path
+from datamind.config import TOKEN_BUDGET
 
 
 class AssemblyService:
@@ -61,12 +62,11 @@ def estimate_tokens(text: str) -> int:
 
 
 def pack_manifest(
-    context_dir: str, project_md_content: str = "", datasets_md_content: str = "",
+    project_md_content: str = "", datasets_md_content: str = "",
     history_md_content: str = "", exploration_md_content: str = "",
     params_md_content: str = "", checkpoint_md_content: str = "",
 ) -> str:
     """Assemble CONTEXT_MANIFEST.md with priority-ordered sections. Truncates from bottom up when over budget."""
-    TOKEN_BUDGET = 5000
     sections = [
         ("P1_PROJECT", project_md_content), ("P1_DATASETS", datasets_md_content),
         ("P2_HISTORY", history_md_content), ("P3_EXPLORATION", exploration_md_content),
