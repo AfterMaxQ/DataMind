@@ -78,3 +78,31 @@ def resolve_component_paths(project_root: str | Path) -> dict[str, Path]:
         "params_file": base / PARAMS_FILE,
         "discoveries_file": base / DISCOVERIES_FILE,
     }
+
+
+def initialize_project(project_root: str | Path, config: dict | None = None) -> dict[str, Path]:
+    """Initialize a DataMind project directory structure.
+
+    Creates .datamind/ and all required subdirectories. Returns the
+    resolved component paths dict.
+    """
+    root = Path(project_root).resolve()
+    if not root.exists():
+        raise FileNotFoundError(f"Project root does not exist: {root}")
+
+    paths = resolve_component_paths(project_root)
+    base = paths["graph_db"].parent  # .datamind/
+    base.mkdir(parents=True, exist_ok=True)
+
+    # Create all directories
+    for key, path_obj in paths.items():
+        if key.endswith("_dir") or key.endswith("_data") or key in ("scripts_dir", "describe_dir", "executions_dir", "skills_dir", "context_dir"):
+            path_obj.mkdir(parents=True, exist_ok=True)
+
+    # Write default config.yaml if config provided
+    if config is not None:
+        import yaml
+        with open(paths["config_file"], "w", encoding="utf-8") as f:
+            yaml.dump(config, f, default_flow_style=False)
+
+    return paths
