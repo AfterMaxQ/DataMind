@@ -16,6 +16,8 @@ The system SHALL provide a mechanism to rebuild the current dataset state by rea
 - **WHEN** replaying execution logs to rebuild state
 - **THEN** events are applied in monotonic counter order, ensuring deterministic reconstruction
 
+## MODIFIED Requirements
+
 ### Requirement: Reproducibility
 The system SHALL enable reproducing any processed dataset by tracing its lineage back to raw data ancestors and re-running the script chain in dependency order.
 

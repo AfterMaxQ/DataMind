@@ -1,5 +1,5 @@
 workflow: full
-phase: open
+phase: build
 context_compression: off
 build_mode: null
 build_pause: null
@@ -9,7 +9,7 @@ isolation: null
 verify_mode: null
 auto_transition: true
 base_ref: 4842fe4e5b873c962a9f4bd07bb30c52e0fd6c3b
-design_doc: null
+design_doc: docs/superpowers/specs/2026-06-15-datamind-engine-v3-design.md
 plan: null
 verify_result: pending
 verification_report: null
@@ -17,3 +17,5 @@ branch_status: pending
 created_at: 2026-06-15
 verified_at: null
 archived: false
+handoff_context: openspec/changes/datamind-engine-v3/.comet/handoff/design-context.json
+handoff_hash: 817967ee25115543db2be3319ba13790aa5f63342dad0ed638d602d781a83df9

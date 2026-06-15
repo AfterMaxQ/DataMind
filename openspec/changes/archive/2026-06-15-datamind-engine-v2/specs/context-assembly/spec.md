@@ -3,7 +3,7 @@
 ## Purpose
 Add automatic context file refresh triggered by project state changes.
 
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Context File Auto-Refresh
 The system SHALL regenerate all context files (PROJECT.md, DATASETS.md, HISTORY.md, EXPLORATION.md, PARAMS.md) after every AI execution that changes project state. Regeneration SHALL be triggered by: dataset registration, script execution, decision logging, discovery recording, and parameter updates.
