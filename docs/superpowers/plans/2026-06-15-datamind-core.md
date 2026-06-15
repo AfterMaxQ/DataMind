@@ -6,7 +6,7 @@ base-ref: ebd08ab49b7656d29e0206504997230efe88a0d9
 
 # DataMind Core 实现计划
 
-> **面向 Agentic Worker：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐个任务实现此计划。步骤使用 checkbox（`- [ ]`）语法跟踪。
+> **面向 Agentic Worker：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐个任务实现此计划。步骤使用 checkbox（`- [x]`）语法跟踪。
 
 **目标：** 构建 DataMind Studio 核心引擎 —— 一个 AI 原生的数据科学研究系统，通过四层架构（数据血缘、认知旅程、上下文组装、技能编排）捕获项目知识以供 AI 跨会话消费。
 
@@ -85,7 +85,7 @@ skills/                             # 内置 SKILL.md 文件
 - 创建: `datamind/errors.py`
 - 创建: `pytest.ini`
 
-- [ ] **Step 1：编写 pyproject.toml**
+- [x] **Step 1：编写 pyproject.toml**
 
 ```toml
 [build-system]
@@ -134,7 +134,7 @@ markers = [
 ]
 ```
 
-- [ ] **Step 2：编写 datamind/__init__.py**
+- [x] **Step 2：编写 datamind/__init__.py**
 
 ```python
 """DataMind Studio — AI-native data science research system."""
@@ -142,7 +142,7 @@ markers = [
 __version__ = "0.1.0"
 ```
 
-- [ ] **Step 3：编写 datamind/config.py**
+- [x] **Step 3：编写 datamind/config.py**
 
 ```python
 """Configuration constants and project defaults."""
@@ -227,7 +227,7 @@ def resolve_component_paths(project_root: str | Path) -> dict[str, Path]:
     }
 ```
 
-- [ ] **Step 4：编写 datamind/errors.py**
+- [x] **Step 4：编写 datamind/errors.py**
 
 ```python
 """Custom exception hierarchy for DataMind."""
@@ -286,7 +286,7 @@ class ProjectNotFoundError(DataMindError):
     pass
 ```
 
-- [ ] **Step 5：编写 pytest.ini（如不使用 pyproject.toml）**
+- [x] **Step 5：编写 pytest.ini（如不使用 pyproject.toml）**
 
 创建 `pytest.ini`（如果 pyproject.toml 的 `[tool.pytest.ini_options]` 生效则跳过）：
 
@@ -301,7 +301,7 @@ markers =
     slow: Slow tests
 ```
 
-- [ ] **Step 6：安装开发依赖并验证**
+- [x] **Step 6：安装开发依赖并验证**
 
 ```bash
 pip install -e ".[dev]"
@@ -310,7 +310,7 @@ python -c "from datamind import __version__; print(__version__)"
 
 预期：`0.1.0`
 
-- [ ] **Step 7：提交**
+- [x] **Step 7：提交**
 
 ```bash
 git add pyproject.toml datamind/__init__.py datamind/config.py datamind/errors.py pytest.ini
@@ -325,7 +325,7 @@ git commit -m "feat: add project scaffolding with config and error hierarchy"
 - 创建: `datamind/engine/__init__.py`
 - 修改: `datamind/config.py`（已在 Task 1 创建）
 
-- [ ] **Step 1：编写 .datamind/ 目录初始化测试**
+- [x] **Step 1：编写 .datamind/ 目录初始化测试**
 
 创建 `tests/__init__.py`（空文件）。
 
@@ -409,7 +409,7 @@ pytest tests/unit/test_init.py -v
 
 预期：3 passed
 
-- [ ] **Step 2：编写初始化逻辑**
+- [x] **Step 2：编写初始化逻辑**
 
 创建 `datamind/engine/__init__.py`（空文件）。
 
@@ -460,7 +460,7 @@ def initialize_project(project_root: str | Path, config: dict | None = None) -> 
 from pathlib import Path
 ```
 
-- [ ] **Step 3：编写测试验证目录创建**
+- [x] **Step 3：编写测试验证目录创建**
 
 在 `tests/unit/test_init.py` 中追加：
 
@@ -503,7 +503,7 @@ pytest tests/unit/test_init.py -v
 
 预期：6 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add tests/__init__.py tests/conftest.py tests/unit/test_init.py datamind/config.py datamind/engine/__init__.py
@@ -518,7 +518,7 @@ git commit -m "feat: add .datamind/ project initialization logic"
 - 创建: `datamind/cli/__init__.py`
 - 创建: `datamind/cli/main.py`
 
-- [ ] **Step 1：编写 CLI 测试**
+- [x] **Step 1：编写 CLI 测试**
 
 创建 `tests/unit/test_cli.py`：
 
@@ -559,7 +559,7 @@ def test_cli_init_preserves_existing(tmp_project):
     assert existing.read_text() == "keep me"
 ```
 
-- [ ] **Step 2：编写 CLI 实现**
+- [x] **Step 2：编写 CLI 实现**
 
 创建 `datamind/cli/__init__.py`（空文件）。
 
@@ -603,7 +603,7 @@ if __name__ == "__main__":
     cli()
 ```
 
-- [ ] **Step 3：运行测试验证 CLI**
+- [x] **Step 3：运行测试验证 CLI**
 
 ```bash
 pytest tests/unit/test_cli.py -v
@@ -611,7 +611,7 @@ pytest tests/unit/test_cli.py -v
 
 预期：3 passed
 
-- [ ] **Step 4：手动验证**
+- [x] **Step 4：手动验证**
 
 ```bash
 pip install -e .
@@ -621,7 +621,7 @@ datamind init --name test-proj /tmp/test_datamind
 
 预期：看到 "Initialized DataMind project" 和创建的目录。
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/cli/__init__.py datamind/cli/main.py tests/unit/test_cli.py
@@ -637,7 +637,7 @@ git commit -m "feat: add Click CLI with 'datamind init' command"
 **文件：**
 - 创建: `datamind/engine/graph.py`
 
-- [ ] **Step 1：编写 GraphDB 初始化测试**
+- [x] **Step 1：编写 GraphDB 初始化测试**
 
 创建 `tests/unit/test_graph.py`：
 
@@ -688,7 +688,7 @@ def test_graphdb_init_idempotent(tmp_project):
     db2.close()
 ```
 
-- [ ] **Step 2：运行测试验证失败**
+- [x] **Step 2：运行测试验证失败**
 
 ```bash
 pytest tests/unit/test_graph.py -v
@@ -696,7 +696,7 @@ pytest tests/unit/test_graph.py -v
 
 预期：3 failed（`ImportError: cannot import name 'GraphDB'`）
 
-- [ ] **Step 3：编写 GraphDB 实现**
+- [x] **Step 3：编写 GraphDB 实现**
 
 创建 `datamind/engine/graph.py`：
 
@@ -759,7 +759,7 @@ class GraphDB:
             self._conn = None
 ```
 
-- [ ] **Step 4：运行测试验证通过**
+- [x] **Step 4：运行测试验证通过**
 
 ```bash
 pytest tests/unit/test_graph.py -v
@@ -767,7 +767,7 @@ pytest tests/unit/test_graph.py -v
 
 预期：3 passed
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/engine/graph.py tests/unit/test_graph.py
@@ -781,7 +781,7 @@ git commit -m "feat: add GraphDB with SQLite schema and WAL mode"
 **文件：**
 - 修改: `datamind/engine/graph.py`（追加方法）
 
-- [ ] **Step 1：编写节点/边 CRUD 测试**
+- [x] **Step 1：编写节点/边 CRUD 测试**
 
 在 `tests/unit/test_graph.py` 中追加：
 
@@ -872,7 +872,7 @@ def test_list_nodes_by_type(tmp_project):
     db.close()
 ```
 
-- [ ] **Step 2：运行测试验证失败**
+- [x] **Step 2：运行测试验证失败**
 
 ```bash
 pytest tests/unit/test_graph.py::test_insert_node_and_get -v
@@ -880,7 +880,7 @@ pytest tests/unit/test_graph.py::test_insert_node_and_get -v
 
 预期：FAIL（`AttributeError: 'GraphDB' object has no attribute 'insert_node'`）
 
-- [ ] **Step 3：实现节点/边 CRUD API**
+- [x] **Step 3：实现节点/边 CRUD API**
 
 在 `datamind/engine/graph.py` 的 `GraphDB` 类中追加：
 
@@ -1022,7 +1022,7 @@ import uuid
 from datetime import datetime, timezone
 ```
 
-- [ ] **Step 4：运行全部图数据库测试**
+- [x] **Step 4：运行全部图数据库测试**
 
 ```bash
 pytest tests/unit/test_graph.py -v
@@ -1030,7 +1030,7 @@ pytest tests/unit/test_graph.py -v
 
 预期：8 passed
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/engine/graph.py tests/unit/test_graph.py
@@ -1044,7 +1044,7 @@ git commit -m "feat: add GraphDB node/edge CRUD and traversal API"
 **文件：**
 - 创建: `datamind/engine/events.py`
 
-- [ ] **Step 1：编写 EventSourcing 测试**
+- [x] **Step 1：编写 EventSourcing 测试**
 
 创建 `tests/unit/test_events.py`：
 
@@ -1121,7 +1121,7 @@ def test_count_since(tmp_project):
     assert el.count_since("1970-01-01T00:00:00Z") == 5
 ```
 
-- [ ] **Step 2：运行测试验证失败**
+- [x] **Step 2：运行测试验证失败**
 
 ```bash
 pytest tests/unit/test_events.py -v
@@ -1129,7 +1129,7 @@ pytest tests/unit/test_events.py -v
 
 预期：4 failed（ImportError）
 
-- [ ] **Step 3：实现 EventSourcing**
+- [x] **Step 3：实现 EventSourcing**
 
 创建 `datamind/engine/events.py`：
 
@@ -1215,7 +1215,7 @@ class ExecutionLog:
         return count
 ```
 
-- [ ] **Step 4：运行测试验证通过**
+- [x] **Step 4：运行测试验证通过**
 
 ```bash
 pytest tests/unit/test_events.py -v
@@ -1223,7 +1223,7 @@ pytest tests/unit/test_events.py -v
 
 预期：4 passed
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/engine/events.py tests/unit/test_events.py
@@ -1239,7 +1239,7 @@ git commit -m "feat: add EventSourcing with immutable execution logs"
 **文件：**
 - 创建: `datamind/engine/describe.py`
 
-- [ ] **Step 1：编写 DescribeEngine 测试**
+- [x] **Step 1：编写 DescribeEngine 测试**
 
 创建 `tests/unit/test_describe.py`：
 
@@ -1326,7 +1326,7 @@ def test_describe_missing_file(tmp_project):
         engine.describe(str(tmp_project / "nonexistent.csv"))
 ```
 
-- [ ] **Step 2：运行测试验证失败**
+- [x] **Step 2：运行测试验证失败**
 
 ```bash
 pytest tests/unit/test_describe.py -v
@@ -1334,7 +1334,7 @@ pytest tests/unit/test_describe.py -v
 
 预期：5 failed（ImportError）
 
-- [ ] **Step 3：实现 DescribeEngine**
+- [x] **Step 3：实现 DescribeEngine**
 
 创建 `datamind/engine/describe.py`：
 
@@ -1424,7 +1424,7 @@ class DescribeEngine:
         return "\n".join(lines)
 ```
 
-- [ ] **Step 4：运行测试**
+- [x] **Step 4：运行测试**
 
 ```bash
 pytest tests/unit/test_describe.py -v
@@ -1432,7 +1432,7 @@ pytest tests/unit/test_describe.py -v
 
 预期：5 passed
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/engine/describe.py tests/unit/test_describe.py
@@ -1446,7 +1446,7 @@ git commit -m "feat: add DescribeEngine for CSV/Parquet/Excel auto-describe"
 **文件：**
 - 创建: `datamind/engine/lineage.py`
 
-- [ ] **Step 1：编写 LineageService 测试**
+- [x] **Step 1：编写 LineageService 测试**
 
 创建 `tests/unit/test_lineage.py`：
 
@@ -1528,7 +1528,7 @@ def test_scan_raw_data_detects_all(tmp_project):
     graph.close()
 ```
 
-- [ ] **Step 2：运行测试验证失败**
+- [x] **Step 2：运行测试验证失败**
 
 ```bash
 pytest tests/unit/test_lineage.py -v
@@ -1536,7 +1536,7 @@ pytest tests/unit/test_lineage.py -v
 
 预期：3 failed（ImportError）
 
-- [ ] **Step 3：实现 LineageService**
+- [x] **Step 3：实现 LineageService**
 
 创建 `datamind/engine/lineage.py`：
 
@@ -1647,7 +1647,7 @@ class LineageService:
         return {"script_node_id": script_node_id, "edges": edges}
 ```
 
-- [ ] **Step 4：处理 test_scan_raw_data_detects_all 中的 parquet 占位符**
+- [x] **Step 4：处理 test_scan_raw_data_detects_all 中的 parquet 占位符**
 
 `b.parquet` 占位符无法被 pandas 读取。更新测试以使用真实 CSV：
 
@@ -1678,7 +1678,7 @@ def test_scan_raw_data_detects_all(tmp_project):
     graph.close()
 ```
 
-- [ ] **Step 5：运行测试**
+- [x] **Step 5：运行测试**
 
 ```bash
 pytest tests/unit/test_lineage.py -v
@@ -1686,7 +1686,7 @@ pytest tests/unit/test_lineage.py -v
 
 预期：3 passed
 
-- [ ] **Step 6：提交**
+- [x] **Step 6：提交**
 
 ```bash
 git add datamind/engine/lineage.py tests/unit/test_lineage.py
@@ -1700,7 +1700,7 @@ git commit -m "feat: add LineageService with dataset registration and lineage qu
 **文件：**
 - 创建: `tests/integration/test_lineage_integration.py`
 
-- [ ] **Step 1：编写集成测试**
+- [x] **Step 1：编写集成测试**
 
 创建 `tests/integration/__init__.py`（空文件）。
 
@@ -1779,7 +1779,7 @@ def test_full_lineage_workflow(tmp_project):
     graph.close()
 ```
 
-- [ ] **Step 2：运行集成测试**
+- [x] **Step 2：运行集成测试**
 
 ```bash
 pytest tests/integration/test_lineage_integration.py -v -m integration
@@ -1787,7 +1787,7 @@ pytest tests/integration/test_lineage_integration.py -v -m integration
 
 预期：1 passed
 
-- [ ] **Step 3：提交**
+- [x] **Step 3：提交**
 
 ```bash
 git add tests/integration/__init__.py tests/integration/test_lineage_integration.py
@@ -1803,7 +1803,7 @@ git commit -m "test: add LineageService integration test with real files"
 **文件：**
 - 创建: `datamind/engine/cognition.py`
 
-- [ ] **Step 1：编写 CognitionService 测试**
+- [x] **Step 1：编写 CognitionService 测试**
 
 创建 `tests/unit/test_cognition.py`：
 
@@ -1874,7 +1874,7 @@ def test_add_exploration_node_and_tree(tmp_project):
     assert child_id in root["children"]
 ```
 
-- [ ] **Step 2：实现 CognitionService**
+- [x] **Step 2：实现 CognitionService**
 
 创建 `datamind/engine/cognition.py`：
 
@@ -2042,7 +2042,7 @@ class CognitionService:
             json.dump(data, f, indent=2, ensure_ascii=False)
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_cognition.py -v
@@ -2050,7 +2050,7 @@ pytest tests/unit/test_cognition.py -v
 
 预期：3 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/engine/cognition.py tests/unit/test_cognition.py
@@ -2066,7 +2066,7 @@ git commit -m "feat: add CognitionService with decisions, exploration, params, d
 **文件：**
 - 创建: `datamind/engine/assembly.py`
 
-- [ ] **Step 1：编写 AssemblyService 测试**
+- [x] **Step 1：编写 AssemblyService 测试**
 
 创建 `tests/unit/test_assembly.py`：
 
@@ -2111,7 +2111,7 @@ def test_generate_datasets_md(tmp_project):
     assert "1000" in content
 ```
 
-- [ ] **Step 2：实现 AssemblyService**
+- [x] **Step 2：实现 AssemblyService**
 
 创建 `datamind/engine/assembly.py`：
 
@@ -2248,7 +2248,7 @@ class AssemblyService:
         return path
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_assembly.py -v
@@ -2256,7 +2256,7 @@ pytest tests/unit/test_assembly.py -v
 
 预期：2 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/engine/assembly.py tests/unit/test_assembly.py
@@ -2270,7 +2270,7 @@ git commit -m "feat: add AssemblyService for context file generation"
 **文件：**
 - 修改: `datamind/engine/assembly.py`（追加打包逻辑）
 
-- [ ] **Step 1：编写打包算法测试**
+- [x] **Step 1：编写打包算法测试**
 
 在 `tests/unit/test_assembly.py` 中追加：
 
@@ -2322,7 +2322,7 @@ def test_estimate_tokens():
     assert 80 <= tokens <= 120  # ~100 tokens for 400 chars
 ```
 
-- [ ] **Step 2：运行测试确认失败**
+- [x] **Step 2：运行测试确认失败**
 
 ```bash
 pytest tests/unit/test_assembly.py::test_pack_manifest_priority_order -v
@@ -2330,7 +2330,7 @@ pytest tests/unit/test_assembly.py::test_pack_manifest_priority_order -v
 
 预期：FAIL（ImportError: cannot import name 'pack_manifest'）
 
-- [ ] **Step 3：实现打包算法**
+- [x] **Step 3：实现打包算法**
 
 在 `datamind/engine/assembly.py` 中追加（文件末尾）：
 
@@ -2399,7 +2399,7 @@ def pack_manifest(
     return "\n".join(parts)
 ```
 
-- [ ] **Step 4：运行打包测试**
+- [x] **Step 4：运行打包测试**
 
 ```bash
 pytest tests/unit/test_assembly.py -v
@@ -2407,7 +2407,7 @@ pytest tests/unit/test_assembly.py -v
 
 预期：5 passed
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/engine/assembly.py tests/unit/test_assembly.py
@@ -2423,7 +2423,7 @@ git commit -m "feat: add priority-ordered context packer with token budget trunc
 **文件：**
 - 创建: `datamind/engine/skills.py`
 
-- [ ] **Step 1：编写 SKILL.md 解析测试**
+- [x] **Step 1：编写 SKILL.md 解析测试**
 
 创建 `tests/unit/test_skills.py`：
 
@@ -2499,7 +2499,7 @@ def test_parse_empty_skill_md():
     assert skill.inputs == ""
 ```
 
-- [ ] **Step 2：运行测试确认失败**
+- [x] **Step 2：运行测试确认失败**
 
 ```bash
 pytest tests/unit/test_skills.py -v
@@ -2507,7 +2507,7 @@ pytest tests/unit/test_skills.py -v
 
 预期：4 failed（ImportError）
 
-- [ ] **Step 3：实现 SkillParser**
+- [x] **Step 3：实现 SkillParser**
 
 创建 `datamind/engine/skills.py`：
 
@@ -2606,7 +2606,7 @@ class SkillParser:
         return self.parse(content)
 ```
 
-- [ ] **Step 4：运行测试**
+- [x] **Step 4：运行测试**
 
 ```bash
 pytest tests/unit/test_skills.py -v
@@ -2614,7 +2614,7 @@ pytest tests/unit/test_skills.py -v
 
 预期：4 passed
 
-- [ ] **Step 5：提交**
+- [x] **Step 5：提交**
 
 ```bash
 git add datamind/engine/skills.py tests/unit/test_skills.py
@@ -2628,7 +2628,7 @@ git commit -m "feat: add SKILL.md parser with AUTO/GATE step detection"
 **文件：**
 - 修改: `datamind/engine/skills.py`（追加 SkillService 类）
 
-- [ ] **Step 1：编写 SkillService 测试**
+- [x] **Step 1：编写 SkillService 测试**
 
 在 `tests/unit/test_skills.py` 中追加：
 
@@ -2710,7 +2710,7 @@ def test_load_missing_skill(tmp_project):
         svc.load_skill("nonexistent")
 ```
 
-- [ ] **Step 2：实现 SkillService**
+- [x] **Step 2：实现 SkillService**
 
 在 `datamind/engine/skills.py` 末尾追加：
 
@@ -2771,7 +2771,7 @@ class SkillService:
         return [self.load_skill(name) for name in skill_names]
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_skills.py -v
@@ -2779,7 +2779,7 @@ pytest tests/unit/test_skills.py -v
 
 预期：9 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/engine/skills.py tests/unit/test_skills.py
@@ -2797,7 +2797,7 @@ git commit -m "feat: add SkillService for loading and executing skills"
 - 创建: `skills/model-training.md`
 - 创建: `skills/report-generation.md`
 
-- [ ] **Step 1：编写 data-cleaning.md**
+- [x] **Step 1：编写 data-cleaning.md**
 
 创建 `skills/data-cleaning.md`：
 
@@ -2826,7 +2826,7 @@ git commit -m "feat: add SkillService for loading and executing skills"
 - Graph edges linking raw → script → cleaned
 ```
 
-- [ ] **Step 2：编写 data-exploration.md**
+- [x] **Step 2：编写 data-exploration.md**
 
 创建 `skills/data-exploration.md`：
 
@@ -2851,7 +2851,7 @@ git commit -m "feat: add SkillService for loading and executing skills"
 - Exploration tree updated in exploration.json
 ```
 
-- [ ] **Step 3：编写 feature-engineering.md**
+- [x] **Step 3：编写 feature-engineering.md**
 
 创建 `skills/feature-engineering.md`：
 
@@ -2878,7 +2878,7 @@ git commit -m "feat: add SkillService for loading and executing skills"
 - Execution log in executions/
 ```
 
-- [ ] **Step 4：编写 model-training.md**
+- [x] **Step 4：编写 model-training.md**
 
 创建 `skills/model-training.md`：
 
@@ -2906,7 +2906,7 @@ git commit -m "feat: add SkillService for loading and executing skills"
 - Model metrics logged to discoveries.jsonl
 ```
 
-- [ ] **Step 5：编写 report-generation.md**
+- [x] **Step 5：编写 report-generation.md**
 
 创建 `skills/report-generation.md`：
 
@@ -2929,7 +2929,7 @@ git commit -m "feat: add SkillService for loading and executing skills"
 - Final report document
 ```
 
-- [ ] **Step 6：验证内置技能可解析**
+- [x] **Step 6：验证内置技能可解析**
 
 在 `tests/unit/test_skills.py` 中追加：
 
@@ -2958,7 +2958,7 @@ pytest tests/unit/test_skills.py::test_all_builtin_skills_parse -v
 
 预期：1 passed
 
-- [ ] **Step 7：提交**
+- [x] **Step 7：提交**
 
 ```bash
 git add skills/ tests/unit/test_skills.py
@@ -2974,7 +2974,7 @@ git commit -m "feat: add 5 built-in SKILL.md files (cleaning, exploration, featu
 **文件：**
 - 创建: `datamind/engine/project.py`
 
-- [ ] **Step 1：编写 Project 测试**
+- [x] **Step 1：编写 Project 测试**
 
 在 `tests/unit/test_init.py` 中追加（或创建 `tests/unit/test_project.py`）：
 
@@ -3016,7 +3016,7 @@ def test_project_scan_raw_data(tmp_project):
     assert datasets[0]["name"] == "sample.csv"
 ```
 
-- [ ] **Step 2：实现 Project 门面**
+- [x] **Step 2：实现 Project 门面**
 
 创建 `datamind/engine/project.py`：
 
@@ -3076,7 +3076,7 @@ class Project:
         return self.lineage.scan_raw_data(str(self.paths["data_dir"].parent))
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_project.py -v
@@ -3084,7 +3084,7 @@ pytest tests/unit/test_project.py -v
 
 预期：3 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/engine/project.py tests/unit/test_project.py
@@ -3098,7 +3098,7 @@ git commit -m "feat: add Project facade composing all four services"
 **文件：**
 - 修改: `datamind/cli/main.py`（追加新命令）
 
-- [ ] **Step 1：编写 CLI 扩展测试**
+- [x] **Step 1：编写 CLI 扩展测试**
 
 在 `tests/unit/test_cli.py` 中追加：
 
@@ -3133,7 +3133,7 @@ def test_cli_skill_list(tmp_project):
     assert result.exit_code == 0  # should work even with empty skills dir
 ```
 
-- [ ] **Step 2：扩展 CLI**
+- [x] **Step 2：扩展 CLI**
 
 修改 `datamind/cli/main.py`，在 `init` 命令后追加新命令：
 
@@ -3226,7 +3226,7 @@ def skill_list(project_root):
         click.echo("No skills found in skills/ directory")
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_cli.py -v
@@ -3234,7 +3234,7 @@ pytest tests/unit/test_cli.py -v
 
 预期：6 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/cli/main.py tests/unit/test_cli.py
@@ -3251,7 +3251,7 @@ git commit -m "feat: extend CLI with lineage query, context inject, skill list c
 - 创建: `datamind/mcp/__init__.py`
 - 创建: `datamind/mcp/server.py`
 
-- [ ] **Step 1：编写 MCP Server 测试**
+- [x] **Step 1：编写 MCP Server 测试**
 
 创建 `tests/unit/test_mcp.py`：
 
@@ -3317,7 +3317,7 @@ def test_tool_list_datasets(tmp_project):
     assert "a.csv" in names
 ```
 
-- [ ] **Step 2：实现 MCP tools**
+- [x] **Step 2：实现 MCP tools**
 
 创建 `datamind/mcp/__init__.py`（空文件）。
 
@@ -3399,7 +3399,7 @@ def tool_list_datasets(project: Project) -> list[dict]:
     ]
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_mcp.py -v
@@ -3407,7 +3407,7 @@ pytest tests/unit/test_mcp.py -v
 
 预期：4 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/mcp/ tests/unit/test_mcp.py
@@ -3422,7 +3422,7 @@ git commit -m "feat: add MCP Server tools wrapping the DataMind engine"
 - 创建: `datamind/api/__init__.py`
 - 创建: `datamind/api/app.py`
 
-- [ ] **Step 1：编写 API 测试**
+- [x] **Step 1：编写 API 测试**
 
 创建 `tests/unit/test_api.py`：
 
@@ -3476,7 +3476,7 @@ def test_register_dataset(api_client, tmp_project):
     assert "new_data.csv" in response.json()["name"]
 ```
 
-- [ ] **Step 2：实现 FastAPI 应用**
+- [x] **Step 2：实现 FastAPI 应用**
 
 创建 `datamind/api/__init__.py`（空文件）。
 
@@ -3588,7 +3588,7 @@ def create_server(project_root: str, host: str = "127.0.0.1", port: int = 8000):
     uvicorn.run(app, host=host, port=port)
 ```
 
-- [ ] **Step 3：运行测试**
+- [x] **Step 3：运行测试**
 
 ```bash
 pytest tests/unit/test_api.py -v
@@ -3596,7 +3596,7 @@ pytest tests/unit/test_api.py -v
 
 预期：4 passed
 
-- [ ] **Step 4：提交**
+- [x] **Step 4：提交**
 
 ```bash
 git add datamind/api/ tests/unit/test_api.py
@@ -3613,7 +3613,7 @@ git commit -m "feat: add FastAPI REST API with datasets, context, decisions, ski
 - 创建: `tests/e2e/__init__.py`
 - 创建: `tests/e2e/test_workflows.py`
 
-- [ ] **Step 1：编写 E2E 测试**
+- [x] **Step 1：编写 E2E 测试**
 
 创建 `tests/e2e/__init__.py`（空文件）。
 
@@ -3765,7 +3765,7 @@ def test_context_assembly_workflow(e2e_project):
     assert "test finding" in history
 ```
 
-- [ ] **Step 2：运行 E2E 测试**
+- [x] **Step 2：运行 E2E 测试**
 
 ```bash
 pytest tests/e2e/test_workflows.py -v -m e2e
@@ -3773,7 +3773,7 @@ pytest tests/e2e/test_workflows.py -v -m e2e
 
 预期：3 passed
 
-- [ ] **Step 3：提交**
+- [x] **Step 3：提交**
 
 ```bash
 git add tests/e2e/
@@ -3789,7 +3789,7 @@ git commit -m "test: add E2E workflow tests covering full pipeline"
 **文件：**
 - 创建: `README.md`
 
-- [ ] **Step 1：编写 README.md**
+- [x] **Step 1：编写 README.md**
 
 ```markdown
 # DataMind Studio
@@ -3858,7 +3858,7 @@ skills/             # SKILL.md workflow definitions
 - **AI Integration:** MCP Server wrapping the engine
 ```
 
-- [ ] **Step 2：提交**
+- [x] **Step 2：提交**
 
 ```bash
 git add README.md
@@ -3869,7 +3869,7 @@ git commit -m "docs: add README with quick start and architecture overview"
 
 ### Task 22：全面测试与最终验证
 
-- [ ] **Step 1：运行全部测试**
+- [x] **Step 1：运行全部测试**
 
 ```bash
 pytest tests/ -v
@@ -3877,7 +3877,7 @@ pytest tests/ -v
 
 预期：所有测试通过（~40+ tests）。
 
-- [ ] **Step 2：验证 CLI 端到端**
+- [x] **Step 2：验证 CLI 端到端**
 
 ```bash
 datamind init --name pytest /tmp/datamind_test_project
@@ -3886,7 +3886,7 @@ datamind skill list /tmp/datamind_test_project
 
 预期：两个命令都成功。
 
-- [ ] **Step 3：提交最终检查**
+- [x] **Step 3：提交最终检查**
 
 ```bash
 git status
