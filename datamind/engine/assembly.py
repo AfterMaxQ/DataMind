@@ -56,6 +56,31 @@ class AssemblyService:
         return path
 
 
+class AutoRefreshTrigger:
+    """Signals context files need regeneration on state changes."""
+
+    def __init__(self, assembly_service):
+        self._assembly = assembly_service
+        self._dirty = False
+
+    def on_dataset_added(self, dataset_info):
+        self._dirty = True
+
+    def on_decision_logged(self, decision):
+        self._dirty = True
+
+    def on_execution_completed(self, execution_log):
+        self._dirty = True
+
+    def refresh_if_needed(self, project_name, dataset_names, datasets_info) -> bool:
+        """Regenerate all context files if dirty. Returns True if refreshed."""
+        if self._dirty:
+            self._assembly.refresh_all(project_name, dataset_names, datasets_info)
+            self._dirty = False
+            return True
+        return False
+
+
 def estimate_tokens(text: str) -> int:
     """Rough token estimation: ~8 characters per token for English text."""
     return len(text) // 8

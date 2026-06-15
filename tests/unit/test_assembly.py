@@ -65,3 +65,63 @@ def test_estimate_tokens():
     text = "a " * 400
     tokens = estimate_tokens(text)
     assert 80 <= tokens <= 120
+
+
+def test_auto_refresh_triggers_on_change(tmp_project):
+    from datamind.engine.assembly import AutoRefreshTrigger
+
+    class SpyAssembly:
+        def __init__(self):
+            self.refreshed = False
+            self.last_call = None
+
+        def refresh_all(self, project_name, dataset_names, datasets_info):
+            self.refreshed = True
+            self.last_call = (project_name, dataset_names, datasets_info)
+
+    spy = SpyAssembly()
+    trigger = AutoRefreshTrigger(spy)
+
+    # Initially clean
+    assert trigger.refresh_if_needed("proj", ["ds1"], [{"name": "ds1"}]) is False
+    assert spy.refreshed is False
+
+    # Trigger dirtiness
+    trigger.on_dataset_added({"name": "new.csv"})
+    assert trigger.refresh_if_needed("proj", ["ds1"], [{"name": "ds1"}]) is True
+    assert spy.refreshed is True
+
+    # Clean again after refresh
+    spy.refreshed = False
+    assert trigger.refresh_if_needed("proj", ["ds1"], [{"name": "ds1"}]) is False
+    assert spy.refreshed is False
+
+
+def test_auto_refresh_skips_when_clean(tmp_project):
+    from datamind.engine.assembly import AutoRefreshTrigger
+
+    class SpyAssembly:
+        def __init__(self):
+            self.refresh_count = 0
+
+        def refresh_all(self, project_name, dataset_names, datasets_info):
+            self.refresh_count += 1
+
+    spy = SpyAssembly()
+    trigger = AutoRefreshTrigger(spy)
+
+    # Multiple calls without triggering — should skip each time
+    for _ in range(3):
+        result = trigger.refresh_if_needed("proj", [], [])
+        assert result is False
+    assert spy.refresh_count == 0
+
+    # Trigger once, refresh once
+    trigger.on_execution_completed({"script": "test.py"})
+    assert trigger.refresh_if_needed("proj", [], []) is True
+    assert spy.refresh_count == 1
+
+    # After refresh, subsequent calls skip again
+    for _ in range(2):
+        assert trigger.refresh_if_needed("proj", [], []) is False
+    assert spy.refresh_count == 1

@@ -68,3 +68,26 @@ def test_count_since(tmp_project):
     for i in range(5):
         el.record(script_path=f"s{i}.py", status="success")
     assert el.count_since("1970-01-01T00:00:00Z") == 5
+
+
+def test_list_all_returns_sorted_logs(tmp_project):
+    exec_dir = tmp_project / "executions"
+    exec_dir.mkdir()
+    el = ExecutionLog(str(exec_dir))
+    el.record(script_path="a.py", status="success")
+    el.record(script_path="b.py", status="failure")
+    el.record(script_path="c.py", status="success")
+
+    all_logs = el.list_all()
+    assert len(all_logs) == 3
+    # Oldest first
+    assert all_logs[0]["script_path"] == "a.py"
+    assert all_logs[1]["script_path"] == "b.py"
+    assert all_logs[2]["script_path"] == "c.py"
+
+
+def test_list_all_empty(tmp_project):
+    exec_dir = tmp_project / "executions"
+    exec_dir.mkdir()
+    el = ExecutionLog(str(exec_dir))
+    assert el.list_all() == []

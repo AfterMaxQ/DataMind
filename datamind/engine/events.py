@@ -65,6 +65,14 @@ class ExecutionLog:
         logs.sort(key=lambda e: e["timestamp"], reverse=True)
         return logs[:limit]
 
+    def list_all(self) -> list[dict]:
+        """Return all execution logs sorted by timestamp (oldest first) for materialized view rebuild."""
+        logs = []
+        for f in self.dir.glob("*.json"):
+            logs.append(json.loads(f.read_text()))
+        logs.sort(key=lambda e: e["timestamp"])
+        return logs
+
     def count_since(self, since_timestamp: str) -> int:
         """Count execution logs with timestamp >= since_timestamp."""
         count = 0

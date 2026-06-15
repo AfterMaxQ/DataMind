@@ -55,6 +55,22 @@ class LineageService:
     def query_descendants(self, dataset_node_id: str) -> list[dict]:
         return self.graph.query_descendants(dataset_node_id)
 
+    def reproduce(self, dataset_path: str) -> list[str]:
+        """Return script chain in topological order (raw first) to reproduce a dataset.
+
+        Traces lineage back to raw data ancestors, collects all script edges,
+        returns scripts in dependency order.
+        """
+        ds = self.find_dataset_by_path(dataset_path)
+        if ds is None:
+            return []
+
+        ancestors = self.query_ancestors(ds["id"])
+        script_nodes = [n for n in ancestors if n["type"] == "script"]
+        # BFS gives closest ancestors first; reverse so raw-data scripts come first
+        script_nodes.reverse()
+        return [n["path"] for n in script_nodes]
+
     def link_script_to_datasets(self, script_path: str, input_paths: list[str], output_paths: list[str]) -> dict:
         """Register a script node and link it to its I/O datasets."""
         script_node_id = self.graph.insert_node(

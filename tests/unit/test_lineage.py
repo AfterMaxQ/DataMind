@@ -104,3 +104,76 @@ def test_link_script_to_datasets(tmp_project):
     assert len(result["edges"]["inputs"]) == 1
     assert len(result["edges"]["outputs"]) == 1
     graph.close()
+
+
+def test_reproduce_returns_script_chain(tmp_project):
+    raw_dir = tmp_project / "data" / "raw"
+    raw_dir.mkdir(parents=True)
+    (raw_dir / "raw.csv").write_text("a,b\n1,2\n")
+    processed_dir = tmp_project / "data" / "processed"
+    processed_dir.mkdir(parents=True)
+    (processed_dir / "clean.csv").write_text("a,b\n1,2\n")
+    describe_dir = tmp_project / "describe"
+    describe_dir.mkdir()
+    exec_dir = tmp_project / "executions"
+    exec_dir.mkdir()
+
+    graph = GraphDB(str(tmp_project / "test.db"))
+    graph.initialize()
+    exec_log = ExecutionLog(str(exec_dir))
+    svc = LineageService(graph, DescribeEngine(str(describe_dir)), exec_log)
+
+    svc.register_dataset(str(raw_dir / "raw.csv"))
+    svc.register_dataset(str(processed_dir / "clean.csv"))
+
+    svc.link_script_to_datasets(
+        script_path="scripts/clean.py",
+        input_paths=[str(raw_dir / "raw.csv")],
+        output_paths=[str(processed_dir / "clean.csv")],
+    )
+
+    scripts = svc.reproduce(str(processed_dir / "clean.csv"))
+    assert len(scripts) == 1
+    assert scripts[0] == "scripts/clean.py"
+    graph.close()
+
+
+def test_reproduce_with_multi_script_chain(tmp_project):
+    raw_dir = tmp_project / "data" / "raw"
+    raw_dir.mkdir(parents=True)
+    (raw_dir / "raw.csv").write_text("a,b\n1,2\n")
+    processed_dir = tmp_project / "data" / "processed"
+    processed_dir.mkdir(parents=True)
+    (processed_dir / "clean.csv").write_text("a,b\n1,2\n")
+    (processed_dir / "report.csv").write_text("summary\nok\n")
+    describe_dir = tmp_project / "describe"
+    describe_dir.mkdir()
+    exec_dir = tmp_project / "executions"
+    exec_dir.mkdir()
+
+    graph = GraphDB(str(tmp_project / "test.db"))
+    graph.initialize()
+    exec_log = ExecutionLog(str(exec_dir))
+    svc = LineageService(graph, DescribeEngine(str(describe_dir)), exec_log)
+
+    svc.register_dataset(str(raw_dir / "raw.csv"))
+    svc.register_dataset(str(processed_dir / "clean.csv"))
+    svc.register_dataset(str(processed_dir / "report.csv"))
+
+    svc.link_script_to_datasets(
+        script_path="scripts/clean.py",
+        input_paths=[str(raw_dir / "raw.csv")],
+        output_paths=[str(processed_dir / "clean.csv")],
+    )
+    svc.link_script_to_datasets(
+        script_path="scripts/analyze.py",
+        input_paths=[str(processed_dir / "clean.csv")],
+        output_paths=[str(processed_dir / "report.csv")],
+    )
+
+    scripts = svc.reproduce(str(processed_dir / "report.csv"))
+    assert len(scripts) == 2
+    # Raw-data scripts first: clean.py before analyze.py
+    assert scripts[0] == "scripts/clean.py"
+    assert scripts[1] == "scripts/analyze.py"
+    graph.close()
