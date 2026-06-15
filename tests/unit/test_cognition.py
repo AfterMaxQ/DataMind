@@ -66,3 +66,20 @@ def test_add_discovery(tmp_project):
     discoveries = svc.get_recent_discoveries(5)
     assert len(discoveries) == 1
     assert "seasonality" in discoveries[0]["finding"]
+
+
+def test_register_and_get_params(tmp_project):
+    svc = CognitionService(
+        decisions_file=str(tmp_project / "decisions.jsonl"),
+        exploration_file=str(tmp_project / "exploration.json"),
+        params_file=str(tmp_project / "params.json"),
+        discoveries_file=str(tmp_project / "discoveries.jsonl"),
+    )
+    svc.register_params("script_a", "run_1", {"lr": 0.01, "epochs": 10})
+    svc.register_params("script_a", "run_2", {"lr": 0.001, "epochs": 20})
+
+    params = svc.get_params("script_a")
+    assert len(params) == 2
+    assert params["run_1"]["params"]["lr"] == 0.01
+    assert params["run_2"]["params"]["epochs"] == 20
+    assert svc.get_params("nonexistent") == {}
