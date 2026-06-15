@@ -263,3 +263,73 @@ class TestCreateSession:
         yaml_files = list(session_path.rglob(".skill.yaml"))
         assert len(yaml_files) == 1
         assert yaml_files[0].exists()
+
+
+class TestAutoPersist:
+    """Phase transitions should automatically persist to .skill.yaml."""
+
+    def test_complete_phase_persists_to_file(self, tmp_project):
+        """complete_phase() should update the .skill.yaml on disk."""
+        yaml_path = tmp_project / ".skill.yaml"
+        sm = _make_sm()
+        sm.save(str(yaml_path))
+
+        # Reload from disk, advance, then reload again to verify persistence
+        sm2 = SkillStateMachine.load(str(yaml_path))
+        assert sm2.state.phase == "analyze"
+
+        sm2.complete_phase("analyze", artifact_path="phase-1-analyze.md")
+        assert sm2.state.phase == "gate-approve"
+
+        # Reload — the transition should be persisted
+        sm3 = SkillStateMachine.load(str(yaml_path))
+        assert sm3.state.phase == "gate-approve"
+        assert sm3.state.phases["analyze"] == PhaseStatus.COMPLETE.value
+        assert sm3.state.phases["gate-approve"] == PhaseStatus.AWAITING_HUMAN.value
+
+    def test_approve_gate_persists_to_file(self, tmp_project):
+        """approve_gate() should update the .skill.yaml on disk."""
+        yaml_path = tmp_project / ".skill.yaml"
+        sm = _make_sm()
+        sm.complete_phase("analyze")  # now at gate-approve, but initial save missing
+        sm.save(str(yaml_path))  # save current state
+
+        # Reload and approve the gate
+        sm2 = SkillStateMachine.load(str(yaml_path))
+        assert sm2.state.phase == "gate-approve"
+
+        sm2.approve_gate("gate-approve", decision={"approved": True})
+        assert sm2.state.phase == "execute"
+
+        # Reload — the approval should be persisted
+        sm3 = SkillStateMachine.load(str(yaml_path))
+        assert sm3.state.phase == "execute"
+        assert sm3.state.phases["gate-approve"] == PhaseStatus.COMPLETE.value
+        assert sm3.state.phases["execute"] == PhaseStatus.IN_PROGRESS.value
+
+    def test_full_workflow_persists_each_step(self, tmp_project):
+        """Each phase transition in a full workflow should be persisted."""
+        yaml_path = tmp_project / ".skill.yaml"
+        sm = _make_sm()
+        sm.save(str(yaml_path))
+
+        # Phase 1: AUTO
+        sm.complete_phase("analyze", artifact_path="a.md")
+        r1 = SkillStateMachine.load(str(yaml_path))
+        assert r1.state.phase == "gate-approve"
+
+        # Phase 2: GATE
+        sm.approve_gate("gate-approve", decision={"ok": True})
+        r2 = SkillStateMachine.load(str(yaml_path))
+        assert r2.state.phase == "execute"
+
+        # Phase 3: AUTO
+        sm.complete_phase("execute", artifact_path="e.md")
+        r3 = SkillStateMachine.load(str(yaml_path))
+        assert r3.state.phase == "gate-result"
+
+        # Phase 4: GATE (final)
+        sm.approve_gate("gate-result", decision={"done": True})
+        r4 = SkillStateMachine.load(str(yaml_path))
+        assert r4.state.result == "pass"
+        assert r4.state.completed_at is not None

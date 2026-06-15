@@ -56,10 +56,10 @@ base-ref: 2808165382b9928d6e386bbe789fb4de46b896c7
 
 ## Phase 7: API & Integration
 
-- [ ] **T7.1** — Wire new services into `engine/project.py` facade (llm_client, prompt_manager)
-- [ ] **T7.2** — Add SSE chat endpoint to `api/app.py` + model list/switch + skill session + usage endpoints
-- [ ] **T7.3** — Add `chat` command to `cli/main.py` with streaming and skill interaction
-- [ ] **T7.4** — Add agent MCP tools to `mcp/server.py` (execute_skill, list_models)
+- [x] **T7.1** — Wire new services into `engine/project.py` facade (llm_client, prompt_manager)
+- [x] **T7.2** — Add SSE chat endpoint to `api/app.py` + model list/switch + skill session + usage endpoints
+- [x] **T7.3** — Add `chat` command to `cli/main.py` with streaming and skill interaction
+- [x] **T7.4** — Add agent MCP tools to `mcp/server.py` (execute_skill, list_models)
 
 ## Phase 8: End-to-End Validation
 

@@ -71,6 +71,7 @@ class SkillStateMachine:
         self._phase_defs = list(phase_definitions)
         self._phase_map: dict[str, SkillPhase] = {p.id: p for p in self._phase_defs}
         self._phase_order: list[str] = [p.id for p in self._phase_defs]
+        self._yaml_path: str | None = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -153,6 +154,7 @@ class SkillStateMachine:
 
     def save(self, path: str) -> None:
         """Persist the current state to a ``.skill.yaml`` file."""
+        self._yaml_path = path
         import yaml
 
         data = {
@@ -212,7 +214,9 @@ class SkillStateMachine:
             usage=data.get("usage", {}),
         )
 
-        return SkillStateMachine(state, phase_defs)
+        sm = SkillStateMachine(state, phase_defs)
+        sm._yaml_path = path
+        return sm
 
     @staticmethod
     def create_session(
@@ -254,7 +258,9 @@ class SkillStateMachine:
         # Create session directory and persist initial state
         full_session_dir = Path(session_dir) / session_id
         full_session_dir.mkdir(parents=True, exist_ok=True)
-        sm.save(str(full_session_dir / ".skill.yaml"))
+        yaml_path = str(full_session_dir / ".skill.yaml")
+        sm._yaml_path = yaml_path
+        sm.save(yaml_path)
 
         return sm
 
@@ -276,10 +282,17 @@ class SkillStateMachine:
                 self.state.phases[next_id] = PhaseStatus.AWAITING_HUMAN.value
             else:
                 self.state.phases[next_id] = PhaseStatus.IN_PROGRESS.value
+            self._persist()
             return next_id
         else:
             self.state.completed_at = datetime.now(timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%SZ"
             )
             self.state.result = "pass"
+            self._persist()
             return ""
+
+    def _persist(self) -> None:
+        """Persist the current state to the configured yaml path, if set."""
+        if self._yaml_path is not None:
+            self.save(self._yaml_path)

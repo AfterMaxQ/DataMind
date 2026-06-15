@@ -47,11 +47,11 @@
 
 ## Phase 7: API & Integration
 
-- [ ] **T7.1** — Add SSE chat endpoint to `api/app.py`: streaming chat with agent loop, tool call progress events
-- [ ] **T7.2** — Add model listing and switching endpoints
-- [ ] **T7.3** — Add usage/cost query endpoint
-- [ ] **T7.4** — Update CLI `chat` command to use agent loop with streaming
-- [ ] **T7.5** — Update MCP server tools to integrate agent loop where applicable
+- [x] **T7.1** — Add SSE chat endpoint to `api/app.py`: streaming chat with agent loop, tool call progress events
+- [x] **T7.2** — Add model listing and switching endpoints
+- [x] **T7.3** — Add usage/cost query endpoint
+- [x] **T7.4** — Update CLI `chat` command to use agent loop with streaming
+- [x] **T7.5** — Update MCP server tools to integrate agent loop where applicable
 
 ## Phase 8: End-to-End Validation
 

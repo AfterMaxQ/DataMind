@@ -21,7 +21,8 @@ def test_resolve_component_paths_returns_all_keys():
         "graph_db", "context_dir", "config_file",
         "data_dir", "raw_data", "processed_data",
         "scripts_dir", "describe_dir", "executions_dir",
-        "skills_dir", "decisions_file", "exploration_file",
+        "skills_dir", "prompts_dir",
+        "decisions_file", "exploration_file",
         "params_file", "discoveries_file",
     }
     assert set(paths.keys()) == expected_keys

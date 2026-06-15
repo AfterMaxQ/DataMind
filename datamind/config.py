@@ -73,6 +73,7 @@ def resolve_component_paths(project_root: str | Path) -> dict[str, Path]:
         "describe_dir": root / DESCRIBE_DIR,
         "executions_dir": root / EXECUTIONS_DIR,
         "skills_dir": root / SKILLS_DIR,
+        "prompts_dir": root / "prompts",
         "decisions_file": base / DECISIONS_FILE,
         "exploration_file": base / EXPLORATION_FILE,
         "params_file": base / PARAMS_FILE,
