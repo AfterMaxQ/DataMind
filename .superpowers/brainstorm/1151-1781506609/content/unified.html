@@ -1,0 +1,163 @@
+<h2>Unified Architecture: Two Layers, One System</h2>
+<p class="subtitle">Layer 1 tracks WHAT happened to the data. Layer 2 tracks WHY and WHAT WAS LEARNED.</p>
+
+<div class="section">
+  <h3>The Complete Picture</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:10px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; font-size:10px; white-space:pre; font-family:monospace; line-height:1.45;">
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        .datamind/                                         │
+│                                                                           │
+│  ═══════════════ LAYER 1: DATA LINEAGE (what happened) ═══════════════    │
+│                                                                           │
+│  graph.db              ← nodes: Dataset, Script, Execution                │
+│                           edges: GENERATED_BY, PRODUCED, USED_INPUT       │
+│                                                                           │
+│  describe/*.md         ← auto data.describe for every dataset              │
+│                           schema, stats, distributions, column meanings   │
+│                                                                           │
+│  scripts/              ← all AI-generated code, named by step             │
+│                           the script IS the edge between datasets         │
+│                                                                           │
+│  ═══════════════ LAYER 2: COGNITIVE JOURNEY (why & what was learned) ═══   │
+│                                                                           │
+│  decisions.jsonl       ← {what, why, alternatives, implications, time}    │
+│                           e.g. "forward fill, not interpolation, because  │
+│                           stocks don't interpolate on non-trading days"   │
+│                                                                           │
+│  exploration.json      ← tree of approaches with status tags              │
+│                           nodes: SELECTED | REJECTED | EXPLORATORY         │
+│                           dead ends preserved — prevent repeating mistakes│
+│                                                                           │
+│  params.json           ← {script_id, run_id, key: value}                  │
+│                           e.g. split_date: 2025-01-01                      │
+│                           e.g. norm_source_A_min: -1.0                     │
+│                                                                           │
+│  discoveries.jsonl     ← {timestamp, tag, finding, linked_code, linked_data}│
+│                           e.g. "Model acc drops 15% during earnings season"│
+│                                                                           │
+│  ═══════════════ LAYER 3: CONTEXT ASSEMBLY (bridge to AI) ═══════════════  │
+│                                                                           │
+│  context/              ← auto-generated from both layers                  │
+│    PROJECT.md          ← project overview + active goals                  │
+│    DATASETS.md         ← all datasets + lineage summary + schemas         │
+│    HISTORY.md          ← recent decisions + discoveries + executions      │
+│    EXPLORATION.md      ← active branch of exploration tree                │
+│    PARAMS.md           ← current parameters for active models             │
+│    CHECKPOINT.md       ← compressed state-of-project snapshot             │
+│    CONTEXT_MANIFEST.md ← PRIORITY-ORDERED injection for new AI sessions   │
+└──────────────────────────────────────────────────────────────────────────┘</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>How Layers Connect — A Real Example</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+
+     LAYER 1 (Lineage)              LAYER 2 (Cognition)
+     ═════════════════              ═══════════════════
+
+     raw/sales.csv                  decisions.jsonl:
+        │                           → "Narrow 5 stocks → 2 (3 had missing data)"
+        │ GENERATED_BY              → "Forward fill chosen over interpolation"
+        ▼                           → "Split date 2025-01-01 (time-series)"
+     scripts/clean_nulls.py
+        │                           exploration.json:
+        │ PRODUCED                  → Logistic Regression: REJECTED (52% acc)
+        ▼                           → Random Forest: BASELINE (57% acc)
+     processed/sales_clean.csv      → XGBoost: SELECTED (66% acc)
+        │
+        │ GENERATED_BY              discoveries.jsonl:
+        ▼                           → "Sentiment scores on different scales"
+     scripts/aggregate.py           → "Model fails during earnings (-15% acc)"
+        │
+        │ PRODUCED                  params.json:
+        ▼                           → norm_source_A_min: -1.0
+     processed/sales_agg.parquet    → split_date: 2025-01-01
+                                    → xgb_max_depth: 6
+
+     <b>The AI sees BOTH layers in context/CONTEXT_MANIFEST.md.
+     It knows the data flow AND the thinking behind every step.</b></pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>The Context Injection Flow</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+
+  NEW AI SESSION STARTS
+         │
+         ▼
+  ┌─────────────────────────────────────────────────┐
+  │  Context Packer: assemble CONTEXT_MANIFEST.md    │
+  │                                                  │
+  │  ~40k token budget:                              │
+  │                                                  │
+  │  ████████  PROJECT.md               (~500)       │
+  │  ████████  DATASETS.md (all)        (~2k)        │
+  │  ████████  EXPLORATION.md           (~1k)        │
+  │  ████████  PARAMS.md (active)       (~500)       │
+  │  ████████  Recent decisions (last 5)(~1k)        │
+  │  ████████  Recent discoveries (last 5)(~1k)      │
+  │  ████████  Recent executions (last 3)(~6k)       │
+  │  ████████  CHECKPOINT.md             (~2k)       │
+  │  ░░░░░░░░  Older history (compressed)(~3k)       │
+  │  ░░░░░░░░  Relevant nodes from query (~3k)       │
+  │  ░░░░░░░░  Conversation space        (~20k)      │
+  │                                                  │
+  │  AFTER SESSION:                                  │
+  │  → New execution log saved                       │
+  │  → New decisions/discoveries appended            │
+  │  → graph.db updated with new nodes/edges         │
+  │  → describe/ regenerated if data changed         │
+  │  → If enough new activity: regenerate CHECKPOINT │
+  │  → Context files refreshed for next session      │
+  └─────────────────────────────────────────────────┘</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Summary: The Five Innovations</h3>
+
+  <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 12px; background:#1e1e2e; border-radius:6px;">
+      <div style="background:#89b4fa; color:#1e1e2e; border-radius:4px; padding:2px 8px; font-weight:bold; font-size:12px; min-width:90px; text-align:center;">Lineage</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Graph + Script-as-Edge</b> — Raw → Script → Processed. The script filename IS the relationship. Auto data.describe for every dataset.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 12px; background:#1e1e2e; border-radius:6px;">
+      <div style="background:#a6e3a1; color:#1e1e2e; border-radius:4px; padding:2px 8px; font-weight:bold; font-size:12px; min-width:90px; text-align:center;">Decisions</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Decision Log</b> — Every non-trivial choice: {what, why, alternatives, implications}. The rationale layer data lineage doesn't capture.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 12px; background:#1e1e2e; border-radius:6px;">
+      <div style="background:#fab387; color:#1e1e2e; border-radius:4px; padding:2px 8px; font-weight:bold; font-size:12px; min-width:90px; text-align:center;">Exploration</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Exploration Tree</b> — SELECTED, REJECTED, EXPLORATORY nodes. Dead ends preserved to prevent repeating mistakes.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 12px; background:#1e1e2e; border-radius:6px;">
+      <div style="background:#f9e2af; color:#1e1e2e; border-radius:4px; padding:2px 8px; font-weight:bold; font-size:12px; min-width:90px; text-align:center;">Parameters</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Auto-Param Registry</b> — Normalization bounds, split dates, hyperparameters. Extracted from scripts, keyed to execution runs.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 12px; background:#1e1e2e; border-radius:6px;">
+      <div style="background:#cba6f7; color:#1e1e2e; border-radius:4px; padding:2px 8px; font-weight:bold; font-size:12px; min-width:90px; text-align:center;">Discoveries</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Discovery Feed</b> — Accidental insights, structured chronologically with tags, linked to data + code that produced them.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 12px; background:#1e1e2e; border-radius:6px;">
+      <div style="background:#f38ba8; color:#1e1e2e; border-radius:4px; padding:2px 8px; font-weight:bold; font-size:12px; min-width:90px; text-align:center;">Assembly</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Context Manifest</b> — Priority-ordered, token-budget-aware injection assembled from all five sources. New AI sessions get curated understanding, not a dump.</div>
+    </div>
+  </div>
+</div>

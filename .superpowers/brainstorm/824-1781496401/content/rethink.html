@@ -1,0 +1,100 @@
+<h2>Rethinking from First Principles</h2>
+<p class="subtitle">The problem isn't UI layout — it's AI amnesia across sessions</p>
+
+<div class="section">
+  <h3>The Real Problem</h3>
+  <div class="mockup" style="margin-bottom:16px;">
+    <div class="mockup-body" style="padding:20px; font-size:13px; line-height:1.7;">
+      <div style="display:flex; gap:16px; align-items:center;">
+        <div style="flex:1; background:#1e1e2e; border-radius:8px; padding:16px; text-align:center;">
+          <div style="color:#f38ba8; font-weight:bold; margin-bottom:8px;">Session 1</div>
+          <div style="color:#a6adc8; font-size:11px;">"Explore sales_2024.csv"<br>→ Found 23% nulls in revenue<br>→ Region column has 7 typos<br>→ Decided: drop rows with null revenue<br>→ Generated clean_nulls.py</div>
+        </div>
+        <div style="color:#6c7086; font-size:24px;">→</div>
+        <div style="flex:1; background:#1e1e2e; border-radius:8px; padding:16px; text-align:center; opacity:0.5;">
+          <div style="color:#f38ba8; font-weight:bold; margin-bottom:8px;">Session 2</div>
+          <div style="color:#a6adc8; font-size:11px;">"Let's analyze the sales data"<br>→ <span style="color:#f38ba8;">What sales data?</span><br>→ <span style="color:#f38ba8;">Which file is clean?</span><br>→ <span style="color:#f38ba8;">Why was region important?</span><br>→ <span style="color:#f38ba8;">What did we already try?</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Core Insight: The Product Isn't a UI — It's a Context Engine</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:16px; font-size:12px;">
+      <pre style="background:#1e1e2e; padding:12px; border-radius:6px; color:#a6adc8; margin:0;">
+┌─────────────────────────────────────────────────────────┐
+│                    CONTEXT ENGINE                        │
+│                                                         │
+│  ┌──────────┐   ┌──────────┐   ┌──────────┐            │
+│  │ Dataset  │   │  Script  │   │ Decision │            │
+│  │  Graph   │   │  Graph   │   │   Log    │            │
+│  │          │   │          │   │          │            │
+│  │ raw →    │   │ clean()  │   │ "Dropped │            │
+│  │ clean →  │   │  → agg() │   │  null    │            │
+│  │ results  │   │  → plot()│   │  revenue"│            │
+│  └────┬─────┘   └────┬─────┘   └────┬─────┘            │
+│       │              │              │                   │
+│       └──────────────┼──────────────┘                   │
+│                      ▼                                  │
+│            ┌─────────────────┐                          │
+│            │  Context Pack   │                          │
+│            │  (auto-inject   │                          │
+│            │   into new      │                          │
+│            │   AI sessions)  │                          │
+│            └────────┬────────┘                          │
+└─────────────────────┼───────────────────────────────────┘
+                      │
+          ┌───────────┼───────────┐
+          ▼           ▼           ▼
+     ┌─────────┐ ┌─────────┐ ┌─────────┐
+     │ Claude  │ │  Web UI │ │  CLI    │
+     │  Code   │ │         │ │  Tools  │
+     └─────────┘ └─────────┘ └─────────┘</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Three Architecture Approaches</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Full Web IDE</h3>
+      <p>Custom web app with sidebar, chat, and code panels. Everything integrated into one interface. Like Jupyter + lineage tracking built from scratch.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Polished, controlled UX</li><li>Single entry point</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Massive build effort</li><li>Locks users in</li><li>Can't use existing AI tools (Claude Code, etc.)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Context Engine + MCP Server</h3>
+      <p>A backend-first system: context engine manages the knowledge graph, exposes it via MCP (Model Context Protocol) so ANY AI client can consume it. Web UI is a lightweight optional client.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Works with existing tools</li><li>Faster to build MVP</li><li>More flexible ecosystem</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Less polished initial UX</li><li>MCP adoption still early</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hybrid: Engine First, UI Layered On</h3>
+      <p>Start with the context engine + MCP server. Build the web UI incrementally as a first-class client. The engine is the product; the UI is one way to interact with it.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Best of both worlds</li><li>Validates core tech early</li><li>Progressive enhancement</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Requires discipline to keep engine + UI decoupled</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

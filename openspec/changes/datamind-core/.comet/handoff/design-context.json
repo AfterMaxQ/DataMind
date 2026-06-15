@@ -1,0 +1,19 @@
+{
+  "change": "datamind-core",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "b39985f46a0970c5e1ba6aaa2567fafc207239e0d8f8f915706cd1f3a444ba69",
+  "files": [
+    { "path": "openspec/changes/datamind-core/proposal.md", "sha256": "70cf5f3d2ff9517479598e03eac423a62599d298802543639cc60cc4994575f3" },
+    { "path": "openspec/changes/datamind-core/design.md", "sha256": "f6b18b7260dd63fa60118de785ddf0b7c4831a62d9429ee72aa97dbb29bf4f90" },
+    { "path": "openspec/changes/datamind-core/tasks.md", "sha256": "561a9f079a5ed694f6acec02a7f2ea53a3058f3f0f4025ad0ae34c4d8a1d9f7f" },
+    { "path": "openspec/changes/datamind-core/specs/cognitive-journey/spec.md", "sha256": "e5628db25a93a6a658769c4ea574c7034dd75b627c73af966efcf4018f0ec892" },
+    { "path": "openspec/changes/datamind-core/specs/context-assembly/spec.md", "sha256": "1c1a4ae77e5968bb4ca059e2a009eed4a50fc39eed329bf26eed91d1c6823507" },
+    { "path": "openspec/changes/datamind-core/specs/context-engine/spec.md", "sha256": "d7aa75ed18e89e2569e9604ffdd1482616e9cfbca7c1986b985f13d1df449fa6" },
+    { "path": "openspec/changes/datamind-core/specs/data-lineage/spec.md", "sha256": "8d58c991ad584667756b33362499a6b09c818ebbce68e728b81346158106daca" },
+    { "path": "openspec/changes/datamind-core/specs/skill-system/spec.md", "sha256": "50b6a1ba65b41e9c094b7a2b1497be2dfb97e059ce59938e2525f4786bb1ba07" },
+    { "path": "openspec/changes/datamind-core/specs/web-ui/spec.md", "sha256": "c115d98c48f871a2fd5d0e3b47ea3804d7dcff8102abd26a0963bf1eb0e90687" }
+  ]
+}

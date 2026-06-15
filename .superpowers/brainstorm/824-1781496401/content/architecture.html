@@ -1,0 +1,95 @@
+<h2>DataMind Studio — System Architecture</h2>
+<p class="subtitle">Three interconnected surfaces: Data, Dialogue, and Lineage</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Layout Overview</div>
+    <div class="mockup-body" style="display:flex; gap:0; padding:0; min-height:320px;">
+      <!-- Sidebar -->
+      <div style="width:200px; background:#1e1e2e; color:#cdd6f4; padding:12px; font-size:11px; font-family:monospace; border-radius:4px 0 0 4px;">
+        <div style="color:#89b4fa; font-weight:bold; margin-bottom:10px;">📁 DataMind</div>
+        <div style="color:#a6e3a1; margin-bottom:4px;">📂 raw/</div>
+        <div style="padding-left:8px; margin-bottom:8px;">
+          <div>📄 sales_2024.csv</div>
+          <div style="font-size:9px; color:#6c7086;">12 cols · 45k rows</div>
+          <div>📄 customers.xlsx</div>
+          <div style="font-size:9px; color:#6c7086;">8 cols · 3k rows</div>
+        </div>
+        <div style="color:#fab387; margin-bottom:4px;">📂 processed/</div>
+        <div style="padding-left:8px;">
+          <div>📄 sales_clean.csv</div>
+          <div style="font-size:9px; color:#6c7086;">via clean_nulls.py</div>
+          <div>📄 sales_agg.parquet</div>
+          <div style="font-size:9px; color:#6c7086;">via aggregate.py</div>
+        </div>
+      </div>
+      <!-- Main -->
+      <div style="flex:1; background:#313244; padding:16px; border-radius:0 4px 4px 0; display:flex; flex-direction:column; gap:8px;">
+        <div style="background:#45475a; border-radius:6px; padding:10px; font-size:11px; color:#cdd6f4; flex:1;">
+          <div style="color:#89b4fa; margin-bottom:6px;">💬 AI Dialogue</div>
+          <div style="background:#313244; border-radius:4px; padding:8px; margin-bottom:4px;">
+            <div style="color:#a6e3a1;">User:</div>
+            <div>Clean null values in sales_2024.csv and save the result</div>
+          </div>
+          <div style="background:#313244; border-radius:4px; padding:8px;">
+            <div style="color:#89b4fa;">AI:</div>
+            <div style="font-size:10px;">I'll analyze the data, handle nulls, and generate a cleaning script. <span style="color:#f9e2af;">Script saved → clean_nulls.py</span></div>
+          </div>
+        </div>
+        <div style="background:#45475a; border-radius:6px; padding:10px; font-size:11px; color:#cdd6f4;">
+          <div style="color:#a6e3a1; margin-bottom:4px;">📝 Generated Script: clean_nulls.py</div>
+          <div style="background:#1e1e2e; border-radius:4px; padding:6px; font-family:monospace; font-size:9px; color:#a6adc8;">
+            df = pd.read_csv("raw/sales_2024.csv")<br>
+            df.dropna(subset=["revenue"], inplace=True)<br>
+            df["region"].fillna("Unknown", inplace=True)<br>
+            df.to_csv("processed/sales_clean.csv")
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Lineage Graph (Automatic)</div>
+    <div class="mockup-body" style="display:flex; flex-direction:column; align-items:center; gap:16px; padding:24px; min-height:320px;">
+      <div style="background:#45475a; border:2px solid #89b4fa; border-radius:8px; padding:14px 20px; text-align:center;">
+        <div style="color:#89b4fa; font-weight:bold;">📄 sales_2024.csv</div>
+        <div style="font-size:10px; color:#a6adc8;">raw · 45k rows · 12 cols</div>
+        <div style="font-size:10px; color:#f9e2af; margin-top:4px;">data.describe ✓</div>
+      </div>
+      <div style="color:#a6adc8; font-size:20px; line-height:1;">│<br>▼</div>
+      <div style="background:#a6e3a1; border-radius:4px; padding:6px 16px; font-size:11px; color:#1e1e2e; font-weight:bold; text-align:center;">
+        🔗 clean_nulls.py
+      </div>
+      <div style="color:#a6adc8; font-size:20px; line-height:1;">│<br>▼</div>
+      <div style="background:#45475a; border:2px solid #fab387; border-radius:8px; padding:14px 20px; text-align:center;">
+        <div style="color:#fab387; font-weight:bold;">📄 sales_clean.csv</div>
+        <div style="font-size:10px; color:#a6adc8;">processed · 43k rows · 12 cols</div>
+        <div style="font-size:10px; color:#f9e2af; margin-top:4px;">parent: sales_2024.csv</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Key Innovation: The Script IS the Index</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>What this unlocks</h4>
+      <ul>
+        <li>AI always knows how any dataset was created — just read the linked script</li>
+        <li>New sessions auto-load lineage graph → full historical context</li>
+        <li>data.describe gives instant schema understanding without reading entire files</li>
+        <li>Reproducibility: re-run the script chain to recreate any processed dataset</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Questions to resolve</h4>
+      <ul>
+        <li>What happens when a user manually edits data outside the system?</li>
+        <li>How do we handle branching? (one raw → multiple processed variants)</li>
+        <li>Versioning: if a script is re-run with changes, do we overwrite or fork?</li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,147 @@
+<h2>A Financial Analyst's Real Journey</h2>
+<p class="subtitle">Following one project end-to-end reveals what ACTUALLY breaks</p>
+
+<div class="section">
+  <h3>Phase 1: Scoping → Phase 2: Data Acquisition</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:14px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+DAY 1
+
+09:00  Boss: "Can we predict stock moves from Twitter sentiment?"
+09:30  Me: Define scope — tech stocks, 2yr history, binary prediction
+10:00  Try Twitter API → $5k/month, rate limited. Dead end.
+10:30  Pivot to Kaggle dataset + yfinance
+11:00  Kaggle data has different column names than expected
+11:30  Merge 2 sources → date formats conflict (UTC vs EST)
+14:00  Discovered: 3 of 5 stocks missing Q1 2024 data
+14:15  DECISION: narrow to AAPL + GOOG only
+       RATIONALE: incomplete data would bias results
+       IMPLICATION: results won't generalize to all tech
+
+<b>What was lost:</b>
+✗ Why Twitter API was rejected (cost, not capability)
+✗ The 3 excluded stocks and WHY they were excluded
+✗ Date format resolution — if we add new data, same problem repeats
+✗ The merge logic is in a script, but the DECISION to merge is in my head</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 3 & 4: Exploration → Cleaning</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:14px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+DAY 2
+
+09:00  Explore sentiment data → scores on different scales (0-1 vs -1 to 1)
+09:30  DECISION: normalize all to [0,1]
+       RATIONALE: model needs consistent input range
+       PARAMS: source_A_min=-1, source_A_max=1, source_B_min=0, source_B_max=1
+10:00  Missing values in stock data → gaps are weekends/holidays
+10:15  DECISION: forward fill (not interpolation)
+       RATIONALE: stock prices don't interpolate on non-trading days
+11:00  Engineered features: sentiment_lag_1, sentiment_lag_2, sentiment_lag_3
+13:00  Train/test split at 2025-01-01
+       RATIONALE: time-series, must avoid look-ahead bias
+
+<b>What was lost:</b>
+✗ Normalization parameters (need these for inference!)
+✗ Forward fill vs interpolation decision rationale
+✗ Lag feature definitions — why 3 days? why not 5?
+✗ Split date — if someone re-runs, they must use same date</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 5: Modeling — The Iteration Tree</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:14px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+DAY 3 — MODELING
+
+                    raw/sentiment.csv + raw/stock_prices.csv
+                                    │
+                          ┌─────────┴──────────┐
+                          ▼                    ▼
+              Logistic Regression        Random Forest
+              Acc: 52% (rejected)        Acc: 57% (promising)
+              WHY: too simple,            WHY: captures non-linear
+              linear boundary             but overfitting on noise
+              can't separate              ──→ kept as baseline
+                          │                    │
+                          └─────────┬──────────┘
+                                    ▼
+                                  XGBoost
+                                  Acc: 61% → tuned → 64%
+                                    │
+                          ┌─────────┴──────────┐
+                          ▼                    ▼
+              Backtest reveals:         Engineered new features:
+              FAILS during earnings     sentiment_volatility,
+              season (-15% acc)         sentiment_trend
+              ──→ DISCOVERY!            ──→ Acc: 66%, AUC: 0.71
+
+<b>What was lost:</b>
+✗ Logistic regression failure — next AI might try it again
+✗ WHY RF was kept as baseline, not deleted
+✗ Earnings season discovery — most valuable insight, completely accidental
+✗ Feature engineering rationale (volatility + trend)</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>What the AI Actually Needs — Five Practical Innovations</h3>
+
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+
+    <div style="background:#1e1e2e; border-left:3px solid #89b4fa; border-radius:0 8px 8px 0; padding:14px;">
+      <h3 style="color:#89b4fa; margin:0 0 4px 0;">1. The Decision Log — Rationale, Not Just Lineage</h3>
+      <p style="color:#a6adc8; font-size:11px; margin:0;">Data lineage tells you WHAT happened. Decision log tells you WHY. Every non-trivial choice is recorded: the options considered, the choice made, the rationale, and the downstream implications. <b>Structure: {what, why, alternatives, implications, timestamp}.</b> This is the single most important innovation — it's the missing layer between raw events and AI understanding.</p>
+    </div>
+
+    <div style="background:#1e1e2e; border-left:3px solid #a6e3a1; border-radius:0 8px 8px 0; padding:14px;">
+      <h3 style="color:#a6e3a1; margin:0 0 4px 0;">2. The Exploration Tree — Dead Ends ARE the Context</h3>
+      <p style="color:#a6adc8; font-size:11px; margin:0;">Data exploration is a TREE, not a DAG. For every successful path, there were 3 dead ends. Dead ends are <b>the most valuable context for future AI sessions</b> because they prevent repeating mistakes. Each node has status: SELECTED, REJECTED, or EXPLORATORY. The AI sees the full tree, not just the winning path.</p>
+    </div>
+
+    <div style="background:#1e1e2e; border-left:3px solid #fab387; border-radius:0 8px 8px 0; padding:14px;">
+      <h3 style="color:#fab387; margin:0 0 4px 0;">3. Auto-Parameter Registry — Capture What Code Alone Can't</h3>
+      <p style="color:#a6adc8; font-size:11px; margin:0;">Scripts contain logic but often hardcode parameters. A parameter registry auto-extracts: normalization bounds, split dates, hyperparameters, feature definitions. This is keyed to the script version AND the execution run. When the AI reuses a model, it has the exact parameters without re-reading the script.</p>
+    </div>
+
+    <div style="background:#1e1e2e; border-left:3px solid #f9e2af; border-radius:0 8px 8px 0; padding:14px;">
+      <h3 style="color:#f9e2af; margin:0 0 4px 0;">4. The Discovery Feed — Unplanned Insights, Structured</h3>
+      <p style="color:#a6adc8; font-size:11px; margin:0;">Most valuable insights are ACCIDENTAL: "Model fails during earnings season." A chronological lab-notebook feed where every discovery — planned or accidental — is timestamped, tagged, and linked to the data/code that produced it. This is the analyst's thinking, structured for AI consumption.</p>
+    </div>
+
+    <div style="background:#1e1e2e; border-left:3px solid #cba6f7; border-radius:0 8px 8px 0; padding:14px;">
+      <h3 style="color:#cba6f7; margin:0 0 4px 0;">5. The Context Manifest — Assembled, Not Dumped</h3>
+      <p style="color:#a6adc8; font-size:11px; margin:0;">When a new AI session starts, the system assembles a Context Manifest from #1-#4: project overview → dataset registry → active branch of exploration tree → recent decisions → relevant parameters → key discoveries. Priority-ordered, token-budget-aware. The AI gets a CURATED understanding, not a data dump.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>The Architecture They Enable</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:10px;">
+      <pre style="background:#1e1e2e; padding:8px; border-radius:4px; color:#a6adc8; margin:0; font-size:10px; white-space:pre; font-family:monospace; line-height:1.5;">
+┌──────────────────────────────────────────────────────────────────┐
+│                      .datamind/ (auto-managed)                    │
+│                                                                   │
+│  decisions.jsonl    ← {what, why, alternatives, implications}     │
+│  exploration.json   ← tree of explorations with status tags       │
+│  params.json        ← {script, run, key: value}                   │
+│  discoveries.jsonl  ← {timestamp, tag, finding, linked_code}      │
+│  context/           ← auto-generated manifest files               │
+│                                                                   │
+│  All five feed into: context/CONTEXT_MANIFEST.md                  │
+│  Which is the FIRST thing any AI session reads.                   │
+└──────────────────────────────────────────────────────────────────┘</pre>
+    </div>
+  </div>
+</div>

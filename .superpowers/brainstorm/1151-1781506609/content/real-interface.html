@@ -1,0 +1,205 @@
+<h2>DataMind Studio — Real Interface</h2>
+<p class="subtitle">A financial analyst's actual workflow. All context auto-managed.</p>
+
+<div class="section">
+  <h3>The App — Three Panels, One Workflow</h3>
+</div>
+
+<div style="display:flex; gap:12px; margin-top:12px;">
+
+  <!-- LEFT SIDEBAR -->
+  <div style="min-width:180px; width:180px; background:#11111b; border-radius:8px; padding:10px; font-family:monospace; font-size:10px; color:#cdd6f4;">
+    <div style="color:#cba6f7; font-weight:bold; font-size:11px; margin-bottom:10px;">📁 Project: Sentiment</div>
+
+    <div style="color:#89b4fa; font-size:9px; margin-bottom:4px;">📂 raw/</div>
+    <div style="padding-left:6px; margin-bottom:8px;">
+      <div style="margin-bottom:2px;">📄 tweets_raw.csv</div>
+      <div style="font-size:8px; color:#6c7086; margin-bottom:6px;">1.2M rows · 8 cols</div>
+      <div style="margin-bottom:2px;">📄 stock_prices.csv</div>
+      <div style="font-size:8px; color:#6c7086;">365 rows · 6 cols</div>
+    </div>
+
+    <div style="color:#a6e3a1; font-size:9px; margin-bottom:4px;">📂 processed/</div>
+    <div style="padding-left:6px; margin-bottom:8px;">
+      <div style="margin-bottom:2px;">📄 tweets_clean.csv</div>
+      <div style="font-size:8px; color:#6c7086; margin-bottom:2px;">→ clean_tweets.py</div>
+      <div style="margin-bottom:2px;">📄 stock_clean.csv</div>
+      <div style="font-size:8px; color:#6c7086; margin-bottom:2px;">→ clean_stocks.py</div>
+      <div style="margin-bottom:2px;">📄 merged.parquet</div>
+      <div style="font-size:8px; color:#6c7086;">→ merge_data.py</div>
+    </div>
+
+    <div style="color:#fab387; font-size:9px; margin-bottom:4px;">📂 scripts/</div>
+    <div style="padding-left:6px; margin-bottom:8px; font-size:9px;">
+      <div>clean_tweets.py</div>
+      <div>clean_stocks.py</div>
+      <div>merge_data.py</div>
+      <div style="color:#f9e2af;">feature_eng.py ← active</div>
+    </div>
+
+    <div style="border-top:1px solid #313244; margin-top:8px; padding-top:8px;">
+      <div style="font-size:8px; color:#6c7086; margin-bottom:2px;">Context: Ready ✓</div>
+      <div style="font-size:8px; color:#6c7086; margin-bottom:2px;">Last session: 2h ago</div>
+      <div style="font-size:8px; color:#6c7086;">Checkpoint: v3</div>
+    </div>
+  </div>
+
+  <!-- CENTER CHAT -->
+  <div style="flex:1; background:#1e1e2e; border-radius:8px; display:flex; flex-direction:column; font-size:11px;">
+
+    <!-- Chat messages -->
+    <div style="flex:1; padding:12px; overflow:hidden; display:flex; flex-direction:column; gap:8px;">
+
+      <div style="color:#6c7086; text-align:center; font-size:9px; margin-bottom:4px;">── Session #7 · Context injected: DATASETS.md + HISTORY.md + CHECKPOINT.md ──</div>
+
+      <div style="display:flex; gap:6px;">
+        <div style="color:#cba6f7; font-weight:bold; min-width:40px;">User</div>
+        <div style="background:#313244; border-radius:6px; padding:8px 10px; color:#cdd6f4;">
+          /skill feature-engineering merged.parquet<br>
+          <span style="color:#a6adc8; font-size:10px;">Target: stock_5d_return. Predict direction from sentiment features.</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <div style="color:#89b4fa; font-weight:bold; min-width:40px;">AI</div>
+        <div style="background:#313244; border-radius:6px; padding:8px 10px; color:#cdd6f4;">
+          <div style="margin-bottom:4px;">Analyzing merged.parquet from context...</div>
+          <div style="font-size:10px; color:#a6adc8; margin-bottom:4px;">
+            ✓ Read describe/merged.parquet.describe.md<br>
+            ✓ Previous decisions: forward fill, normalized [0,1], split @ 2025-01-01<br>
+            ✓ Current features: none yet (first feature engineering run)
+          </div>
+          <div style="margin-bottom:6px;">Based on the dataset and target variable, here's my proposed feature set:</div>
+
+          <div style="background:#11111b; border-radius:4px; padding:8px; font-size:10px; margin-bottom:6px; color:#a6adc8;">
+            <div style="color:#f9e2af; margin-bottom:4px;">Proposed Features (8):</div>
+            <div>1. sentiment_lag_1 — sentiment score 1 day prior</div>
+            <div>2. sentiment_lag_2 — sentiment score 2 days prior</div>
+            <div>3. sentiment_lag_3 — sentiment score 3 days prior</div>
+            <div>4. sentiment_vol_5d — sentiment std dev over 5 days</div>
+            <div>5. sentiment_trend — linear slope over 5 days</div>
+            <div>6. tweet_volume — number of tweets per day</div>
+            <div>7. tweet_volume_change — day-over-day change</div>
+            <div>8. day_of_week — trading day effect</div>
+          </div>
+
+          <div style="background:#f9e2af22; border:1px solid #f9e2af; border-radius:4px; padding:8px; font-size:10px; color:#f9e2af;">
+            <b>⏸ GATE 1: Approve feature set?</b><br>
+            APPROVE to generate code · REJECT to revise · MODIFY to adjust
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <div style="color:#cba6f7; font-weight:bold; min-width:40px;">User</div>
+        <div style="background:#313244; border-radius:6px; padding:8px 10px; color:#cdd6f4;">
+          <span style="color:#a6e3a1;">APPROVE</span> — but drop day_of_week, add sentiment_ma_7d instead
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <div style="color:#89b4fa; font-weight:bold; min-width:40px;">AI</div>
+        <div style="background:#313244; border-radius:6px; padding:8px 10px; color:#cdd6f4;">
+          <div style="margin-bottom:4px;">Adjusted. Generating scripts/feature_eng.py...</div>
+          <div style="background:#11111b; border-radius:4px; padding:8px; margin-bottom:6px; font-size:9px; color:#a6adc8; font-family:monospace;">
+            <span style="color:#6c7086;"># feature_eng.py — generated 2026-06-15</span><br>
+            <span style="color:#cba6f7;">import</span> pandas <span style="color:#cba6f7;">as</span> pd<br>
+            <span style="color:#cba6f7;">import</span> numpy <span style="color:#cba6f7;">as</span> np<br><br>
+            df = pd.read_parquet(<span style="color:#a6e3a1;">"processed/merged.parquet"</span>)<br><br>
+            <span style="color:#6c7086;"># Lag features (decision: 3-day window, ref decisions.jsonl #12)</span><br>
+            <span style="color:#cba6f7;">for</span> i <span style="color:#cba6f7;">in</span> [1,2,3]:<br>
+            &nbsp;&nbsp;df[<span style="color:#a6e3a1;">f"sentiment_lag_{i}"</span>] = df.groupby(<span style="color:#a6e3a1;">"symbol"</span>)[<span style="color:#a6e3a1;">"sentiment"</span>].shift(i)<br>
+            <span style="color:#6c7086;"># ... (8 features generated)</span><br>
+            df.to_parquet(<span style="color:#a6e3a1;">"processed/features.parquet"</span>)
+          </div>
+          <div style="font-size:10px; color:#a6adc8;">
+            ✓ Saved: scripts/feature_eng.py<br>
+            ✓ Saved: processed/features.parquet<br>
+            ✓ Updated: graph.db (merged → feature_eng → features)<br>
+            ✓ Updated: params.json (lag_window: 3, ma_window: 7)<br>
+            ✓ Updated: exploration.json (feature set v1 → SELECTED)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat input -->
+    <div style="border-top:1px solid #313244; padding:8px 12px; display:flex; gap:6px;">
+      <input style="flex:1; background:#11111b; border:1px solid #45475a; border-radius:4px; padding:8px; color:#cdd6f4; font-size:11px;" value="/skill model-training features.parquet" readonly>
+      <button class="mock-button" style="padding:6px 14px; font-size:10px;">Send</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: Lineage + Context Panel -->
+  <div style="min-width:200px; width:200px; display:flex; flex-direction:column; gap:8px;">
+
+    <!-- Mini lineage graph -->
+    <div style="background:#11111b; border-radius:8px; padding:10px; font-size:9px;">
+      <div style="color:#89b4fa; font-weight:bold; margin-bottom:8px;">🔗 Live Lineage</div>
+      <div style="font-family:monospace; color:#a6adc8; line-height:1.6;">
+        <div>📄 tweets_raw</div>
+        <div style="color:#6c7086; margin-left:4px;">│ clean_tweets.py</div>
+        <div style="margin-left:4px;">▼</div>
+        <div>📄 tweets_clean</div>
+        <div style="color:#6c7086; margin-left:4px;">│ merge_data.py</div>
+        <div style="margin-left:4px;">▼</div>
+        <div>📄 merged</div>
+        <div style="color:#f9e2af; margin-left:4px;">│ feature_eng.py ← NEW</div>
+        <div style="margin-left:4px;">▼</div>
+        <div style="color:#f9e2af;">📄 features ← NEW</div>
+      </div>
+    </div>
+
+    <!-- Decisions log -->
+    <div style="background:#11111b; border-radius:8px; padding:10px; font-size:9px;">
+      <div style="color:#a6e3a1; font-weight:bold; margin-bottom:6px;">📋 Recent Decisions</div>
+      <div style="color:#a6adc8; line-height:1.5; font-size:8px;">
+        <div style="margin-bottom:3px;"><b>#14</b> lag_window=3 (not 5)<br><span style="color:#6c7086;">3-day captures short-term sentiment</span></div>
+        <div style="margin-bottom:3px;"><b>#12</b> Forward fill, not interpolate<br><span style="color:#6c7086;">stocks don't interpolate weekends</span></div>
+        <div style="margin-bottom:3px;"><b>#8</b> Normalize sentiment to [0,1]<br><span style="color:#6c7086;">consistent input for model</span></div>
+      </div>
+    </div>
+
+    <!-- Current params -->
+    <div style="background:#11111b; border-radius:8px; padding:10px; font-size:9px;">
+      <div style="color:#fab387; font-weight:bold; margin-bottom:6px;">⚙ Active Params</div>
+      <div style="color:#a6adc8; font-size:8px; line-height:1.5;">
+        <div>split_date: 2025-01-01</div>
+        <div>lag_window: 3</div>
+        <div>ma_window: 7</div>
+        <div>norm_range: [0, 1]</div>
+        <div>target: stock_5d_return</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>What Just Happened — Automatically</h3>
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <div style="flex:1; background:#1e1e2e; border-radius:6px; padding:10px; font-size:10px;">
+      <div style="color:#89b4fa; font-weight:bold; margin-bottom:4px;">Context Loaded</div>
+      <div style="color:#a6adc8; line-height:1.5;">
+        Session start → CONTEXT_MANIFEST injected:<br>
+        • All dataset schemas (describe/)<br>
+        • Last 5 decisions (decisions.jsonl)<br>
+        • Current exploration branch<br>
+        • Active parameters<br>
+        • CHECKPOINT.md summary<br>
+        <b>AI already knew the project.</b>
+      </div>
+    </div>
+    <div style="flex:1; background:#1e1e2e; border-radius:6px; padding:10px; font-size:10px;">
+      <div style="color:#a6e3a1; font-weight:bold; margin-bottom:4px;">Context Saved</div>
+      <div style="color:#a6adc8; line-height:1.5;">
+        After APPROVE:<br>
+        • New execution log written<br>
+        • graph.db updated (new nodes + edges)<br>
+        • params.json updated (lag_window, ma_window)<br>
+        • exploration.json updated (feature set v1)<br>
+        • describe/features.parquet.describe.md auto-generated<br>
+        <b>Next session picks up right here.</b>
+      </div>
+    </div>
+  </div>
+</div>

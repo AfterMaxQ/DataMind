@@ -1,0 +1,205 @@
+<h2>DataMind — Technical Architecture</h2>
+<p class="subtitle">Six engineering innovations that solve the AI context problem for data science</p>
+
+<div class="section">
+  <h3>Innovation 1: Event-Sourced Knowledge Graph</h3>
+  <p class="subtitle">Every AI action is an immutable event. The graph is a materialized view. Replay from any point.</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.6;">
+                    ┌────────────────────────────────┐
+                    │       KNOWLEDGE GRAPH           │
+                    │       (SQLite + graph layer)    │
+                    └────────────────────────────────┘
+                                     ▲
+                         materialized view
+                                     │
+    ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+    │ Dataset  │ │  Script  │ │Execution │ │Decision  │
+    │  Node    │ │  Node    │ │  Node    │ │  Node    │
+    └──────────┘ └──────────┘ └──────────┘ └──────────┘
+          ▲            ▲            ▲            ▲
+          │            │            │            │
+    ┌─────┴────────────┴────────────┴────────────┴─────┐
+    │              IMMUTABLE EVENT LOG                  │
+    │                                                  │
+    │  executions/2026-06-15-001-clean-nulls.md        │
+    │  executions/2026-06-15-002-explore-revenue.md     │
+    │  executions/2026-06-15-003-build-model.md         │
+    └──────────────────────────────────────────────────┘</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Innovation 2: The Project Structure</h3>
+  <p class="subtitle">Not a folder convention — it's a schema that the AI natively understands</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+DataMind Project/
+├── .datamind/
+│   ├── graph.db              ← knowledge graph (SQLite)
+│   ├── context/              ← auto-generated context files
+│   │   ├── PROJECT.md        ← project overview
+│   │   ├── DATASETS.md       ← all schemas + statistics
+│   │   ├── HISTORY.md        ← recent activity
+│   │   └── CHECKPOINT.md     ← compressed understanding
+│   └── config.yaml
+├── data/
+│   ├── raw/          ← immutable (never modified)
+│   └── processed/    ← all derived datasets
+├── scripts/          ← AI-generated, linked to lineage
+├── describe/         ← auto data.describe for every dataset
+└── executions/       ← immutable per-session logs</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Innovation 3: Context Packing Algorithm</h3>
+  <p class="subtitle">Not RAG. Not vector search. Priority-ordered structured injection.</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+┌─────────────────────────────────────────────────┐
+│            CONTEXT PACKER                        │
+│                                                  │
+│  Input: user query + project state               │
+│                                                  │
+│  Priority 1 (ALWAYS):                            │
+│    • PROJECT.md       ~500 tokens                │
+│    • All DATASETS.md  ~200 tokens each            │
+│                                                  │
+│  Priority 2 (RECENT):                            │
+│    • Last 5 execution logs   ~2k tokens each     │
+│    • Last 10 decisions       ~100 tokens each    │
+│                                                  │
+│  Priority 3 (RELEVANT):                          │
+│    • Graph search for query-related nodes        │
+│    • e.g. "revenue" → find datasets/scripts      │
+│              with "revenue" in metadata          │
+│                                                  │
+│  Priority 4 (COMPRESSED):                        │
+│    • CHECKPOINT.md — dense summary of            │
+│      all prior work, periodically regenerated    │
+│                                                  │
+│  Output: ~30-50k token context pack              │
+└─────────────────────────────────────────────────┘</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Innovation 4: Script-as-Edge Pattern</h3>
+  <p class="subtitle">The script IS the relationship. No external mapping. Read the graph = understand the data.</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.4;">
+     raw/sales.csv ──→ scripts/clean_nulls.py ──→ processed/sales_clean.csv
+            │                                          │
+            │              ┌───────────────────────────┘
+            │              ▼
+            │    scripts/aggregate.py ──→ processed/sales_agg.parquet
+            │                                   │
+            └──────→ scripts/merge.py ──────────┘
+                            │
+                            ▼
+                  processed/master_table.csv
+
+    Each edge = the script that transformed the data.
+    AI reads scripts/ dir → instantly knows all transformations.</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Innovation 5: Auto-Describe Engine</h3>
+  <p class="subtitle">Every dataset gets a machine-readable description the AI never needs to rediscover</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.4;">
+describe/sales_2024.describe.md:
+
+  ## sales_2024.csv
+  - Rows: 45,231 | Columns: 12 | Size: 3.2 MB
+  - Ingested: 2026-06-15 14:32
+
+  | Column      | Type    | Null%  | Unique | Range/Values          |
+  |-------------|---------|--------|--------|------------------------|
+  | date        | date    | 0%     | 365    | 2024-01-01..2024-12-31|
+  | region      | str     | 2.1%   | 7      | N. America, EU, APAC..|
+  | revenue     | float   | 23.4%  | -      | -$50..$49,999 (1 neg) |
+  | product_id  | str     | 0%     | 1,247  | SKU-0001..SKU-1247    |
+
+  AI never re-reads the CSV to understand its structure.</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Innovation 6: Checkpoint — Compressed Understanding</h3>
+  <p class="subtitle">Like git packfiles for knowledge. Periodically regenerate a dense state-of-project snapshot.</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+CHECKPOINT.md (auto-generated, ~2k tokens):
+
+  ## Current Project State (as of 2026-06-15 16:00)
+
+  ### Active Datasets
+  - raw/sales_2024.csv (45k rows, 12 cols) → source of truth
+  - processed/sales_clean.csv → nulls handled, 43k rows
+  - processed/sales_agg.parquet → monthly by region
+
+  ### What We've Done
+  ✓ Cleaned: dropped null-revenue rows, filled missing regions
+  ✓ Explored: revenue peaks in Nov-Dec, negative value found
+  ✓ Decided: keep negative revenue as data entry error flag
+
+  ### Current Task
+  Building churn prediction model using sales_agg
+
+  ### Open Questions
+  - Should we backfill missing regions from customer DB?
+  - Is the -$50 revenue a real refund or error?
+
+  ### Next Steps (suggested)
+  1. Feature engineering on sales_agg
+  2. Train baseline model
+  3. Validate against Q1 2025 data</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>How This Solves the Core Problem</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>New AI session starts → AI immediately knows:</h4>
+      <ul>
+        <li>Every dataset's schema, stats, and meaning (DATASETS.md)</li>
+        <li>How each dataset was created (lineage graph → scripts)</li>
+        <li>What was tried, what worked, what failed (execution logs)</li>
+        <li>Why decisions were made (decision nodes)</li>
+        <li>The current state of the project (CHECKPOINT.md)</li>
+        <li>What to do next (suggested next steps from checkpoint)</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Open challenges to resolve:</h4>
+      <ul>
+        <li>Checkpoint regeneration: when and how often?</li>
+        <li>How to handle manual (non-AI) changes to data?</li>
+        <li>Multi-user collaboration: merge conflict in graph.db?</li>
+        <li>Large datasets: describe generation cost vs caching</li>
+      </ul>
+    </div>
+  </div>
+</div>

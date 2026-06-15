@@ -1,0 +1,204 @@
+<h2>Layer 4: The Skill System</h2>
+<p class="subtitle">Skills encode data science workflows. AI executes. Human approves/rejects at gates.</p>
+
+<div class="section">
+  <h3>Where Skills Fit</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:10px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; font-size:10px; white-space:pre; font-family:monospace; line-height:1.4;">
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                     LAYER 4: SKILL ORCHESTRATION                      │
+│                                                                       │
+│   skills/                       ← built-in + custom skills            │
+│     data-cleaning/                                                     │
+│       SKILL.md                  ← workflow definition                 │
+│       gates.md                  ← human approval checkpoints          │
+│     data-exploration/                                                  │
+│     feature-engineering/                                               │
+│     model-training/                                                    │
+│     report-generation/                                                 │
+│     fintech-sentiment/           ← custom domain skill                 │
+│                                                                       │
+│   Skill Pipeline: read context → execute workflow → write results     │
+│                         ▲                               │             │
+│                         │                               ▼             │
+│                    Reads from                      Writes to           │
+│                    CONTEXT_MANIFEST        All layers below            │
+└──────────────────────────────────────────────────────────────────────┘
+                                    │
+        ┌───────────────────────────┼───────────────────────────┐
+        ▼                           ▼                           ▼
+┌───────────────┐       ┌───────────────────────┐       ┌──────────────┐
+│  LAYER 1      │       │  LAYER 2              │       │  LAYER 3     │
+│  Data Lineage │       │  Cognitive Journey    │       │  Context     │
+│  (WHAT)       │       │  (WHY & LEARNED)      │       │  Assembly    │
+│               │       │                       │       │  (BRIDGE)    │
+│  graph.db     │       │  decisions.jsonl      │       │  MANIFEST.md │
+│  describe/    │       │  exploration.json     │       │  PROJECT.md  │
+│  scripts/     │       │  params.json          │       │  DATASETS.md │
+│               │       │  discoveries.jsonl    │       │  CHECKPOINT  │
+└───────────────┘       └───────────────────────┘       └──────────────┘</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Example Skill: data-cleaning</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.5;">
+
+  skills/data-cleaning/SKILL.md:
+
+    # Data Cleaning Skill
+
+    ## Purpose
+    Systematically clean a raw dataset: detect issues, propose strategy,
+    apply fixes, validate results.
+
+    ## Inputs
+    - dataset: name of raw dataset (from describe/)
+    - constraints: optional user constraints (columns to preserve, etc.)
+
+    ## Workflow
+
+    <b>Step 1: AUTO — Analyze</b>
+    AI reads describe/{dataset}.md + samples data
+    → Produces: issue_report (nulls, outliers, type mismatches, duplicates)
+
+    <b>Step 2: GATE — Human approves cleaning strategy</b>    ← HUMAN HERE
+    AI proposes: "Drop null-revenue rows (23%). Forward fill regions.
+                 Clip revenue to [0, p99]."
+    Human: APPROVE | REJECT | MODIFY
+
+    <b>Step 3: AUTO — Execute</b>
+    AI generates scripts/clean_{dataset}.py and runs it
+    → Saves: processed/{dataset}_clean.csv
+    → Updates: graph.db (raw → clean edge), params.json
+    → Appends: decisions.jsonl (why forward fill, why clip at p99)
+
+    <b>Step 4: AUTO — Validate</b>
+    AI runs validation checks on output
+    → Produces: validation_report (null count, distribution shifts)
+
+    <b>Step 5: GATE — Human approves result</b>               ← HUMAN HERE
+    AI shows: before/after stats, validation report
+    Human: APPROVE (proceed) | REJECT (re-run with changes)
+
+    ## Outputs
+    - processed/{dataset}_clean.csv
+    - scripts/clean_{dataset}.py
+    - validation report
+    - Updated: graph.db, decisions.jsonl, params.json</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Skill Pipeline: End-to-End Project</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:12px; font-size:11px;">
+      <pre style="background:#1e1e2e; padding:10px; border-radius:4px; color:#a6adc8; margin:0; white-space:pre; font-family:monospace; line-height:1.35;">
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                    PROJECT PIPELINE                              │
+  │                                                                  │
+  │  data-ingestion      data-cleaning     feature-engineering       │
+  │  ┌──────────┐       ┌──────────┐       ┌──────────┐             │
+  │  │ Upload   │       │ Detect   │       │ Propose  │             │
+  │  │ Describe │  ───▶ │ Propose  │ ───▶  │ features │──▶ ...     │
+  │  │ Validate │       │ Execute  │       │ Generate │             │
+  │  └──────────┘       │ Validate │       │ Validate │             │
+  │       │             └──────────┘       └──────────┘             │
+  │       │                  │                  │                    │
+  │       ▼                  ▼                  ▼                    │
+  │   [GATE]             [GATE]             [GATE]                  │
+  │   "Import            "Forward fill      "Lag features            │
+  │    these 5            null regions?      at t-1,t-2,t-3?"       │
+  │    datasets?"                                                      │
+  │                                                                  │
+  │       │                  │                  │                    │
+  │       └──────────────────┼──────────────────┘                    │
+  │                          ▼                                       │
+  │               model-training        report-generation            │
+  │               ┌──────────┐         ┌──────────┐                 │
+  │               │ Baseline │         │ Gather   │                 │
+  │          ───▶ │ Tune     │  ───▶   │ Visualize│                 │
+  │               │ Evaluate │         │ Export   │                 │
+  │               └──────────┘         └──────────┘                 │
+  │                    │                    │                        │
+  │                    ▼                    ▼                        │
+  │                [GATE]               [GATE]                       │
+  │                "XGBoost             "Report                      │
+  │                 66% acc —            ready for                    │
+  │                 deploy?"            stakeholder?"                │
+  └─────────────────────────────────────────────────────────────────┘
+
+  Each skill reads CONTEXT_MANIFEST → executes → writes back.
+  Skills compose: outputs of one are inputs to the next.
+  Human only appears at [GATE] — judgment, not labor.</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>The Human Role Shift</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Without Skills</div>
+      <div class="mockup-body" style="padding:14px; color:#f38ba8; font-size:12px; line-height:1.6;">
+        Human: "Clean the sales data"<br>
+        AI: "How should I handle nulls?"<br>
+        Human: "Drop revenue nulls, fill regions"<br>
+        AI: writes code, makes mistakes<br>
+        Human: "No, use forward fill not mean"<br>
+        AI: fixes code<br>
+        Human: "Also clip outliers"<br>
+        AI: "Which columns? What threshold?"<br>
+        Human: <i>exhausted</i>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">With Skills</div>
+      <div class="mockup-body" style="padding:14px; color:#a6e3a1; font-size:12px; line-height:1.6;">
+        Human: /skill data-cleaning sales.csv<br>
+        AI: executes Analyze → finds 23% nulls in revenue,<br>
+             7 region typos, 1 negative revenue<br>
+        <b>[GATE]</b> Proposes: drop null-revenue rows,<br>
+             forward fill regions, clip revenue p99<br>
+        Human: APPROVE<br>
+        AI: executes, validates, writes everything<br>
+        <b>[GATE]</b> Shows: before/after stats. Pass.<br>
+        Human: APPROVE<br>
+        <i>Done. All context saved.</i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Complete Four-Layer Architecture</h3>
+  <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:#1e1e2e; border-radius:6px; border-left:4px solid #cba6f7;">
+      <div style="color:#cba6f7; font-weight:bold; font-size:12px; min-width:100px;">LAYER 4<br>Skills</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Encoded workflows with human gates.</b> Built-in: data-cleaning, data-exploration, feature-engineering, model-training, report-generation. Custom: fintech-sentiment, retail-forecast, etc. Skills compose into pipelines. Human only appears at approval gates — judgment, not labor.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:#1e1e2e; border-radius:6px; border-left:4px solid #f38ba8;">
+      <div style="color:#f38ba8; font-weight:bold; font-size:12px; min-width:100px;">LAYER 3<br>Assembly</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>Context Manifest — curated understanding for every AI session.</b> Priority-ordered, token-budget-aware. Assembled from Layers 1+2. The bridge between stored knowledge and AI consumption.</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:#1e1e2e; border-radius:6px; border-left:4px solid #a6e3a1;">
+      <div style="color:#a6e3a1; font-weight:bold; font-size:12px; min-width:100px;">LAYER 2<br>Cognition</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>WHY and what was learned.</b> Decision log (what, why, alternatives). Exploration tree (dead ends + successes). Parameter registry (exact settings). Discovery feed (accidental insights).</div>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:#1e1e2e; border-radius:6px; border-left:4px solid #89b4fa;">
+      <div style="color:#89b4fa; font-weight:bold; font-size:12px; min-width:100px;">LAYER 1<br>Lineage</div>
+      <div style="color:#cdd6f4; font-size:12px;"><b>WHAT happened to the data.</b> Knowledge graph (Dataset, Script, Execution nodes). Script-as-edge pattern. Auto data.describe for every dataset.</div>
+    </div>
+  </div>
+</div>
