@@ -12,11 +12,9 @@ Endpoints:
 """
 
 import json
-import logging
 import os
+from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query, Request
-
-_log = logging.getLogger(__name__)
 debug_router = APIRouter(prefix="/debug", tags=["debug"])
 
 
@@ -68,7 +66,6 @@ async def list_sessions(request: Request):
 
 @debug_router.get("/logs")
 async def query_logs(
-    request: Request,
     session_id: str | None = Query(None, description="Filter by session_id"),
     level: str | None = Query(None, description="Filter by log level"),
     limit: int = Query(100, ge=1, le=1000, description="Max entries to return"),
@@ -77,7 +74,7 @@ async def query_logs(
 
     Supports optional filtering by session_id and log level.
     """
-    log_dir = os.path.join(os.getcwd(), ".datamind", "logs")
+    log_dir = str(Path(__file__).resolve().parent.parent / ".datamind" / "logs")
     log_file = os.path.join(log_dir, "app.jsonl")
 
     entries: list[dict] = []

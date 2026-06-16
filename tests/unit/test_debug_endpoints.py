@@ -55,6 +55,40 @@ def test_debug_disabled_when_env_var_set():
         os.environ.pop("DATAMIND_DEBUG_DISABLE", None)
 
 
+def test_debug_state_returns_session_data():
+    """Existing session returns full state."""
+    os.environ.pop("DATAMIND_DEBUG_DISABLE", None)
+    app, _ = _make_test_app()
+
+    # Create a mock state machine
+    class MockState:
+        skill = "data-exploration"
+        phase = "phase-2"
+        phases = {"phase-1": "COMPLETE", "phase-2": "IN_PROGRESS"}
+        result = None
+
+    class MockSM:
+        state = MockState()
+
+    app.state.session_registry["test-session-1"] = {
+        "agent": object(),
+        "state_machine": MockSM(),
+        "started_at": "2026-06-16T12:00:00Z",
+        "skill_name": "data-exploration",
+        "updated_at": "2026-06-16T12:05:00Z",
+    }
+
+    client = TestClient(app)
+    resp = client.get("/debug/state/test-session-1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["session_id"] == "test-session-1"
+    assert data["skill_name"] == "data-exploration"
+    assert data["current_phase"] == "phase-2"
+    assert data["started_at"] == "2026-06-16T12:00:00Z"
+    assert data["agent_type"] == "object"
+
+
 def test_debug_logs_with_query_params():
     """Debug /logs endpoint accepts query parameters."""
     os.environ.pop("DATAMIND_DEBUG_DISABLE", None)
