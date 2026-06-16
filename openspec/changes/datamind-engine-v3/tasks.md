@@ -40,14 +40,14 @@
 
 ## 5. Skill Migration to LangGraph
 
-- [ ] 5.1 Migrate `auto-archive` skill to LangGraph state graph
-- [ ] 5.2 Migrate `requirement-discussion` skill to LangGraph state graph
-- [ ] 5.3 Migrate `report-generation` skill to LangGraph state graph
-- [ ] 5.4 Migrate `data-exploration` skill to LangGraph state graph
-- [ ] 5.5 Migrate `data-cleaning` skill to LangGraph state graph
-- [ ] 5.6 Migrate `feature-engineering` skill to LangGraph state graph
-- [ ] 5.7 Migrate `model-training` skill to LangGraph state graph (parallel training + conditional gate routing)
-- [ ] 5.8 Write integration test verifying full skill execution through LangGraph for each skill
+- [x] 5.1 Migrate `auto-archive` skill to LangGraph state graph
+- [x] 5.2 Migrate `requirement-discussion` skill to LangGraph state graph
+- [x] 5.3 Migrate `report-generation` skill to LangGraph state graph
+- [x] 5.4 Migrate `data-exploration` skill to LangGraph state graph
+- [x] 5.5 Migrate `data-cleaning` skill to LangGraph state graph
+- [x] 5.6 Migrate `feature-engineering` skill to LangGraph state graph
+- [x] 5.7 Migrate `model-training` skill to LangGraph state graph (parallel training + conditional gate routing)
+- [x] 5.8 Write integration test verifying full skill execution through LangGraph for each skill
 
 ## 6. DeepSeek Integration
 
