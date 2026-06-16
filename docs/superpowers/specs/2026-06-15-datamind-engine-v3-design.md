@@ -1,3 +1,7 @@
+---
+archived-with: 2026-06-16-datamind-engine-v3
+status: final
+---
 ﻿---
 comet_change: datamind-engine-v3
 role: technical-design

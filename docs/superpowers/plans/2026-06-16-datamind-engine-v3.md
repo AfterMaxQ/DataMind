@@ -1,3 +1,7 @@
+---
+archived-with: 2026-06-16-datamind-engine-v3
+status: final
+---
 ﻿---
 change: datamind-engine-v3
 design-doc: docs/superpowers/specs/2026-06-15-datamind-engine-v3-design.md
