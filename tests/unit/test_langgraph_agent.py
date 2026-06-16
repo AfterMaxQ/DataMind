@@ -5,8 +5,39 @@ from pathlib import Path
 
 import pytest
 import yaml
+from langgraph.graph import StateGraph
 
 from datamind.engine.skill_state import SkillPhase
+
+
+# ===========================================================================
+# Mock objects
+# ===========================================================================
+
+class MockSkillDef:
+    """Mock skill definition for testing SkillGraphBuilder constructor."""
+
+    def __init__(self, phases, frontmatter=None):
+        self.phases = list(phases)
+        self.frontmatter = frontmatter or {}
+
+
+class MockPromptManager:
+    """Mock prompt manager for testing prompt_manager integration."""
+
+    def __init__(self):
+        self.render_calls = []
+
+    def render(self, skill_name="", phase=None, phase_index=0, total_phases=0,
+               target="", **kwargs):
+        self.render_calls.append({
+            "skill_name": skill_name,
+            "phase": phase,
+            "phase_index": phase_index,
+            "total_phases": total_phases,
+            "target": target,
+        })
+        return f"Rendered prompt for {skill_name}"
 
 
 # ===========================================================================
@@ -75,24 +106,102 @@ AUTO_GATE_PHASES = [
 
 
 class TestSkillGraphBuilder:
-    """Verify SkillGraphBuilder constructs valid StateGraph instances."""
+    """Verify SkillGraphBuilder constructs valid compiled graphs."""
 
-    def test_build_returns_state_graph(self):
-        """build() returns a StateGraph (not compiled)."""
+    # ------------------------------------------------------------------
+    # D1: Constructor accepts skill_def, prompt_manager
+    # ------------------------------------------------------------------
+
+    def test_constructor_accepts_skill_def(self):
+        """D1: Constructor accepts skill_def, extracts phases and frontmatter."""
         from datamind.engine.langgraph_agent import SkillGraphBuilder
-        builder = SkillGraphBuilder(phases=SIMPLE_AUTO_PHASES)
-        graph = builder.build()
-        from langgraph.graph import StateGraph
-        assert isinstance(graph, StateGraph)
 
-    def test_compile_produces_runnable_graph(self):
-        """Compiled graph can be invoked and runs AUTO phases."""
+        frontmatter = {"routing": {"gate-0": {"reject": "analyze"}}}
+        skill_def = MockSkillDef(phases=SIMPLE_AUTO_PHASES, frontmatter=frontmatter)
+        builder = SkillGraphBuilder(skill_def=skill_def)
+        assert len(builder.phases) == 2
+        assert builder.phases[0].id == "analyze"
+        assert builder._frontmatter == frontmatter
+
+    def test_prompt_manager_used_when_provided(self):
+        """D1: prompt_manager.render() is used instead of inline prompt assembly."""
         from datamind.engine.langgraph_agent import SkillGraphBuilder, SkillState
-        from langgraph.checkpoint.memory import InMemorySaver
 
-        builder = SkillGraphBuilder(phases=SIMPLE_AUTO_PHASES)
+        prompt_mgr = MockPromptManager()
+        skill_def = MockSkillDef(phases=SIMPLE_AUTO_PHASES)
+        # Must provide an llm_client so the auto node enters the prompt path
+        llm = MockLLMClient()
+        builder = SkillGraphBuilder(
+            skill_def=skill_def, llm_client=llm, prompt_manager=prompt_mgr
+        )
+        compiled = builder.build()
+
+        initial: SkillState = {
+            "session_id": "s1",
+            "skill_name": "test-skill",
+            "target": "test.csv",
+            "current_phase": 0,
+            "phase_results": {},
+            "messages": [],
+            "tool_calls": [],
+            "gate_decision": "",
+            "result": None,
+        }
+
+        compiled.invoke(initial, {"configurable": {"thread_id": "t2"}})
+        assert len(prompt_mgr.render_calls) == 2, (
+            f"Expected 2 render calls (one per AUTO phase), got {len(prompt_mgr.render_calls)}"
+        )
+
+    def test_prompt_manager_none_falls_back_to_inline(self):
+        """D1: When prompt_manager is None, falls back to inline prompt (existing behavior)."""
+        from datamind.engine.langgraph_agent import SkillGraphBuilder, SkillState
+
+        skill_def = MockSkillDef(phases=SIMPLE_AUTO_PHASES)
+        builder = SkillGraphBuilder(skill_def=skill_def, prompt_manager=None)
+        compiled = builder.build()
+
+        initial: SkillState = {
+            "session_id": "s1",
+            "skill_name": "test-skill",
+            "target": "test.csv",
+            "current_phase": 0,
+            "phase_results": {},
+            "messages": [],
+            "tool_calls": [],
+            "gate_decision": "",
+            "result": None,
+        }
+
+        result = compiled.invoke(initial, {"configurable": {"thread_id": "t3"}})
+        assert result["result"] == "pass"
+
+    # ------------------------------------------------------------------
+    # D2: build() returns compiled graph
+    # ------------------------------------------------------------------
+
+    def test_build_returns_compiled_graph(self):
+        """D2: build() returns a compiled graph (not an uncompiled StateGraph)."""
+        from datamind.engine.langgraph_agent import SkillGraphBuilder
+
+        skill_def = MockSkillDef(phases=SIMPLE_AUTO_PHASES)
+        builder = SkillGraphBuilder(skill_def=skill_def)
         graph = builder.build()
-        compiled = graph.compile(checkpointer=InMemorySaver())
+
+        # Must NOT be a raw StateGraph (must be compiled)
+        assert not isinstance(graph, StateGraph), (
+            "build() must return compiled graph, not raw StateGraph"
+        )
+        # Must have invoke() for execution
+        assert hasattr(graph, "invoke"), "Compiled graph must have invoke()"
+
+    def test_compiled_graph_runs_phases(self):
+        """D2: Compiled graph from build() can be invoked directly without manual compile."""
+        from datamind.engine.langgraph_agent import SkillGraphBuilder, SkillState
+
+        skill_def = MockSkillDef(phases=SIMPLE_AUTO_PHASES)
+        builder = SkillGraphBuilder(skill_def=skill_def)
+        compiled = builder.build()
 
         initial: SkillState = {
             "session_id": "s1",
@@ -116,16 +225,60 @@ class TestSkillGraphBuilder:
         """Linear graph has one node per phase."""
         from datamind.engine.langgraph_agent import SkillGraphBuilder
 
-        builder = SkillGraphBuilder(phases=SIMPLE_AUTO_PHASES)
-        graph = builder.build()
-        compiled = graph.compile()
+        skill_def = MockSkillDef(phases=SIMPLE_AUTO_PHASES)
+        builder = SkillGraphBuilder(skill_def=skill_def)
+        compiled = builder.build()
 
-        # Check that expected node names exist via nodes property (1.2.5 API)
         node_names = list(compiled.nodes.keys())
         for phase in SIMPLE_AUTO_PHASES:
             assert phase.id in node_names, (
                 f"Expected node {phase.id} not found in {node_names}"
             )
+
+    # ------------------------------------------------------------------
+    # D3: REJECT routes to fallback phase
+    # ------------------------------------------------------------------
+
+    def test_reject_routes_to_fallback_from_frontmatter(self):
+        """D3: REJECT edge routes to frontmatter-configured fallback phase."""
+        from datamind.engine.langgraph_agent import SkillGraphBuilder
+
+        frontmatter = {
+            "routing": {
+                "gate-1": {"reject": "analyze"}
+            }
+        }
+        skill_def = MockSkillDef(phases=AUTO_GATE_PHASES, frontmatter=frontmatter)
+        builder = SkillGraphBuilder(skill_def=skill_def)
+        compiled = builder.build()
+
+        # Inspect the gate node's conditional branch
+        branches = compiled.builder.branches
+        gate_branch = branches.get("gate-approve")
+        assert gate_branch is not None, "Gate node must have a conditional branch"
+        # The branch dict is keyed by router function name
+        branch_spec = list(gate_branch.values())[0]
+        assert branch_spec.ends["reject"] == "analyze", (
+            f"Reject should route to 'analyze', got {branch_spec.ends.get('reject')}"
+        )
+
+    def test_reject_defaults_to_end_without_routing(self):
+        """D3: REJECT edge defaults to END when no routing config is present."""
+        from datamind.engine.langgraph_agent import SkillGraphBuilder
+
+        skill_def = MockSkillDef(phases=AUTO_GATE_PHASES)
+        builder = SkillGraphBuilder(skill_def=skill_def)
+        compiled = builder.build()
+
+        branches = compiled.builder.branches
+        gate_branch = branches.get("gate-approve")
+        assert gate_branch is not None
+        # The branch dict is keyed by router function name
+        branch_spec = list(gate_branch.values())[0]
+        # LangGraph represents END as "__end__"
+        assert branch_spec.ends["reject"] == "__end__", (
+            f"Reject should default to __end__, got {branch_spec.ends.get('reject')}"
+        )
 
 
 # ===========================================================================
@@ -162,14 +315,13 @@ class TestLangGraphAgent:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _make_agent(phases, llm_client=None, yaml_path=None):
+    def _make_agent(phases, llm_client=None, yaml_path=None, frontmatter=None):
         """Create a LangGraphAgent for testing."""
         from datamind.engine.langgraph_agent import SkillGraphBuilder, LangGraphAgent
-        from langgraph.checkpoint.memory import InMemorySaver
 
-        builder = SkillGraphBuilder(phases=phases, llm_client=llm_client)
-        checkpointer = InMemorySaver()
-        return LangGraphAgent(builder, checkpointer, skill_yaml_path=yaml_path)
+        skill_def = MockSkillDef(phases=phases, frontmatter=frontmatter)
+        builder = SkillGraphBuilder(skill_def=skill_def, llm_client=llm_client)
+        return LangGraphAgent(builder, skill_yaml_path=yaml_path)
 
     @staticmethod
     def _initial_state(skill_name="test-skill", target="test.csv"):
@@ -274,8 +426,8 @@ class TestLangGraphAgent:
         assert data["result"] == "pass"
         assert "analyze" in data["phase_results"]
 
-    def test_skill_yaml_not_corrupted_on_error(self, tmp_project):
-        """Incomplete runs should not corrupt .skill.yaml."""
+    def test_skill_yaml_written_on_gate_interrupt(self, tmp_project):
+        """D4: .skill.yaml is written on EVERY state transition, including gate interrupt."""
         yaml_path = tmp_project / ".skill.yaml"
         agent = self._make_agent(
             phases=AUTO_GATE_PHASES,
@@ -283,18 +435,21 @@ class TestLangGraphAgent:
         )
         state = self._initial_state()
 
-        # Run — should stop at GATE (no complete)
+        # Run — should stop at GATE (interrupt, not complete)
         event = agent.run(state)
         from datamind.engine.langgraph_agent import LangGraphWaitForApproval
         assert isinstance(event, LangGraphWaitForApproval)
 
-        # File may or may not exist (implementation choice)
-        # If it exists, it should NOT have result="pass"
-        if yaml_path.exists():
-            data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
-            assert data.get("result") is None, (
-                "Incomplete run must not set result=pass"
-            )
+        # D4: File MUST exist after interrupt (every transition)
+        assert yaml_path.exists(), (
+            ".skill.yaml must be written on every state transition (D4)"
+        )
+        data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+        assert data["skill_name"] == "test-skill"
+        # Result should be None (not yet complete)
+        assert data.get("result") is None, (
+            "Interrupted run must not set result=pass"
+        )
 
     def test_run_with_thread_id_configures_thread(self):
         """run() with explicit thread_id uses that thread."""

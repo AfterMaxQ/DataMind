@@ -119,29 +119,45 @@ class SkillGraphBuilder:
     a linear or complex graph structure.
 
     Parameters:
-        phases: Ordered list of :class:`~datamind.engine.skill_state.SkillPhase`.
-        llm_client: Optional LLM client for real model calls (mockable for tests).
+        skill_def: Skill definition object with ``phases`` and optional
+            ``frontmatter`` attributes.
         tool_registry: Optional :class:`~datamind.engine.tools.ToolRegistry` for tool execution.
+        llm_client: Optional LLM client for real model calls (mockable for tests).
+        prompt_manager: Optional prompt manager for template-based prompt assembly.
     """
 
-    def __init__(self, phases, llm_client=None, tool_registry=None):
-        self.phases = list(phases)
+    def __init__(self, skill_def, tool_registry=None, llm_client=None, prompt_manager=None):
+        self.phases = list(skill_def.phases)
         self.llm_client = llm_client
         self.tool_registry = tool_registry
+        self.prompt_manager = prompt_manager
+        self._frontmatter = getattr(skill_def, "frontmatter", {})
 
     # ------------------------------------------------------------------
     # Build entry point
     # ------------------------------------------------------------------
 
-    def build(self) -> StateGraph:
-        """Return a configured :class:`StateGraph` (not yet compiled)."""
+    def build(self, checkpointer=None):
+        """Build and compile a graph, returning a runnable compiled graph.
+
+        Parameters:
+            checkpointer: Optional LangGraph checkpointer.  Defaults to
+                :class:`~langgraph.checkpoint.memory.InMemorySaver` when
+                ``None``.
+        """
+        if checkpointer is None:
+            from langgraph.checkpoint.memory import InMemorySaver
+            checkpointer = InMemorySaver()
+
         # Detect complexity — check for parallel or routing config
         has_parallel = any(
             getattr(p, "parallel", False) for p in self.phases
         )
         if has_parallel:
-            return self._build_complex_graph()
-        return self._build_linear_graph()
+            builder = self._build_complex_graph()
+        else:
+            builder = self._build_linear_graph()
+        return builder.compile(checkpointer=checkpointer)
 
     # ------------------------------------------------------------------
     # Linear graph
@@ -151,8 +167,10 @@ class SkillGraphBuilder:
         """Build a linear graph: one node per phase, sequential edges.
 
         After each GATE node, a conditional edge routes based on
-        ``gate_decision``.
+        ``gate_decision``.  REJECT routing is read from
+        ``self._frontmatter["routing"]["gate-{i}"]``; defaults to ``END``.
         """
+        routing = self._frontmatter.get("routing", {})
         builder = StateGraph(SkillState)
 
         # Register nodes
@@ -171,10 +189,13 @@ class SkillGraphBuilder:
             current = self.phases[i]
             next_phase = self.phases[i + 1]
             if current.type == "GATE":
+                routing_key = f"gate-{i}"
+                route_info = routing.get(routing_key, {})
+                reject_target = route_info.get("reject", END)
                 builder.add_conditional_edges(
                     current.id,
                     self._gate_router,
-                    {"approve": next_phase.id, "reject": END},
+                    {"approve": next_phase.id, "reject": reject_target},
                 )
             else:
                 builder.add_edge(current.id, next_phase.id)
@@ -197,7 +218,12 @@ class SkillGraphBuilder:
     # ------------------------------------------------------------------
 
     def _build_complex_graph(self) -> StateGraph:
-        """Build a graph with parallel execution support."""
+        """Build a graph with parallel execution support.
+
+        REJECT routing is read from ``self._frontmatter["routing"]["gate-{i}"]``;
+        defaults to ``END``.
+        """
+        routing = self._frontmatter.get("routing", {})
         builder = StateGraph(SkillState)
 
         for i, phase in enumerate(self.phases):
@@ -218,10 +244,13 @@ class SkillGraphBuilder:
             current = self.phases[i]
             next_phase = self.phases[i + 1]
             if current.type == "GATE":
+                routing_key = f"gate-{i}"
+                route_info = routing.get(routing_key, {})
+                reject_target = route_info.get("reject", END)
                 builder.add_conditional_edges(
                     current.id,
                     self._gate_router,
-                    {"approve": next_phase.id, "reject": END},
+                    {"approve": next_phase.id, "reject": reject_target},
                 )
             else:
                 builder.add_edge(current.id, next_phase.id)
@@ -245,9 +274,10 @@ class SkillGraphBuilder:
     def _make_auto_node(self, phase, index: int):
         """Return a node function for an AUTO phase.
 
-        The node: assembles context, renders a minimal prompt, calls the
-        LLM (with tool loop, max 5 turns), records the result, and advances
-        ``current_phase``.
+        The node: assembles context, renders a prompt (via
+        ``prompt_manager`` when available, or inline assembly as
+        fallback), calls the LLM (with tool loop, max 5 turns), records
+        the result, and advances ``current_phase``.
 
         When no ``llm_client`` is provided, the node records a mock result
         so that tests and skill structure validation can proceed without a
@@ -261,16 +291,23 @@ class SkillGraphBuilder:
             messages: list[dict] = list(state.get("messages", []))
 
             if self.llm_client:
-                # Assemble prompt
-                system_msg = {
-                    "role": "system",
-                    "content": (
+                # Assemble prompt — use prompt_manager if available
+                if self.prompt_manager:
+                    prompt_text = self.prompt_manager.render(
+                        skill_name=state.get("skill_name", ""),
+                        target=state.get("target", ""),
+                        phase=phase,
+                        phase_index=index,
+                        total_phases=len(self.phases),
+                    )
+                else:
+                    prompt_text = (
                         f"Skill: {state.get('skill_name', '')}\n"
                         f"Target: {state.get('target', '')}\n"
                         f"Phase: {phase.name} — {phase.description}\n"
                         f"Phase {index + 1}/{len(self.phases)}"
-                    ),
-                }
+                    )
+                system_msg = {"role": "system", "content": prompt_text}
                 phase_messages = [system_msg]
                 if messages:
                     phase_messages.extend(messages)
@@ -479,20 +516,19 @@ class SkillGraphBuilder:
 class LangGraphAgent:
     """LangGraph-based execution engine for skill workflows.
 
-    Compiles a :class:`StateGraph` from a :class:`SkillGraphBuilder` once
-    and drives execution across skill phases with checkpoint-based resume.
+    Uses a pre-compiled graph from :class:`SkillGraphBuilder.build` and
+    drives execution across skill phases with checkpoint-based resume.
 
     Parameters:
-        graph_builder: A configured :class:`SkillGraphBuilder`.
-        checkpointer: A LangGraph checkpointer (e.g. :class:`InMemorySaver`
-            for tests, :class:`SqliteSaver` for production).
+        graph_builder: A configured :class:`SkillGraphBuilder` whose
+            ``build()`` returns a compiled graph.
         skill_yaml_path: Optional path to a ``.skill.yaml`` file for
             persisting state on phase transitions.
     """
 
-    def __init__(self, graph_builder: SkillGraphBuilder, checkpointer, skill_yaml_path=None):
+    def __init__(self, graph_builder: SkillGraphBuilder, skill_yaml_path=None):
         self.graph_builder = graph_builder
-        self.graph = graph_builder.build().compile(checkpointer=checkpointer)
+        self.graph = graph_builder.build()
         self.config: dict = {"configurable": {"thread_id": "default"}}
         self.skill_yaml_path = skill_yaml_path
 
@@ -550,7 +586,13 @@ class LangGraphAgent:
         In LangGraph 1.2.5, ``interrupt()`` stores pending interrupts in
         ``state['__interrupt__']`` instead of raising ``GraphInterrupt``.
         We check for pending interrupts first.
+
+        ``_update_skill_yaml`` is called on **every** transition so the
+        ``.skill.yaml`` stays current even during GATE pauses.
         """
+        # Persist on every transition (D4)
+        self._update_skill_yaml(state)
+
         # Check for pending interrupts (GATE phases paused)
         pending_interrupts = state.get("__interrupt__", [])
         if pending_interrupts and not state.get("result"):
@@ -569,7 +611,6 @@ class LangGraphAgent:
 
         result = state.get("result")
         if result in ("pass", "rejected"):
-            self._update_skill_yaml(state)
             return LangGraphComplete(state=dict(state))
 
         # Intermediate completion (shouldn't normally happen)
