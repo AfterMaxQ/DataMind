@@ -1,3 +1,7 @@
+---
+archived-with: 2026-06-16-datamind-e2e-test-debug
+status: final
+---
 ﻿---
 change: datamind-e2e-test-debug
 design-doc: docs/superpowers/specs/2026-06-16-datamind-e2e-test-debug-design.md

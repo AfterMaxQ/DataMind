@@ -2,6 +2,8 @@
 comet_change: datamind-e2e-test-debug
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-16-datamind-e2e-test-debug
+status: final
 ---
 
 # DataMind E2E Testing & Debug Infrastructure — Technical Design
