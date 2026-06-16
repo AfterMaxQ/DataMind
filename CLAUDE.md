@@ -38,6 +38,8 @@
 - Git Bash uses `/f/Python/...` format (not `F:/`)
 - Shell commands → `/f/...` format; PowerShell → `F:\...` format; Write/Edit tools → `F:\...` format
 - comet-env.sh is at `/f/Python/DataMind-Studio/.claude/skills/comet/scripts/comet-env.sh`
+- **Bash tool vs PowerShell running bash**: Use the Bash tool for `/f/...` paths. PowerShell's `bash` cannot resolve `/f/` — use `F:/` format if calling bash from PowerShell, or prefer the Bash tool directly
+- **Comet scripts need correct CWD**: `comet-state.sh` / `comet-guard.sh` search for `.comet.yaml` relative to `$PWD`. Always `cd` to the change root (or repo root for multi-change repos) before running them, or they will fail with ".comet.yaml not found"
 
 ### 8. Persist State
 - State machine MUST call `save()` after every phase transition to `.skill.yaml`
