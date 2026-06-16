@@ -44,13 +44,13 @@ async function handleReject() {
     </div>
     <p v-if="gate.context" class="gate-context">{{ gate.context }}</p>
     <div class="gate-comment">
-      <input
+      <textarea
         v-model="comment"
-        type="text"
-        placeholder="Add a comment (optional)"
+        placeholder="Add a comment (optional)..."
         class="gate-input"
         :disabled="submitting"
-      />
+        rows="2"
+      ></textarea>
     </div>
     <div class="gate-actions">
       <button
@@ -79,48 +79,50 @@ async function handleReject() {
 .gate-prompt {
   border: 2px solid var(--color-warning);
   border-radius: var(--radius-md);
-  padding: 16px;
-  margin: 8px 0;
+  padding: var(--spacing-lg);
+  margin: var(--spacing-sm) 0;
   background: var(--color-bg-secondary);
 }
 
 .gate-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
 .gate-icon {
-  font-size: 16px;
+  font-size: var(--font-size-lg);
 }
 
 .gate-title {
-  font-size: 14px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
 .gate-context {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-md);
   line-height: 1.4;
 }
 
 .gate-comment {
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-md);
 }
 
 .gate-input {
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-bg-input);
   color: var(--color-text-primary);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   outline: none;
+  resize: vertical;
+  font-family: inherit;
 }
 
 .gate-input:focus {
@@ -129,15 +131,15 @@ async function handleReject() {
 
 .gate-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .gate-btn {
-  padding: 8px 20px;
+  padding: var(--spacing-sm) var(--spacing-xl);
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
 }
 
 .gate-btn:disabled {
@@ -166,11 +168,11 @@ async function handleReject() {
 .gate-decided {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
-  margin: 8px 0;
-  font-size: 13px;
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 

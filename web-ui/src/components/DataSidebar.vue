@@ -242,33 +242,33 @@ onMounted(() => {
 
 <style scoped>
 .sidebar {
-  padding: 12px;
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-lg);
 }
 
 .sidebar-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .section-title {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
-  padding: 4px 0;
+  padding: var(--spacing-xs) 0;
 }
 
 .drop-zone {
   border: 2px dashed var(--color-border);
   border-radius: var(--radius-md);
-  padding: 16px 12px;
+  padding: var(--spacing-lg) var(--spacing-md);
   text-align: center;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
   cursor: pointer;
 }
 
@@ -285,7 +285,7 @@ onMounted(() => {
 
 .drop-zone-label {
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
@@ -294,15 +294,15 @@ onMounted(() => {
 }
 
 .upload-error {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-error);
-  padding: 4px 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .loading {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  padding: 8px 0;
+  padding: var(--spacing-sm) 0;
 }
 
 .dataset-group {
@@ -312,21 +312,21 @@ onMounted(() => {
 }
 
 .group-title {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--color-text-muted);
-  padding: 4px 8px 2px;
+  padding: var(--spacing-xs) var(--spacing-sm) 2px;
   font-family: var(--font-mono);
 }
 
 .dataset-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .dataset-item:hover {
@@ -349,7 +349,7 @@ onMounted(() => {
 }
 
 .dataset-name {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -357,7 +357,7 @@ onMounted(() => {
 }
 
 .dataset-meta {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
@@ -370,19 +370,19 @@ onMounted(() => {
 .skill-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .skill-icon {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .script-link {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--color-accent);
   text-decoration: none;
   margin-top: 2px;
@@ -393,9 +393,9 @@ onMounted(() => {
 }
 
 .empty-state {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  padding: 8px;
+  padding: var(--spacing-sm);
   font-style: italic;
 }
 </style>

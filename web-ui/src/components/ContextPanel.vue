@@ -97,35 +97,35 @@ onMounted(async () => {
 
 <style scoped>
 .context-panel {
-  padding: 12px;
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-lg);
 }
 
 .panel-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--spacing-xs);
 }
 
 .section-title {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
-  padding-bottom: 4px;
+  padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--color-border-light);
 }
 
 .context-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--color-bg-primary);
   border-radius: var(--radius-sm);
 }
@@ -145,13 +145,13 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 4px 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .detail-label {
@@ -166,11 +166,11 @@ onMounted(async () => {
 .sessions-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--spacing-xs);
 }
 
 .session-item {
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--color-bg-primary);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border-light);
@@ -180,11 +180,11 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .session-skill {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--color-text-primary);
 }
@@ -205,13 +205,13 @@ onMounted(async () => {
 }
 
 .session-target {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   margin-top: 2px;
 }
 
 .session-result {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--color-success);
   margin-top: 2px;
   font-weight: 500;
@@ -220,24 +220,24 @@ onMounted(async () => {
 .decisions-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .decision-item {
-  padding: 6px 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--color-bg-primary);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--color-accent);
 }
 
 .decision-what {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--color-text-primary);
 }
 
 .decision-why {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin-top: 2px;
 }
@@ -258,8 +258,8 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 8px;
-  font-size: 12px;
+  padding: 3px var(--spacing-sm);
+  font-size: var(--font-size-xs);
   background: var(--color-bg-primary);
   border-radius: var(--radius-sm);
 }
@@ -280,9 +280,9 @@ onMounted(async () => {
 }
 
 .empty-state {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  padding: 8px;
+  padding: var(--spacing-sm);
   font-style: italic;
 }
 </style>
