@@ -23,8 +23,12 @@
 ### Task 3.2 — Implement tool call tracing (GREEN) ✅
 - Commit: 0d4c56a | Spec: ✅ | Code: ✅
 
+### Task 4 — Session Registry ✅
+- Commits: 1e02689 (initial), 3042532 (fix C1: NameError in _try_langgraph_resume)
+- Spec: ✅ | Code: ✅ (re-review passed after fix)
+- Note: C1 found by code quality review — `app` not in scope for module-level `_try_langgraph_resume`. Fixed by adding `app` parameter.
+
 ## Current Task
 
-- Plan task: Task 4 — Session Registry
-- Stage: implementing
-- Round: 1/3
+- Plan task: Task 5.1 — Write debug endpoint tests (RED)
+- Stage: dispatching
