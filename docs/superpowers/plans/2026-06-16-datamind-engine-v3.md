@@ -2619,7 +2619,7 @@ version: 2
 ---
 ```
 
-- [ ] **Step 5.3: Extend SkillParser to parse YAML frontmatter**
+- [x] **Step 5.3: Extend SkillParser to parse YAML frontmatter**
 
 ```python
 # In datamind/engine/skills.py, extend SkillParser.parse():
@@ -2658,19 +2658,19 @@ class SkillDefinition:
     frontmatter: dict = field(default_factory=dict)
 ```
 
-- [ ] **Step 5.4: Run skill migration tests**
+- [x] **Step 5.4: Run skill migration tests**
 
 Run: `pytest tests/integration/test_skill_migration.py -v`
 
 Expected: All 8 tests PASS. All 7 skills parse correctly with frontmatter, all build valid StateGraphs.
 
-- [ ] **Step 5.5: Run full test suite**
+- [x] **Step 5.5: Run full test suite**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: All tests PASS. No regressions.
 
-- [ ] **Step 5.6: Commit**
+- [x] **Step 5.6: Commit**
 
 ```bash
 git add skills/*.md datamind/engine/skills.py tests/integration/test_skill_migration.py
@@ -2829,13 +2829,13 @@ class TestDeepSeekChat:
         assert r2 is not None
 ```
 
-- [ ] **Step 6.3: Run DeepSeek integration test**
+- [x] **Step 6.3: Run DeepSeek integration test**
 
 Run: `DEEPSEEK_API_KEY=$env:DEEPSEEK_API_KEY pytest tests/integration/test_deepseek.py -v`
 
 Expected: If `DEEPSEEK_API_KEY` is set, 4 tests PASS. Otherwise, 4 tests SKIP.
 
-- [ ] **Step 6.4: Commit**
+- [x] **Step 6.4: Commit**
 
 ```bash
 git add datamind/config.py tests/integration/test_deepseek.py
@@ -2941,13 +2941,13 @@ class TestFileUpload:
         assert response.status_code == 422
 ```
 
-- [ ] **Step 7.2: Run test to verify it fails**
+- [x] **Step 7.2: Run test to verify it fails**
 
 Run: `pytest tests/integration/test_websocket.py -v`
 
 Expected: FAIL -- WebSocket endpoint not yet implemented.
 
-- [ ] **Step 7.3: Implement WebSocket endpoint in api/app.py**
+- [x] **Step 7.3: Implement WebSocket endpoint in api/app.py**
 
 Add to `create_app()` in `datamind/api/app.py`:
 
@@ -3099,19 +3099,19 @@ Add to `create_app()` in `datamind/api/app.py`:
             raise HTTPException(status_code=400, detail=str(e))
 ```
 
-- [ ] **Step 7.4: Run WebSocket integration tests**
+- [x] **Step 7.4: Run WebSocket integration tests**
 
 Run: `pytest tests/integration/test_websocket.py -v`
 
 Expected: All tests PASS.
 
-- [ ] **Step 7.5: Run full test suite**
+- [x] **Step 7.5: Run full test suite**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: All tests PASS.
 
-- [ ] **Step 7.6: Commit**
+- [x] **Step 7.6: Commit**
 
 ```bash
 git add datamind/api/app.py tests/integration/test_websocket.py
@@ -3136,13 +3136,13 @@ npm install element-plus pinia @element-plus/icons-vue
 npm install -D @playwright/test
 ```
 
-- [ ] **Step 8.1: Verify scaffolded project runs**
+- [x] **Step 8.1: Verify scaffolded project runs**
 
 Run: `cd web-ui && npm run dev`
 
 Expected: Vite dev server starts on localhost:5173.
 
-- [ ] **Step 8.2: Configure Vite proxy to FastAPI**
+- [x] **Step 8.2: Configure Vite proxy to FastAPI**
 
 ```typescript
 // web-ui/vite.config.ts
@@ -3621,7 +3621,7 @@ class TestWebUIFullFlow:
         app.mount("/", StaticFiles(directory=str(web_ui_dist), html=True), name="static")
 ```
 
-- [ ] **Step 8.8: Commit**
+- [x] **Step 8.8: Commit**
 
 ```bash
 git add web-ui/ tests/e2e/test_web_ui.py
@@ -3634,13 +3634,13 @@ git commit -m "feat: scaffold Vue 3 SPA with three-panel layout, WebSocket, SSE 
 
 **Files:** None new -- verification and validation only.
 
-- [ ] **Step 9.1: Run full test suite -- all unit, integration, and E2E tests**
+- [x] **Step 9.1: Run full test suite -- all unit, integration, and E2E tests**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: All tests PASS. Total should be 185+ (existing) + new tests from tools, LangGraph, API, etc.
 
-- [ ] **Step 9.2: Verify each spec file exists and is non-empty**
+- [x] **Step 9.2: Verify each spec file exists and is non-empty**
 
 Run:
 ```bash
@@ -3650,13 +3650,13 @@ ls -la openspec/changes/datamind-engine-v3/*.md
 
 Expected: All spec files present and non-empty.
 
-- [ ] **Step 9.3: Confirm DeepSeek integration test passes**
+- [x] **Step 9.3: Confirm DeepSeek integration test passes**
 
 Run: `DEEPSEEK_API_KEY=$env:DEEPSEEK_API_KEY pytest tests/integration/test_deepseek.py -v`
 
 Expected: 4 PASS or 4 SKIP (if no key).
 
-- [ ] **Step 9.4: Confirm Web UI builds**
+- [x] **Step 9.4: Confirm Web UI builds**
 
 Run:
 ```bash
@@ -3665,13 +3665,13 @@ cd web-ui && npm run build
 
 Expected: Build succeeds, `web-ui/dist/` directory created.
 
-- [ ] **Step 9.5: Run comet-state check**
+- [x] **Step 9.5: Run comet-state check**
 
 Run: `comet-state check datamind-engine-v3 build`
 
 Expected: State check passes without errors.
 
-- [ ] **Step 9.6: Commit final verification results**
+- [x] **Step 9.6: Commit final verification results**
 
 ```bash
 git add -u
