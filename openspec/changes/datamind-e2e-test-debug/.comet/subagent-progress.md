@@ -34,7 +34,13 @@
 - Tests: 5/5 debug tests, 321/321 full suite
 - Deferred: I1/I2 (plan-vs-spec field naming), I3 (127.0.0.1 binding check), I6 (log filtering test structural only)
 
+### Task 7 — Playwright E2E Infrastructure (fixtures + config) ✅
+- Commits: 20a21d2 (initial), 7c89b99 (3 spec compliance fixes)
+- Spec: ✅ (re-review passed after fixes) | Code: ✅ Approved
+- Files: web-ui/playwright.config.ts, web-ui/tests/e2e/fixtures/sample.{csv,xlsx,parquet}
+- Fixes: cwd '.'→'..', DEEPSEEK_API_KEY reference, removed extra LOG_LEVEL
+
 ## Current Task
 
-- Plan task: Task 7 — Playwright E2E Infrastructure (fixtures + config)
+- Plan task: Task 8 — Playwright E2E Mock Rendering Tests (app.spec.ts API mocking)
 - Stage: dispatching

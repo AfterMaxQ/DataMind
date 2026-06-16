@@ -1,8 +1,8 @@
 ## 1. 基础设施准备
 
-- [ ] 1.1 安装 Playwright 浏览器（chromium），配置 `playwright.config.ts` 指向 `http://127.0.0.1:9000`
-- [ ] 1.2 创建 E2E 测试 fixture 数据文件（`sample.csv`、`sample.xlsx`、`sample.parquet`）
-- [ ] 1.3 配置 Playwright `webServer` 启动 FastAPI（`python -m uvicorn serve:app --host 127.0.0.1 --port 9000`），注入 DeepSeek 环境变量
+- [x] 1.1 安装 Playwright 浏览器（chromium），配置 `playwright.config.ts` 指向 `http://127.0.0.1:9000`
+- [x] 1.2 创建 E2E 测试 fixture 数据文件（`sample.csv`、`sample.xlsx`、`sample.parquet`）
+- [x] 1.3 配置 Playwright `webServer` 启动 FastAPI（`python -m uvicorn serve:app --host 127.0.0.1 --port 9000`），注入 DeepSeek 环境变量
 
 ## 2. 结构化日志系统
 
