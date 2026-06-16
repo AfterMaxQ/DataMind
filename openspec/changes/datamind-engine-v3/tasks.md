@@ -57,12 +57,12 @@
 
 ## 7. API Extensions
 
-- [ ] 7.1 Add WebSocket endpoint (`GET /ws`) to `api/app.py` with connection management
-- [ ] 7.2 Implement WebSocket event types: `lineage_update`, `decision_update`, `phase_transition`, `token_stream`
-- [ ] 7.3 Add `POST /upload` endpoint for drag-and-drop file upload
-- [ ] 7.4 Hook gate approval endpoint to LangGraph resume (update `POST /skill/gate`)
-- [ ] 7.5 Add WebSocket broadcast on phase transitions in LangGraphAgent
-- [ ] 7.6 Write integration tests for WebSocket and new endpoints
+- [x] 7.1 Add WebSocket endpoint (`GET /ws`) to `api/app.py` with connection management
+- [x] 7.2 Implement WebSocket event types: `lineage_update`, `decision_update`, `phase_transition`, `token_stream`
+- [x] 7.3 Add `POST /upload` endpoint for drag-and-drop file upload
+- [x] 7.4 Hook gate approval endpoint to LangGraph resume (update `POST /skill/gate`)
+- [x] 7.5 Add WebSocket broadcast on phase transitions in LangGraphAgent
+- [x] 7.6 Write integration tests for WebSocket and new endpoints
 
 ## 8. Web UI — Vue 3 SPA
 
