@@ -102,9 +102,9 @@ class TestYamlFrontmatter:
         fm = skill.frontmatter
 
         assert fm["skill"] == "feature-engineering"
-        assert "gate-3" in fm["routing"]
-        assert fm["routing"]["gate-3"]["approve"] == "execute"
-        assert fm["routing"]["gate-3"]["reject"] == "select-features"
+        assert "gate-4" in fm["routing"]
+        assert fm["routing"]["gate-4"]["approve"] == "execute"
+        assert fm["routing"]["gate-4"]["reject"] == "propose-features"
         assert "phase-1" in fm["tools"]
 
     def test_linear_skill_frontmatter(self):
@@ -255,4 +255,22 @@ class TestSkillGraphBuilderIntegration:
         branch_spec = list(gate_branch.values())[0]
         assert branch_spec.ends["reject"] == "propose-strategy", (
             f"Expected reject → propose-strategy, got {branch_spec.ends.get('reject')}"
+        )
+
+    def test_feature_engineering_graph_uses_frontmatter_routing(self):
+        """feature-engineering graph uses frontmatter routing for reject edges."""
+        from datamind.engine.langgraph_agent import SkillGraphBuilder
+
+        skill = _parse_skill("feature-engineering")
+        builder = SkillGraphBuilder(skill_def=skill)
+        compiled = builder.build()
+
+        branches = compiled.builder.branches
+        # Gate at index 3 (gate-approve) routes via key gate-4
+        # Reject should route to "propose-features" per frontmatter
+        gate_branch = branches.get("gate-approve")
+        assert gate_branch is not None, "gate-approve must have a branch"
+        branch_spec = list(gate_branch.values())[0]
+        assert branch_spec.ends["reject"] == "propose-features", (
+            f"Expected reject → propose-features, got {branch_spec.ends.get('reject')}"
         )
