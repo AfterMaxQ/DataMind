@@ -1018,13 +1018,13 @@ class TestSkillState:
         assert set(state.keys()) == required_keys
 ```
 
-- [ ] **Step 3.2: Run test to verify it fails**
+- [x] **Step 3.2: Run test to verify it fails**
 
 Run: `pytest tests/unit/test_langgraph_agent.py::TestSkillState -v`
 
 Expected: FAIL -- "ModuleNotFoundError: No module named 'datamind.engine.langgraph_agent'"
 
-- [ ] **Step 3.3: Implement SkillState + SkillGraphBuilder**
+- [x] **Step 3.3: Implement SkillState + SkillGraphBuilder**
 
 ```python
 # datamind/engine/langgraph_agent.py
@@ -1704,7 +1704,7 @@ class LangGraphAgent:
             _log.warning("Failed to update .skill.yaml", exc_info=True)
 ```
 
-- [ ] **Step 3.4: Write and run build + state transition tests**
+- [x] **Step 3.4: Write and run build + state transition tests**
 
 ```python
 # Append to tests/unit/test_langgraph_agent.py
@@ -1856,13 +1856,13 @@ class TestLangGraphAgent:
             assert event is not None
 ```
 
-- [ ] **Step 3.5: Run all LangGraph tests**
+- [x] **Step 3.5: Run all LangGraph tests**
 
 Run: `pytest tests/unit/test_langgraph_agent.py -v`
 
 Expected: All tests PASS
 
-- [ ] **Step 3.6: Commit**
+- [x] **Step 3.6: Commit**
 
 ```bash
 git add datamind/engine/langgraph_agent.py tests/unit/test_langgraph_agent.py

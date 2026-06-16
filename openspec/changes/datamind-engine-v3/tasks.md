@@ -18,18 +18,18 @@
 
 ## 3. LangGraph Agent Engine
 
-- [ ] 3.1 Implement `SkillState` TypedDict with all required fields
-- [ ] 3.2 Implement `SkillGraphBuilder` class that constructs a `StateGraph` from skill phase definitions
-- [ ] 3.3 Implement `LangGraphAgent` class with graph compilation and execution
-- [ ] 3.4 Implement AUTO phase node: context assembly → prompt → LLM → tool loop → record
-- [ ] 3.5 Implement GATE phase node with LangGraph `interrupt()` for pause and resume
-- [ ] 3.6 Implement conditional routing: APPROVE → next phase, REJECT → fallback phase
-- [ ] 3.7 Implement `SqliteSaver` checkpoint integration for `checkpoints.db`
-- [ ] 3.8 Implement `.skill.yaml` coexistence (summary written on every state transition)
-- [ ] 3.9 Implement parallel execution support via LangGraph `Send` API
-- [ ] 3.10 Implement map-reduce fan-out validation pattern
-- [ ] 3.11 Write unit tests for LangGraphAgent, SkillGraphBuilder, and state transitions
-- [ ] 3.12 Write TDD test for LangGraph state graph — verify RED then implement to GREEN
+- [x] 3.1 Implement `SkillState` TypedDict with all required fields
+- [x] 3.2 Implement `SkillGraphBuilder` class that constructs a `StateGraph` from skill phase definitions
+- [x] 3.3 Implement `LangGraphAgent` class with graph compilation and execution
+- [x] 3.4 Implement AUTO phase node: context assembly → prompt → LLM → tool loop → record
+- [x] 3.5 Implement GATE phase node with LangGraph `interrupt()` for pause and resume
+- [x] 3.6 Implement conditional routing: APPROVE → next phase, REJECT → fallback phase
+- [x] 3.7 Implement `SqliteSaver` checkpoint integration for `checkpoints.db`
+- [x] 3.8 Implement `.skill.yaml` coexistence (summary written on every state transition)
+- [x] 3.9 Implement parallel execution support via LangGraph `Send` API
+- [x] 3.10 Implement map-reduce fan-out validation pattern
+- [x] 3.11 Write unit tests for LangGraphAgent, SkillGraphBuilder, and state transitions
+- [x] 3.12 Write TDD test for LangGraph state graph — verify RED then implement to GREEN
 
 ## 4. Agent Wrapper Migration
 
