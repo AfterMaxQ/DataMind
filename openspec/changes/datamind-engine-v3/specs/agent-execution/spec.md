@@ -1,5 +1,7 @@
 ﻿## MODIFIED Requirements
 
+## MODIFIED Requirements
+
 ### Requirement: Agent Loop
 The system SHALL provide an agent execution loop powered by LangGraph state graphs. Each skill invocation SHALL construct a `StateGraph` from the skill`s phase definitions. AUTO phases SHALL be executed via LLM-tool interaction loops. GATE phases SHALL pause execution using LangGraph`s `interrupt()` primitive and resume on human approval. The execution loop SHALL support conditional branching (REJECT routes to a designated fallback node), parallel execution of independent nodes, and map-reduce fan-out patterns.
 

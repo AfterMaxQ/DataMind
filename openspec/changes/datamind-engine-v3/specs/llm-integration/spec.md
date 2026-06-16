@@ -1,5 +1,7 @@
 ﻿## MODIFIED Requirements
 
+## MODIFIED Requirements
+
 ### Requirement: LLM Client Abstraction
 The system SHALL provide a unified `BaseLLMClient` interface with concrete implementations for OpenAI-compatible APIs (`OpenAIClient`) and Ollama local models (`OllamaClient`). The `OpenAIClient` SHALL be verified against DeepSeek`s OpenAI-compatible API as a supported provider. All implementations SHALL support chat completion, streaming, and tool calling with retry on transient errors (429, 502, 503).
 

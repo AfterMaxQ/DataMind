@@ -1,5 +1,7 @@
 ﻿## MODIFIED Requirements
 
+## MODIFIED Requirements
+
 ### Requirement: Skill Execution Context
 The system SHALL provide skills with access to a shared execution context that includes the project`s `ToolRegistry`. Skills SHALL be able to invoke registered tools (data I/O, describe, script generation, script execution) during AUTO phases. Tool definitions SHALL be dynamically injected into LLM context for each AUTO phase.
 

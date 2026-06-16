@@ -1,5 +1,7 @@
 ﻿## MODIFIED Requirements
 
+## MODIFIED Requirements
+
 ### Requirement: Three-Panel Layout
 The system SHALL provide a Vue 3 web interface with three panels: a left sidebar for data and script browsing, a central panel for AI dialogue, and a right panel for context visualization. The layout SHALL support Dark mode toggle.
 

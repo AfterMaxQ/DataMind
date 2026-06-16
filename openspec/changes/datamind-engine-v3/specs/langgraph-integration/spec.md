@@ -1,5 +1,7 @@
 ﻿## ADDED Requirements
 
+## ADDED Requirements
+
 ### Requirement: LangGraph State Graph per Skill
 The system SHALL construct a LangGraph `StateGraph` for each skill definition. Each skill phase SHALL become a graph node. Phase transitions SHALL become graph edges. AUTO phases SHALL execute via LLM-tool loops. GATE phases SHALL pause execution via LangGraph `interrupt()` and resume on human approval.
 

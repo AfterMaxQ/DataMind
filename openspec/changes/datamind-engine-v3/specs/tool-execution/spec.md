@@ -1,5 +1,7 @@
 ﻿## ADDED Requirements
 
+## ADDED Requirements
+
 ### Requirement: Tool Registry
 The system SHALL provide a `ToolRegistry` that stores all available tool definitions as `(schema, callable)` pairs. Tools SHALL be registered at engine startup. The registry SHALL expose `get_definitions()` returning the full tool schema list for LLM injection, and `execute(name, args)` dispatching execution to the registered callable.
 
