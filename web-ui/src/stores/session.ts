@@ -1,78 +1,28 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import type {
+  Dataset,
+  Decision,
+  LineageNode,
+  LineageEdge,
+  ChatMessage,
+  CodeBlockData,
+  GatePrompt,
+  SkillSession,
+  ContextInfo,
+} from '@/types'
 
-export interface Dataset {
-  id: string
-  name: string
-  path?: string
-  created_at?: string
-  row_count?: number
-  column_count?: number
-  script_path?: string
-}
-
-export interface Decision {
-  id: string
-  what: string
-  why: string
-  alternatives: string[]
-  timestamp: string
-}
-
-export interface LineageNode {
-  id: string
-  type: string
-  name: string
-  path?: string
-  metadata?: Record<string, unknown>
-  created_at?: string
-}
-
-export interface LineageEdge {
-  source: string
-  target: string
-  edge_type: string
-  label?: string
-}
-
-export interface ChatMessage {
-  id: string
-  role: 'user' | 'ai' | 'system'
-  content: string
-  timestamp: number
-  code_blocks?: CodeBlockData[]
-  gate?: GatePrompt
-  skill_name?: string
-  phase_id?: string
-}
-
-export interface CodeBlockData {
-  language: string
-  code: string
-  script_path?: string
-}
-
-export interface GatePrompt {
-  phase_id: string
-  phase_name: string
-  context: string
-  session_dir: string
-}
-
-export interface SkillSession {
-  session_id: string
-  skill: string
-  target: string
-  phase: string
-  result: string | null
-}
-
-export interface ContextInfo {
-  ready: boolean
-  datasets: number
-  decisions: number
-  checkpoint_version?: string
-  last_session?: string
+// Re-export for backward compatibility
+export type {
+  Dataset,
+  Decision,
+  LineageNode,
+  LineageEdge,
+  ChatMessage,
+  CodeBlockData,
+  GatePrompt,
+  SkillSession,
+  ContextInfo,
 }
 
 export const useSessionStore = defineStore('session', () => {

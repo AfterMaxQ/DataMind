@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useSessionStore, type Dataset } from '@/stores/session'
+import { useSessionStore } from '@/stores/session'
+import type { Dataset } from '@/types'
 
 const store = useSessionStore()
 const dragOver = ref(false)
