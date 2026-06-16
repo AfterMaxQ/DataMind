@@ -7,6 +7,7 @@ StateGraph-based execution engine.
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TypedDict
@@ -16,6 +17,7 @@ from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 from langgraph.types import Command, interrupt
 
+_log = logging.getLogger(__name__)
 
 # ===========================================================================
 # SkillState TypedDict
@@ -170,7 +172,6 @@ class SkillGraphBuilder:
         ``gate_decision``.  REJECT routing is read from
         ``self._frontmatter["routing"]["gate-{i}"]``; defaults to ``END``.
         """
-        routing = self._frontmatter.get("routing", {})
         builder = StateGraph(SkillState)
 
         # Register nodes
@@ -183,6 +184,50 @@ class SkillGraphBuilder:
 
         # Entry
         builder.add_edge(START, self.phases[0].id)
+
+        self._add_edges(builder)
+        return builder
+
+    # ------------------------------------------------------------------
+    # Complex graph (parallel / routing)
+    # ------------------------------------------------------------------
+
+    def _build_complex_graph(self) -> StateGraph:
+        """Build a graph with parallel execution support.
+
+        REJECT routing is read from ``self._frontmatter["routing"]["gate-{i}"]``;
+        defaults to ``END``.
+        """
+        builder = StateGraph(SkillState)
+
+        for i, phase in enumerate(self.phases):
+            node_name = phase.id
+            if getattr(phase, "parallel", False):
+                builder.add_node(
+                    node_name,
+                    self._make_parallel_node(phase, i, getattr(phase, "parallel_config", {})),
+                )
+            elif phase.type == "AUTO":
+                builder.add_node(node_name, self._make_auto_node(phase, i))
+            else:
+                builder.add_node(node_name, self._make_gate_node(phase, i))
+
+        builder.add_edge(START, self.phases[0].id)
+
+        self._add_edges(builder)
+        return builder
+
+    # ------------------------------------------------------------------
+    # Edge building (shared by linear and complex graph builders)
+    # ------------------------------------------------------------------
+
+    def _add_edges(self, builder: StateGraph) -> None:
+        """Add sequential and conditional edges for all phases.
+
+        Reads REJECT routing from
+        ``self._frontmatter["routing"]["gate-{i}"]``; defaults to ``END``.
+        """
+        routing = self._frontmatter.get("routing", {})
 
         # Inter-node edges
         for i in range(len(self.phases) - 1):
@@ -210,62 +255,6 @@ class SkillGraphBuilder:
             )
         else:
             builder.add_edge(last.id, END)
-
-        return builder
-
-    # ------------------------------------------------------------------
-    # Complex graph (parallel / routing)
-    # ------------------------------------------------------------------
-
-    def _build_complex_graph(self) -> StateGraph:
-        """Build a graph with parallel execution support.
-
-        REJECT routing is read from ``self._frontmatter["routing"]["gate-{i}"]``;
-        defaults to ``END``.
-        """
-        routing = self._frontmatter.get("routing", {})
-        builder = StateGraph(SkillState)
-
-        for i, phase in enumerate(self.phases):
-            node_name = phase.id
-            if getattr(phase, "parallel", False):
-                builder.add_node(
-                    node_name,
-                    self._make_parallel_node(phase, i, getattr(phase, "parallel_config", {})),
-                )
-            elif phase.type == "AUTO":
-                builder.add_node(node_name, self._make_auto_node(phase, i))
-            else:
-                builder.add_node(node_name, self._make_gate_node(phase, i))
-
-        builder.add_edge(START, self.phases[0].id)
-
-        for i in range(len(self.phases) - 1):
-            current = self.phases[i]
-            next_phase = self.phases[i + 1]
-            if current.type == "GATE":
-                routing_key = f"gate-{i}"
-                route_info = routing.get(routing_key, {})
-                reject_target = route_info.get("reject", END)
-                builder.add_conditional_edges(
-                    current.id,
-                    self._gate_router,
-                    {"approve": next_phase.id, "reject": reject_target},
-                )
-            else:
-                builder.add_edge(current.id, next_phase.id)
-
-        last = self.phases[-1]
-        if last.type == "GATE":
-            builder.add_conditional_edges(
-                last.id,
-                self._gate_router,
-                {"approve": END, "reject": END},
-            )
-        else:
-            builder.add_edge(last.id, END)
-
-        return builder
 
     # ------------------------------------------------------------------
     # Node factories
@@ -329,14 +318,19 @@ class SkillGraphBuilder:
                 if response.tool_calls:
                     tool_turns = 0
                     while response.tool_calls and tool_turns < 5:
-                        tool_calls.extend(response.tool_calls)
 
                         # Execute tools via registry
                         if self.tool_registry:
                             for tc in response.tool_calls:
                                 try:
+                                    args = tc.get("arguments", {})
+                                    if isinstance(args, str):
+                                        try:
+                                            args = json.loads(args)
+                                        except json.JSONDecodeError:
+                                            args = {}
                                     tc_result = self.tool_registry.execute(
-                                        tc.get("name", ""), tc.get("arguments", {})
+                                        tc.get("name", ""), args
                                     )
                                 except Exception as exc:
                                     tc_result = {"error": str(exc)}
@@ -642,5 +636,5 @@ class LangGraphAgent:
                 encoding="utf-8",
             )
         except Exception:
-            pass
+            _log.warning("Failed to update .skill.yaml", exc_info=True)
 

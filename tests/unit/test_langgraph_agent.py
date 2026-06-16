@@ -500,3 +500,146 @@ class TestLangGraphAgent:
         )
         assert comp.state["result"] == "pass"
         assert isinstance(comp, LangGraphEvent)
+
+    # ------------------------------------------------------------------
+    # C1: Tool call accumulation produces malformed list
+    # ------------------------------------------------------------------
+
+    def test_tool_calls_clean_no_raw_objects(self):
+        """C1: tool_calls list contains only result dicts, no raw call objects."""
+        from datamind.engine.llm import LLMResponse
+        from datamind.engine.langgraph_agent import (
+            LangGraphAgent, LangGraphComplete, SkillGraphBuilder,
+        )
+        from datamind.engine.tools import ToolRegistry
+
+        # LLM returns 1 tool call, then empty (ends the while loop)
+        tool_call = {
+            "id": "tc-001",
+            "type": "function",
+            "name": "echo",
+            "arguments": '{"msg": "hello"}',
+        }
+        llm = MockLLMClient(responses=[
+            LLMResponse(content="Calling tool", tool_calls=[tool_call]),
+            LLMResponse(content="Done", tool_calls=[]),
+        ])
+
+        reg = ToolRegistry()
+        reg.register(
+            "echo",
+            {"type": "function", "function": {
+                "name": "echo",
+                "description": "Echo tool",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"msg": {"type": "string"}},
+                    "required": ["msg"],
+                },
+            }},
+            lambda msg="": {"echo": msg},
+        )
+
+        single_auto = [SkillPhase(id="step1", name="Step1", type="AUTO", description="Step 1")]
+        skill_def = MockSkillDef(phases=single_auto)
+        builder = SkillGraphBuilder(
+            skill_def=skill_def, llm_client=llm, tool_registry=reg,
+        )
+        agent = LangGraphAgent(builder)
+
+        state = self._initial_state()
+        event = agent.run(state)
+
+        assert isinstance(event, LangGraphComplete)
+        phase_result = event.state["phase_results"]["step1"]
+        tool_calls = phase_result["tool_calls"]
+
+        # Must have exactly 1 entry (processed result only, no raw call object)
+        assert len(tool_calls) == 1, (
+            f"Expected 1 tool call entry, got {len(tool_calls)}: {tool_calls}"
+        )
+        # Verify it is a result dict (has "result"), NOT a raw call dict (has "arguments")
+        assert "result" in tool_calls[0], (
+            f"Expected 'result' key in tool call entry, got keys: {list(tool_calls[0].keys())}"
+        )
+        assert "arguments" not in tool_calls[0], (
+            "Raw call object with 'arguments' key must not appear in tool_calls list"
+        )
+        assert tool_calls[0]["id"] == "tc-001"
+        assert tool_calls[0]["name"] == "echo"
+
+    # ------------------------------------------------------------------
+    # I2: Tool-call execution path test
+    # ------------------------------------------------------------------
+
+    def test_tool_call_execution_loop(self):
+        """I2: Tool call execution path — loop runs and results are recorded."""
+        from datamind.engine.llm import LLMResponse
+        from datamind.engine.langgraph_agent import (
+            LangGraphAgent, LangGraphComplete, SkillGraphBuilder,
+        )
+        from datamind.engine.tools import ToolRegistry
+
+        # LLM returns 2 tool calls, then finishes
+        tool_call1 = {
+            "id": "tc-1",
+            "type": "function",
+            "name": "echo",
+            "arguments": '{"msg": "hello"}',
+        }
+        tool_call2 = {
+            "id": "tc-2",
+            "type": "function",
+            "name": "double",
+            "arguments": '{"n": 21}',
+        }
+        llm = MockLLMClient(responses=[
+            LLMResponse(content="Calling tools", tool_calls=[tool_call1, tool_call2]),
+            LLMResponse(content="All done", tool_calls=[]),
+        ])
+
+        reg = ToolRegistry()
+        reg.register(
+            "echo",
+            {"type": "function", "function": {
+                "name": "echo", "description": "Echo",
+                "parameters": {"type": "object", "properties": {"msg": {"type": "string"}}},
+            }},
+            lambda msg="": {"echo": msg},
+        )
+        reg.register(
+            "double",
+            {"type": "function", "function": {
+                "name": "double", "description": "Double a number",
+                "parameters": {"type": "object", "properties": {"n": {"type": "number"}}},
+            }},
+            lambda n=0: {"double": n * 2},
+        )
+
+        single_auto = [SkillPhase(id="step1", name="Step1", type="AUTO", description="Step 1")]
+        skill_def = MockSkillDef(phases=single_auto)
+        builder = SkillGraphBuilder(
+            skill_def=skill_def, llm_client=llm, tool_registry=reg,
+        )
+        agent = LangGraphAgent(builder)
+
+        state = self._initial_state()
+        event = agent.run(state)
+
+        assert isinstance(event, LangGraphComplete)
+
+        # Tool results recorded in phase_results
+        phase_result = event.state["phase_results"]["step1"]
+        tool_calls = phase_result["tool_calls"]
+        assert len(tool_calls) == 2, (
+            f"Expected 2 tool call results, got {len(tool_calls)}: {tool_calls}"
+        )
+        assert tool_calls[0]["name"] == "echo"
+        assert tool_calls[0]["result"] == {"echo": "hello"}
+        assert tool_calls[1]["name"] == "double"
+        assert tool_calls[1]["result"] == {"double": 42}
+
+        # LLM called exactly 2 times (initial + one follow-up after tool results)
+        assert llm.call_count == 2, (
+            f"Expected 2 LLM calls (initial + follow-up), got {llm.call_count}"
+        )
