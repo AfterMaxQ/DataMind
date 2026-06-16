@@ -6,24 +6,23 @@
 ## Completed Tasks
 
 ### Task 1.1 — Create datamind/session_context.py ✅
-- Commit: a0b9b02
-- Spec review: ✅ | Code quality: ✅
+- Commit: a0b9b02 | Spec: ✅ | Code: ✅
 
-### Task 2.1 — Write the JsonFormatter test (RED phase) ✅
-- Commit: 4f8f713
-- Spec review: ✅ | Code quality: ✅
+### Task 2.1 — Write JsonFormatter test (RED) ✅
+- Commit: 4f8f713 | Spec: ✅ | Code: ✅
 
-### Task 2.2 — Implement datamind/logging_setup.py (GREEN phase) ✅
-- Commits: 960bcd1 (initial), 8c6497f (fixes)
-- Spec review: ✅ | Code quality: ✅ (after fix round)
+### Task 2.2 — Implement logging_setup.py (GREEN) ✅
+- Commits: 960bcd1, 8c6497f | Spec: ✅ | Code: ✅
 
-### Task 2.3 — Wire logging setup into app startup ✅
-- Commit: 0e5e691
-- Spec review: ✅ | Code quality: ✅
+### Task 2.3 — Wire logging into app startup ✅
+- Commit: 0e5e691 | Spec: ✅ | Code: ✅
+
+### Task 3.1 — Write tool tracing tests (RED) ✅
+- Commits: 545aa7c, c3677a2 (fixes) | Spec: ✅ | Code: ✅ (fixes verified)
 
 ## Current Task
 
-- Plan task: Task 3.1 — Write tool tracing tests (RED phase)
-- OpenSpec task: 3.1, 3.2 (tool call tracing)
+- Plan task: Task 3.2 — Implement tool call tracing in ToolRegistry.execute() (GREEN)
+- OpenSpec task: 3.1, 3.2
 - Stage: implementing
 - Round: 1/3
