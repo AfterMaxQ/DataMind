@@ -67,13 +67,21 @@
 - Uses page.evaluate() Pinia injection due to missing SSE gate-event path (documented)
 - Selectors: .gate-btn.approve/.reject, .gate-decided.approved/.rejected
 
-### Task 13 — Playwright E2E Skill Pipeline Full Flow (skill-pipeline.spec.ts) ✅
-- Commit: initial + comment fix | Spec: ✅ (scope limited to data-exploration, API key unavailable) | Code: ✅ Pass
-- 3 tests: upload→skill→gate→result, context preservation, completion summary
-- Mock SSE stream (self-contained), Pinia gate injection, comprehensive API mocking
-- Note: Plan template covers only data-exploration; full 4-skill chain limited by API key
+### Task 13 — Playwright E2E Skill Pipeline (skill-pipeline.spec.ts) ✅ REWRITTEN
+- Commit: c87e4a8 | Spec: ✅ | Code: ✅
+- Rewritten: mock SSE → real DeepSeek API via `route.continue()`, full 4-skill chain (data-exploration, data-cleaning, feature-engineering, model-training)
+- 3 tests pass (1.2m total), all hitting real API. Streaming fix: `route.continue()` unbuffered pass-through
+
+### Task 14 — Playwright E2E Error Scenarios (error-scenarios.spec.ts) ✅
+- Commit: 8dc41af | Spec: ✅ | Code: ✅
+- 5 tests pass (12.1s): empty message, invalid file, rapid sending, network error, long response
+- Adapted selectors to real Vue components, SSE streaming fix applied
+
+### Fix — streaming.spec.ts real API ✅
+- Commit: fix commit | `route.continue()` replaces `route.fetch()`+`route.fulfill()` for SSE streaming
+- All 3 tests pass with real DeepSeek API (5.9s)
 
 ## Current Task
 
-- Plan task: Task 14 — Playwright E2E Error Scenario Tests (error-scenarios.spec.ts)
+- Plan task: Task 15 — Documentation (testing-runbook.md + debugging-runbook.md)
 - Stage: dispatching

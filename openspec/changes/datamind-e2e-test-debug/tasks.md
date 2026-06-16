@@ -28,14 +28,14 @@
 
 - [x] 5.1 编写 `websocket.spec.ts`：WebSocket 连接建立、消息接收、断线重连、UI 状态同步
 - [x] 5.2 编写 `streaming.spec.ts`：SSE 流式对话 token-by-token 渲染、`/skill` 命令高亮、流完成后状态重置
-- [ ] 5.3 扩展 `app.spec.ts`：验证三栏联动（选数据集 → 聊天引用 → 上下文更新）
+- [x] 5.3 扩展 `app.spec.ts`：验证三栏联动（选数据集 → 聊天引用 → 上下文更新）
 
 ## 6. Playwright E2E — 业务流程
 
 - [x] 6.1 编写 `gate-approval.spec.ts`：启动 data-cleaning → GATE 出现 → Approve 继续 → Reject 路由 → 决策记录更新
 - [x] 6.2 编写 `file-upload.spec.ts`：点击上传 CSV、拖拽上传 Excel、上传后数据集展示（名称/行列数）、无效文件错误提示
 - [x] 6.3 编写 `skill-pipeline.spec.ts`：上传 CSV → data-exploration → data-cleaning → feature-engineering → model-training 全链路（使用真实 DeepSeek API）
-- [ ] 6.4 编写 `error-scenarios.spec.ts`：空消息拒绝、无效文件格式错误、LLM 异常恢复、工具超时处理
+- [x] 6.4 编写 `error-scenarios.spec.ts`：空消息拒绝、无效文件格式错误、LLM 异常恢复、工具超时处理
 
 ## 7. 流程文档
 
