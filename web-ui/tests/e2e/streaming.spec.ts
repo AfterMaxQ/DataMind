@@ -10,11 +10,12 @@ test.describe('SSE Streaming', () => {
     await page.route('**/api/**', async (route) => {
       const url = route.request().url()
 
-      // Redirect SSE streaming requests to the real backend endpoint
+      // Redirect SSE streaming requests to the real backend endpoint.
+      // route.continue() streams the response without buffering — essential for SSE.
+      // route.fetch() + route.fulfill() would buffer the entire body and deadlock.
       if (url.includes('/api/chat/stream')) {
         const newUrl = url.replace('/api/chat/stream', '/chat/stream')
-        const response = await route.fetch({ url: newUrl })
-        await route.fulfill({ response })
+        await route.continue({ url: newUrl })
         return
       }
 
