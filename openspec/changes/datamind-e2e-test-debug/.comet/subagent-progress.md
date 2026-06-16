@@ -56,7 +56,12 @@
 - Adapted selectors: .assistant-bubble→.ai-bubble, .send-btn→.stop-btn state check
 - Added page.route() bridge for /api/chat/stream prefix mismatch
 
+### Task 11 — Playwright E2E File Upload Tests (file-upload.spec.ts) ✅
+- Commits: 471eb15 (initial), f0f542f (fix error assertion) | Spec: ✅ | Code: ✅
+- 4 tests: CSV/Excel/Parquet upload, invalid file error display
+- Adapted: mockUploadApi() helper for dataset list patching, ES module path handling
+
 ## Current Task
 
-- Plan task: Task 11 — Playwright E2E File Upload Tests (file-upload.spec.ts)
+- Plan task: Task 12 — Playwright E2E Gate Approval Tests (gate-approval.spec.ts)
 - Stage: dispatching

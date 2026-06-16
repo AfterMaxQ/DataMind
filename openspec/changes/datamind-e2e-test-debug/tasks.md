@@ -33,7 +33,7 @@
 ## 6. Playwright E2E — 业务流程
 
 - [ ] 6.1 编写 `gate-approval.spec.ts`：启动 data-cleaning → GATE 出现 → Approve 继续 → Reject 路由 → 决策记录更新
-- [ ] 6.2 编写 `file-upload.spec.ts`：点击上传 CSV、拖拽上传 Excel、上传后数据集展示（名称/行列数）、无效文件错误提示
+- [x] 6.2 编写 `file-upload.spec.ts`：点击上传 CSV、拖拽上传 Excel、上传后数据集展示（名称/行列数）、无效文件错误提示
 - [ ] 6.3 编写 `skill-pipeline.spec.ts`：上传 CSV → data-exploration → data-cleaning → feature-engineering → model-training 全链路（使用真实 DeepSeek API）
 - [ ] 6.4 编写 `error-scenarios.spec.ts`：空消息拒绝、无效文件格式错误、LLM 异常恢复、工具超时处理
 
