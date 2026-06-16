@@ -1,10 +1,15 @@
 """SkillService — SKILL.md parsing, AUTO/GATE execution, pipeline composition (Layer 4)."""
 
+import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import yaml
+
 from datamind.engine.skill_state import SkillPhase, SkillStateMachine
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -43,9 +48,9 @@ class SkillParser:
             parts = content.split("---", 2)
             if len(parts) >= 3:
                 try:
-                    import yaml
                     frontmatter = yaml.safe_load(parts[1]) or {}
-                except Exception:
+                except yaml.YAMLError:
+                    _log.warning("Malformed YAML frontmatter in skill — using empty frontmatter")
                     frontmatter = {}
                 content = parts[2]  # Use only the markdown portion
 

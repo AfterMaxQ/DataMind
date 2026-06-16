@@ -2,8 +2,8 @@
 skill: model-training
 version: 2
 routing:
-  gate-3: { approve: train, reject: select-models }
-  gate-6: { approve: archive, reject: train }
+  gate-3: { reject: select-models }
+  gate-6: { reject: train }
 tools:
   phase-1: [read_csv, read_parquet, describe_dataset]
   phase-4: [generate_script, execute_script]

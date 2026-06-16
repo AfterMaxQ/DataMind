@@ -59,16 +59,14 @@ class TestYamlFrontmatter:
             assert skill.frontmatter["version"] == 2
 
     def test_data_cleaning_frontmatter(self):
-        """data-cleaning has routing (2 gates) and tools config."""
+        """data-cleaning has routing (2 gates, reject-only) and tools config."""
         skill = _parse_skill("data-cleaning")
         fm = skill.frontmatter
 
         assert fm["skill"] == "data-cleaning"
         assert "gate-3" in fm["routing"]
         assert "gate-6" in fm["routing"]
-        assert fm["routing"]["gate-3"]["approve"] == "execute"
         assert fm["routing"]["gate-3"]["reject"] == "propose-strategy"
-        assert fm["routing"]["gate-6"]["approve"] == "archive"
         assert fm["routing"]["gate-6"]["reject"] == "execute"
         assert "tools" in fm
         assert "phase-1" in fm["tools"]
@@ -80,12 +78,10 @@ class TestYamlFrontmatter:
         fm = skill.frontmatter
 
         assert fm["skill"] == "model-training"
-        # Routing
+        # Routing (reject-only — approve always goes to next phase)
         assert "gate-3" in fm["routing"]
-        assert fm["routing"]["gate-3"]["approve"] == "train"
         assert fm["routing"]["gate-3"]["reject"] == "select-models"
         assert "gate-6" in fm["routing"]
-        assert fm["routing"]["gate-6"]["approve"] == "archive"
         assert fm["routing"]["gate-6"]["reject"] == "train"
         # Tools
         assert "phase-1" in fm["tools"]
@@ -103,7 +99,6 @@ class TestYamlFrontmatter:
 
         assert fm["skill"] == "feature-engineering"
         assert "gate-4" in fm["routing"]
-        assert fm["routing"]["gate-4"]["approve"] == "execute"
         assert fm["routing"]["gate-4"]["reject"] == "propose-features"
         assert "phase-1" in fm["tools"]
 

@@ -2,7 +2,7 @@
 skill: feature-engineering
 version: 2
 routing:
-  gate-4: { approve: execute, reject: propose-features }
+  gate-4: { reject: propose-features }
 tools:
   phase-1: [read_csv, read_parquet, describe_dataset]
 ---
