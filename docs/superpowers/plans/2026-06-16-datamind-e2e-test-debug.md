@@ -6,7 +6,7 @@ base-ref: a0cf010cd79b3f47fddb4e0c67430be712c38f5f
 
 # DataMind E2E Testing & Debug Infrastructure - Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [ ]) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [x]) syntax for tracking.
 
 **Goal:** Add JSON structured logging, tool call tracing, runtime debug endpoints, and a 7-file Playwright E2E test suite to DataMind Studio -- without modifying existing business logic or test suites.
 
@@ -56,7 +56,7 @@ base-ref: a0cf010cd79b3f47fddb4e0c67430be712c38f5f
 **Files:**
 - Create: datamind/session_context.py
 
-- [ ] **Step 1: Create the session_context module**
+- [x] **Step 1: Create the session_context module**
 
 `python
 # datamind/session_context.py
@@ -81,12 +81,12 @@ from contextvars import ContextVar
 _current_session_id: ContextVar[str] = ContextVar("session_id", default="")
 `
 
-- [ ] **Step 2: Verify the module imports cleanly**
+- [x] **Step 2: Verify the module imports cleanly**
 
 Run: python -c "from datamind.session_context import _current_session_id; print(_current_session_id.get())"
 Expected: prints empty string ("")
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add datamind/session_context.py
@@ -102,7 +102,7 @@ git commit -m "feat: add session_context module with ContextVar for session_id p
 **Files:**
 - Create: 	ests/unit/test_json_formatter.py
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `python
 # tests/unit/test_json_formatter.py
@@ -184,7 +184,7 @@ def test_json_formatter_error_includes_traceback():
     assert "bad input" in record.get("data", {}).get("traceback", "")
 `
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: pytest tests/unit/test_json_formatter.py -v
 Expected: FAIL with ModuleNotFoundError: No module named 'datamind.logging_setup'
@@ -196,7 +196,7 @@ Expected: FAIL with ModuleNotFoundError: No module named 'datamind.logging_setup
 **Files:**
 - Create: datamind/logging_setup.py
 
-- [ ] **Step 3: Write the JsonFormatter class and setup_logging**
+- [x] **Step 3: Write the JsonFormatter class and setup_logging**
 
 `python
 # datamind/logging_setup.py
@@ -311,12 +311,12 @@ def setup_logging(
     root.info("DataMind logging initialized (level=%s, dir=%s)", level, log_dir)
 `
 
-- [ ] **Step 4: Run the JsonFormatter tests**
+- [x] **Step 4: Run the JsonFormatter tests**
 
 Run: pytest tests/unit/test_json_formatter.py -v
 Expected: 3 PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 `ash
 git add datamind/logging_setup.py tests/unit/test_json_formatter.py
@@ -331,7 +331,7 @@ git commit -m "feat: add JsonFormatter and setup_logging for JSON Lines structur
 - Modify: datamind/__init__.py (lines 1-3)
 - Modify: datamind/api/app.py
 
-- [ ] **Step 1: Call setup_logging in datamind/__init__.py**
+- [x] **Step 1: Call setup_logging in datamind/__init__.py**
 
 Replace the content of datamind/__init__.py with:
 
@@ -348,7 +348,7 @@ if _os.environ.get("DATAMIND_LOG_DISABLE") != "1":
     _setup_logging()
 `
 
-- [ ] **Step 2: Add session middleware to datamind/api/app.py**
+- [x] **Step 2: Add session middleware to datamind/api/app.py**
 
 In datamind/api/app.py, inside create_app(), after line 43 (the dd_middleware(CORSMiddleware, ...) call), add:
 
@@ -369,7 +369,7 @@ In datamind/api/app.py, inside create_app(), after line 43 (the dd_middleware(C
             _current_session_id.reset(token)
 `
 
-- [ ] **Step 3: Smoke-test logging**
+- [x] **Step 3: Smoke-test logging**
 
 Create and run a one-off smoke test (delete afterward):
 
@@ -391,7 +391,7 @@ Expected: stdout line [INFO] smoke_test: Hello from smoke test, plus .datamind/l
 
 Clean up: m smoke_test_logging.py
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 `ash
 git add datamind/__init__.py datamind/api/app.py
@@ -407,7 +407,7 @@ git commit -m "feat: wire logging setup into app startup and add session context
 **Files:**
 - Create: 	ests/unit/test_tool_tracing.py
 
-- [ ] **Step 1: Write failing tests for ToolRegistry tracing**
+- [x] **Step 1: Write failing tests for ToolRegistry tracing**
 
 `python
 # tests/unit/test_tool_tracing.py
@@ -502,7 +502,7 @@ def test_unknown_tool_raises_value_error():
         reg.execute("nonexistent", {})
 `
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: pytest tests/unit/test_tool_tracing.py -v
 Expected: FAIL with assertion errors (no tool_call events found)
@@ -514,7 +514,7 @@ Expected: FAIL with assertion errors (no tool_call events found)
 **Files:**
 - Modify: datamind/engine/tools.py (lines 30-39)
 
-- [ ] **Step 3: Add tracing to execute() method**
+- [x] **Step 3: Add tracing to execute() method**
 
 Replace the execute method in datamind/engine/tools.py:
 
@@ -571,17 +571,17 @@ Replace the execute method in datamind/engine/tools.py:
             raise
 `
 
-- [ ] **Step 4: Run the tracing tests**
+- [x] **Step 4: Run the tracing tests**
 
 Run: pytest tests/unit/test_tool_tracing.py -v
 Expected: 3 PASS
 
-- [ ] **Step 5: Run existing tool tests to confirm no regressions**
+- [x] **Step 5: Run existing tool tests to confirm no regressions**
 
 Run: pytest tests/unit/test_tools.py -v
 Expected: all tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 `ash
 git add datamind/engine/tools.py tests/unit/test_tool_tracing.py
@@ -595,7 +595,7 @@ git commit -m "feat: add tool call tracing to ToolRegistry.execute() with struct
 **Files:**
 - Modify: datamind/api/app.py
 
-- [ ] **Step 1: Initialize session_registry in create_app()**
+- [x] **Step 1: Initialize session_registry in create_app()**
 
 In datamind/api/app.py, inside create_app(), after line 49 (pp.state.ws_manager = ConnectionManager()), add:
 
@@ -604,7 +604,7 @@ In datamind/api/app.py, inside create_app(), after line 49 (pp.state.ws_manager
     app.state.session_registry: dict[str, dict] = {}
 `
 
-- [ ] **Step 2: Register sessions after agent execution in gate_decision**
+- [x] **Step 2: Register sessions after agent execution in gate_decision**
 
 In the /skill/gate endpoint, register session state after both the LangGraph resume path and the DataMindAgent fallback path.
 
@@ -641,7 +641,7 @@ In the /skill/gate endpoint, register session state after both the LangGraph res
                 )
 `
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add datamind/api/app.py
@@ -657,7 +657,7 @@ git commit -m "feat: add session_registry to app.state for debug introspection"
 **Files:**
 - Create: 	ests/unit/test_debug_endpoints.py
 
-- [ ] **Step 1: Write the test file**
+- [x] **Step 1: Write the test file**
 
 `python
 # tests/unit/test_debug_endpoints.py
@@ -730,7 +730,7 @@ def test_debug_logs_with_query_params():
     assert "logs" in data
 `
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: pytest tests/unit/test_debug_endpoints.py -v
 Expected: FAIL (404 for all routes -- debug router not yet mounted)
@@ -742,7 +742,7 @@ Expected: FAIL (404 for all routes -- debug router not yet mounted)
 **Files:**
 - Create: datamind/api/debug.py
 
-- [ ] **Step 3: Write the debug router**
+- [x] **Step 3: Write the debug router**
 
 `python
 # datamind/api/debug.py
@@ -863,7 +863,7 @@ async def query_logs(
 **Files:**
 - Modify: datamind/api/app.py
 
-- [ ] **Step 4: Add conditional debug router mount**
+- [x] **Step 4: Add conditional debug router mount**
 
 In datamind/api/app.py, near the end of create_app(), just before eturn app, add:
 
@@ -874,12 +874,12 @@ In datamind/api/app.py, near the end of create_app(), just before eturn app, ad
         app.include_router(debug_router)
 `
 
-- [ ] **Step 5: Run debug endpoint tests**
+- [x] **Step 5: Run debug endpoint tests**
 
 Run: pytest tests/unit/test_debug_endpoints.py -v
 Expected: 4 PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 `ash
 git add datamind/api/debug.py datamind/api/app.py tests/unit/test_debug_endpoints.py
@@ -893,7 +893,7 @@ git commit -m "feat: add debug endpoints (/debug/state, /debug/sessions, /debug/
 **Files:**
 - Modify: web-ui/playwright.config.ts
 
-- [ ] **Step 4: Update playwright.config.ts**
+- [x] **Step 4: Update playwright.config.ts**
 
 Replace web-ui/playwright.config.ts entirely with:
 
@@ -936,12 +936,12 @@ export default defineConfig({
 })
 `
 
-- [ ] **Step 5: Verify webServer starts correctly**
+- [x] **Step 5: Verify webServer starts correctly**
 
 Run: cd web-ui && npx playwright test --list
 Expected: lists available spec files (at minimum pp.spec.ts)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 `ash
 git add web-ui/playwright.config.ts
@@ -955,7 +955,7 @@ git commit -m "chore: reconfigure Playwright to connect directly to FastAPI on p
 **Files:**
 - Modify: web-ui/tests/e2e/app.spec.ts
 
-- [ ] **Step 1: Add API mocking for rendering tests**
+- [x] **Step 1: Add API mocking for rendering tests**
 
 Add a 	est.beforeEach block at the top of pp.spec.ts (after the existing imports, before the first 	est.describe):
 
@@ -979,12 +979,12 @@ test.beforeEach(async ({ page }) => {
 
 The rest of pp.spec.ts remains unchanged from its current 7 tests.
 
-- [ ] **Step 2: Run rendering tests**
+- [x] **Step 2: Run rendering tests**
 
 Run: cd web-ui && npx playwright test app.spec.ts --reporter=list
 Expected: all 7 rendering tests PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/app.spec.ts
@@ -998,7 +998,7 @@ git commit -m "test: add API mocking to rendering E2E tests"
 **Files:**
 - Create: web-ui/tests/e2e/websocket.spec.ts
 
-- [ ] **Step 1: Write websocket.spec.ts**
+- [x] **Step 1: Write websocket.spec.ts**
 
 `	ypescript
 import { test, expect } from '@playwright/test'
@@ -1042,12 +1042,12 @@ test.describe('WebSocket Connectivity', () => {
 })
 `
 
-- [ ] **Step 2: Run WebSocket tests**
+- [x] **Step 2: Run WebSocket tests**
 
 Run: cd web-ui && npx playwright test websocket.spec.ts --reporter=list
 Expected: 4 PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/websocket.spec.ts
@@ -1061,7 +1061,7 @@ git commit -m "test: add WebSocket connectivity E2E tests"
 **Files:**
 - Create: web-ui/tests/e2e/streaming.spec.ts
 
-- [ ] **Step 1: Write streaming.spec.ts**
+- [x] **Step 1: Write streaming.spec.ts**
 
 `	ypescript
 import { test, expect } from '@playwright/test'
@@ -1107,12 +1107,12 @@ test.describe('SSE Streaming', () => {
 })
 `
 
-- [ ] **Step 2: Run SSE streaming tests**
+- [x] **Step 2: Run SSE streaming tests**
 
 Run: cd web-ui && npx playwright test streaming.spec.ts --reporter=list
 Expected: 3 PASS (uses real DeepSeek API)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/streaming.spec.ts
@@ -1126,7 +1126,7 @@ git commit -m "test: add SSE streaming E2E tests"
 **Files:**
 - Create: web-ui/tests/e2e/file-upload.spec.ts
 
-- [ ] **Step 1: Write ile-upload.spec.ts**
+- [x] **Step 1: Write ile-upload.spec.ts**
 
 `	ypescript
 import { test, expect } from '@playwright/test'
@@ -1183,12 +1183,12 @@ test.describe('File Upload', () => {
 })
 `
 
-- [ ] **Step 2: Run file upload tests**
+- [x] **Step 2: Run file upload tests**
 
 Run: cd web-ui && npx playwright test file-upload.spec.ts --reporter=list
 Expected: 4 tests run (upload success depends on endpoint behavior)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/file-upload.spec.ts
@@ -1202,7 +1202,7 @@ git commit -m "test: add file upload E2E tests"
 **Files:**
 - Create: web-ui/tests/e2e/gate-approval.spec.ts
 
-- [ ] **Step 1: Write gate-approval.spec.ts**
+- [x] **Step 1: Write gate-approval.spec.ts**
 
 `	ypescript
 import { test, expect } from '@playwright/test'
@@ -1270,12 +1270,12 @@ test.describe('Gate Approval Workflow', () => {
 })
 `
 
-- [ ] **Step 2: Run gate approval tests**
+- [x] **Step 2: Run gate approval tests**
 
 Run: cd web-ui && npx playwright test gate-approval.spec.ts --reporter=list
 Expected: 4 PASS (these use real DeepSeek API and may take 60-120s each)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/gate-approval.spec.ts
@@ -1289,7 +1289,7 @@ git commit -m "test: add gate approval workflow E2E tests"
 **Files:**
 - Create: web-ui/tests/e2e/skill-pipeline.spec.ts
 
-- [ ] **Step 1: Write skill-pipeline.spec.ts**
+- [x] **Step 1: Write skill-pipeline.spec.ts**
 
 `	ypescript
 import { test, expect } from '@playwright/test'
@@ -1359,12 +1359,12 @@ test.describe('Skill Pipeline - Full E2E Flow', () => {
 })
 `
 
-- [ ] **Step 2: Run skill pipeline tests**
+- [x] **Step 2: Run skill pipeline tests**
 
 Run: cd web-ui && npx playwright test skill-pipeline.spec.ts --reporter=list
 Expected: 3 PASS (long-running, uses real DeepSeek API)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/skill-pipeline.spec.ts
@@ -1378,7 +1378,7 @@ git commit -m "test: add skill pipeline full E2E flow tests"
 **Files:**
 - Create: web-ui/tests/e2e/error-scenarios.spec.ts
 
-- [ ] **Step 1: Write error-scenarios.spec.ts**
+- [x] **Step 1: Write error-scenarios.spec.ts**
 
 `	ypescript
 import { test, expect } from '@playwright/test'
@@ -1456,12 +1456,12 @@ test.describe('Error Scenarios', () => {
 })
 `
 
-- [ ] **Step 2: Run error scenario tests**
+- [x] **Step 2: Run error scenario tests**
 
 Run: cd web-ui && npx playwright test error-scenarios.spec.ts --reporter=list
 Expected: 5 PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 `ash
 git add web-ui/tests/e2e/error-scenarios.spec.ts
@@ -1474,7 +1474,7 @@ git commit -m "test: add error scenario E2E tests"
 **Files:**
 - Create: `docs/testing-runbook.md`
 
-- [ ] **Step 1: Write `docs/testing-runbook.md`**
+- [x] **Step 1: Write `docs/testing-runbook.md`**
 
 ```markdown
 # DataMind Studio Testing Runbook
@@ -1607,7 +1607,7 @@ npx playwright show-report
 | Python tests fail after logging changes | Logger handlers conflict | Run `pytest -p no:logging` or check test isolation |
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add docs/testing-runbook.md
@@ -1621,7 +1621,7 @@ git commit -m "docs: add testing runbook"
 **Files:**
 - Create: `docs/debugging-runbook.md`
 
-- [ ] **Step 3: Write `docs/debugging-runbook.md`**
+- [x] **Step 3: Write `docs/debugging-runbook.md`**
 
 ```markdown
 # DataMind Studio Debugging Runbook
@@ -1737,7 +1737,7 @@ sqlite3 .datamind/checkpoints.db "SELECT thread_id, checkpoint_id, created_at FR
 ```
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/debugging-runbook.md
@@ -1750,12 +1750,12 @@ git commit -m "docs: add debugging decision tree and runbook"
 
 ### Task 16.1: Full Python test suite
 
-- [ ] **Step 1: Run all Python tests**
+- [x] **Step 1: Run all Python tests**
 
 Run: `pytest -v --tb=short`
 Expected: all tests PASS (310+ tests, 0 failures)
 
-- [ ] **Step 2: Address any failures**
+- [x] **Step 2: Address any failures**
 
 If any test fails, diagnose and fix. Common issues:
 - Tests capturing stdout may include JSON log lines from setup_logging
@@ -1764,14 +1764,14 @@ If any test fails, diagnose and fix. Common issues:
 
 ### Task 16.2: Full Playwright test suite
 
-- [ ] **Step 3: Run all Playwright E2E tests**
+- [x] **Step 3: Run all Playwright E2E tests**
 
 Run: `cd web-ui && npx playwright test --reporter=list`
 Expected: all 7 spec files PASS (20+ individual tests)
 
 ### Task 16.3: Debug endpoint smoke test
 
-- [ ] **Step 4: Test debug endpoints with curl**
+- [x] **Step 4: Test debug endpoints with curl**
 
 Start the server in a separate terminal:
 ```bash
@@ -1799,14 +1799,14 @@ curl -s http://127.0.0.1:9000/health
 
 ### Task 16.4: Verify DeepSeek API E2E connectivity
 
-- [ ] **Step 5: Run a real-API streaming test**
+- [x] **Step 5: Run a real-API streaming test**
 
 Run: `cd web-ui && npx playwright test streaming.spec.ts --reporter=list --timeout=60000`
 Expected: streaming.spec.ts PASS (tokens received from DeepSeek API)
 
 ### Task 16.5: Verify debug disable guard
 
-- [ ] **Step 6: Test DATAMIND_DEBUG_DISABLE**
+- [x] **Step 6: Test DATAMIND_DEBUG_DISABLE**
 
 Stop the server and restart with:
 ```bash
@@ -1825,7 +1825,7 @@ curl -s http://127.0.0.1:9000/debug/logs
 
 ### Task 16.6: Final commit
 
-- [ ] **Step 7: Commit final state**
+- [x] **Step 7: Commit final state**
 
 ```bash
 git status
