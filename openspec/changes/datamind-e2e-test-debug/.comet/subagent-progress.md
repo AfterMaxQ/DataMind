@@ -45,7 +45,12 @@
 - Files: web-ui/tests/e2e/app.spec.ts, web-ui/playwright.config.ts (port 9000→9003)
 - Notes: Added API mocking via page.route(), fixed .context-status selector scoping for Playwright strict mode
 
+### Task 9 — Playwright E2E WebSocket Tests (websocket.spec.ts) ✅
+- Commits: 715c10f (initial), fix commit | Spec: ✅ (re-review passed) | Code: ✅ Approved
+- 7 tests: connect, reload-reconnect, UI-interaction, sidebar datasets/skills, message reception, connection close
+- Uses page.routeWebSocket() for advanced WS interception tests
+
 ## Current Task
 
-- Plan task: Task 9 — Playwright E2E WebSocket Tests (websocket.spec.ts)
+- Plan task: Task 10 — Playwright E2E SSE Streaming Tests (streaming.spec.ts)
 - Stage: dispatching
