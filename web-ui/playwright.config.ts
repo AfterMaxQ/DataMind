@@ -10,7 +10,7 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   reporter: [['html'], ['list']],
   use: {
-    baseURL: 'http://127.0.0.1:9000',
+    baseURL: 'http://127.0.0.1:9003',
     trace: 'on-first-retry',
   },
   projects: [
@@ -20,8 +20,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'python -m uvicorn serve:app --host 127.0.0.1 --port 9000',
-    url: 'http://127.0.0.1:9000/health',
+    command: 'python -m uvicorn serve:app --host 127.0.0.1 --port 9003',
+    url: 'http://127.0.0.1:9003/health',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
     env: {

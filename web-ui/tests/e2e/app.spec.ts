@@ -1,6 +1,25 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('DataMind Studio Web UI', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock /api/** requests — FastAPI has no /api/ prefix routes.
+    // The Vite proxy normally strips /api/ and forwards to the backend,
+    // but in production mode the Vue app still calls /api/... which
+    // FastAPI would serve as index.html (SPA catch-all), breaking JSON parsing.
+    await page.route('**/api/**', async (route) => {
+      const url = route.request().url()
+      if (url.includes('/api/datasets')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      } else if (url.includes('/api/skills')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      } else if (url.includes('/api/decisions')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      } else {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+      }
+    })
+  })
+
   test('renders three-panel layout with header', async ({ page }) => {
     await page.goto('/')
 
@@ -13,7 +32,7 @@ test.describe('DataMind Studio Web UI', () => {
     await expect(page.locator('.context-panel')).toBeVisible()
 
     // Context status in header
-    await expect(page.locator('.context-status')).toBeVisible()
+    await expect(page.locator('.header-right .context-status')).toBeVisible()
   })
 
   test('dark mode toggle switches theme', async ({ page }) => {
@@ -92,8 +111,8 @@ test.describe('DataMind Studio Web UI', () => {
   test('context panel shows session context and lineage', async ({ page }) => {
     await page.goto('/')
 
-    // Session context section
-    await expect(page.locator('.context-status')).toBeVisible()
+    // Session context section (inside the context panel)
+    await expect(page.locator('.context-panel .context-status')).toBeVisible()
 
     // Lineage graph section
     await expect(page.locator('.graph-title')).toHaveText('Lineage Graph')
