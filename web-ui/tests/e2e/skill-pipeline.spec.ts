@@ -61,7 +61,7 @@ const SSE_TOKENS = [
   '-', ' **', 'Salary', ' range', ':**', ' 48', ',', '316', ' –', ' 176', ',', '225', '\n',
 ]
 
-/** SSE body pre-built once. Removes the "data:" prefix implicitly — */
+/** SSE body pre-built once. `buildMockSseBody` adds the "data:" prefix to construct SSE wire format. */
 const MOCK_SSE_BODY = buildMockSseBody(SSE_TOKENS)
 
 /**
@@ -172,7 +172,7 @@ test.describe('Skill Pipeline - Full E2E Flow', () => {
     await input.fill('/skill data-exploration --target web-ui/tests/e2e/fixtures/sample.csv')
     await page.locator('.send-btn').click()
 
-    // Step 3 — Wait for AI response via streaming (real backend SSE)
+    // Step 3 — Wait for AI response via streaming (mock SSE)
     // The user bubble should appear immediately
     await expect(page.locator('.user-bubble').first()).toBeVisible()
 
