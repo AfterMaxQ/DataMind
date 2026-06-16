@@ -1,0 +1,15 @@
+{
+  "change": "datamind-e2e-test-debug",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "f0ebc096554303ad8627ecea2cf369c9448a7b49c30e7632cb7793dec9bbc39e",
+  "files": [
+    { "path": "openspec/changes/datamind-e2e-test-debug/proposal.md", "sha256": "8b9c58d29e44476bb5f2533c5b112a39f67bbb7711b63b3a7f155ba0ed881a4e" },
+    { "path": "openspec/changes/datamind-e2e-test-debug/design.md", "sha256": "ab319c2857fb3a55cfe95b7bee0df9fb25442a77d61a7c6d39b30f6645b83239" },
+    { "path": "openspec/changes/datamind-e2e-test-debug/tasks.md", "sha256": "2d944e3c6bad2d1c18d8ced13186d1f7ff8ca50d6f59dd5c9759dd033fd096f6" },
+    { "path": "openspec/changes/datamind-e2e-test-debug/specs/debug-infrastructure/spec.md", "sha256": "f7017f05a9ab5337c885b8532466e24a27aa738228ea3ebdaabe08f24a7df4ff" },
+    { "path": "openspec/changes/datamind-e2e-test-debug/specs/e2e-test-suite/spec.md", "sha256": "fc3d4a520703f173d3ba148f18178509f37863a3768c0c52abaf1aeef0235fdf" }
+  ]
+}
