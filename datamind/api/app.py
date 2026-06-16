@@ -7,6 +7,8 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File as FastAPIFile
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from datamind.api.websocket import ConnectionManager
@@ -314,6 +316,19 @@ def create_app(project_root: str) -> FastAPI:
             "path": str(file_path),
             "size": len(content),
         }
+
+    # -- Static file serving for production Vue build --
+    web_ui_dist = Path(project_root) / "web-ui" / "dist"
+    if web_ui_dist.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(web_ui_dist / "assets")), name="assets")
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def serve_spa(full_path: str = ""):
+            """Serve Vue SPA index.html for any non-API route."""
+            index_path = web_ui_dist / "index.html"
+            if index_path.is_file():
+                return FileResponse(str(index_path))
+            return {"detail": "SPA not found"}
 
     return app
 
