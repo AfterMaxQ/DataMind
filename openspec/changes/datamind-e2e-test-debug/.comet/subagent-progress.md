@@ -40,7 +40,12 @@
 - Files: web-ui/playwright.config.ts, web-ui/tests/e2e/fixtures/sample.{csv,xlsx,parquet}
 - Fixes: cwd '.'→'..', DEEPSEEK_API_KEY reference, removed extra LOG_LEVEL
 
+### Task 8 — Playwright E2E Mock Rendering Tests (app.spec.ts) ✅
+- Commit: b72b73c | Spec: ✅ | Code: ✅ Approved
+- Files: web-ui/tests/e2e/app.spec.ts, web-ui/playwright.config.ts (port 9000→9003)
+- Notes: Added API mocking via page.route(), fixed .context-status selector scoping for Playwright strict mode
+
 ## Current Task
 
-- Plan task: Task 8 — Playwright E2E Mock Rendering Tests (app.spec.ts API mocking)
+- Plan task: Task 9 — Playwright E2E WebSocket Tests (websocket.spec.ts)
 - Stage: dispatching
