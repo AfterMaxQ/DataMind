@@ -17,6 +17,8 @@ from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 from langgraph.types import Command, interrupt
 
+from datamind.session_context import _current_session_id
+
 _log = logging.getLogger(__name__)
 
 # ===========================================================================
@@ -567,11 +569,18 @@ class LangGraphAgent:
         if thread_id:
             self.config["configurable"]["thread_id"] = thread_id
 
+        # Inject session_id into logging context so all log entries
+        # emitted during graph execution carry the session identifier.
+        session_token = _current_session_id.set(
+            initial_state.get("session_id", "")
+        )
         try:
             final_state = self.graph.invoke(initial_state, self.config)
             return self._handle_result(final_state)
         except Exception as exc:
             return LangGraphError(error_message=str(exc))
+        finally:
+            _current_session_id.reset(session_token)
 
     def resume(self, decision) -> LangGraphEvent:
         """Resume graph execution after a GATE interrupt.
@@ -583,6 +592,10 @@ class LangGraphAgent:
         Returns:
             A :class:`LangGraphEvent` subclass.
         """
+        # Inject session_id into logging context for resume execution.
+        session_token = _current_session_id.set(
+            self.config["configurable"]["thread_id"]
+        )
         try:
             final_state = self.graph.invoke(
                 Command(resume=decision), self.config
@@ -590,6 +603,8 @@ class LangGraphAgent:
             return self._handle_result(final_state)
         except Exception as exc:
             return LangGraphError(error_message=str(exc))
+        finally:
+            _current_session_id.reset(session_token)
 
     # ------------------------------------------------------------------
     # Internal
