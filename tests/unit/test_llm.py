@@ -525,3 +525,284 @@ def test_ollama_chat_delegates_to_openai_compatible():
     assert isinstance(result, LLMResponse)
     assert result.content == "Ollama response"
     assert result.model == "llama3"
+
+
+# ---------------------------------------------------------------------------
+# DeepSeek provider tests
+# ---------------------------------------------------------------------------
+
+def test_create_client_deepseek_provider():
+    """_create_llm_client with provider='deepseek' returns OpenAIClient
+    pointed at the DeepSeek API base URL."""
+    from datamind.engine.project import _create_llm_client
+
+    client = _create_llm_client({
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "api_key": "sk-deepseek-test",
+    })
+
+    assert isinstance(client, OpenAIClient)
+    assert client.api_url == "https://api.deepseek.com/v1"
+    assert client.model == "deepseek-v4-flash"
+    assert client.api_key == "sk-deepseek-test"
+
+
+def test_create_client_deepseek_no_model_defaults_to_v4_flash():
+    """_create_llm_client with provider='deepseek' and no explicit model
+    defaults to 'deepseek-v4-flash' instead of the generic default."""
+    from datamind.engine.project import _create_llm_client
+
+    client = _create_llm_client({
+        "provider": "deepseek",
+        "api_key": "sk-deepseek-test",
+    })
+
+    assert isinstance(client, OpenAIClient)
+    assert client.api_url == "https://api.deepseek.com/v1"
+    assert client.model == "deepseek-v4-flash"
+
+
+def test_deepseek_load_llm_config_applies_defaults(tmp_project):
+    """load_llm_config applies DeepSeek-specific defaults when provider is deepseek."""
+    import yaml
+    dot = tmp_project / ".datamind"
+    dot.mkdir()
+    config_path = dot / "config.yaml"
+    config_path.write_text(yaml.dump({
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+    }))
+
+    config = load_llm_config(str(config_path))
+    assert config["provider"] == "deepseek"
+    assert config["model"] == "deepseek-v4-flash"
+    assert config["api_base"] == "https://api.deepseek.com/v1"
+
+
+def test_deepseek_load_llm_config_env_override(tmp_project):
+    """Env vars can override DeepSeek config defaults."""
+    import yaml
+    import os
+    dot = tmp_project / ".datamind"
+    dot.mkdir()
+    config_path = dot / "config.yaml"
+    config_path.write_text(yaml.dump({
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+    }))
+
+    os.environ["DATAMIND_MODEL"] = "deepseek-v4-flash"
+    os.environ["DATAMIND_PROVIDER"] = "deepseek"
+    try:
+        config = load_llm_config(str(config_path))
+        assert config["model"] == "deepseek-v4-flash"
+        assert config["provider"] == "deepseek"
+        assert config["api_base"] == "https://api.deepseek.com/v1"
+    finally:
+        del os.environ["DATAMIND_MODEL"]
+        del os.environ["DATAMIND_PROVIDER"]
+
+
+def test_deepseek_load_llm_config_no_model_defaults_to_v4_flash(tmp_project):
+    """When provider is deepseek but no model is specified,
+    the default model should be 'deepseek-v4-flash', not the generic default."""
+    import yaml
+    dot = tmp_project / ".datamind"
+    dot.mkdir()
+    config_path = dot / "config.yaml"
+    config_path.write_text(yaml.dump({
+        "provider": "deepseek",
+    }))
+
+    config = load_llm_config(str(config_path))
+    assert config["provider"] == "deepseek"
+    assert config["model"] == "deepseek-v4-flash"
+    assert config["api_base"] == "https://api.deepseek.com/v1"
+
+
+# ---------------------------------------------------------------------------
+# DeepSeek integration tests (mocked HTTP)
+# ---------------------------------------------------------------------------
+
+class TestDeepSeekIntegration:
+    """Integration-style tests for OpenAIClient configured for DeepSeek."""
+
+    def test_deepseek_openai_client_chat(self):
+        """OpenAIClient with DeepSeek base URL sends chat requests correctly."""
+        client = OpenAIClient(
+            api_key="sk-deepseek-test",
+            model="deepseek-v4-flash",
+            api_url="https://api.deepseek.com/v1",
+            max_retries=1,
+        )
+
+        fake_choice = MagicMock()
+        fake_message = MagicMock()
+        fake_message.content = "Hello from DeepSeek"
+        fake_message.tool_calls = None
+        fake_choice.message = fake_message
+        fake_choice.finish_reason = "stop"
+        fake_response = MagicMock()
+        fake_response.choices = [fake_choice]
+        fake_response.model = "deepseek-v4-flash"
+        fake_response.usage = MagicMock(prompt_tokens=5, completion_tokens=10, total_tokens=15)
+
+        client._client = MagicMock()
+        client._client.chat.completions.create.return_value = fake_response
+
+        result = client.chat(messages=[{"role": "user", "content": "Hi"}])
+
+        assert isinstance(result, LLMResponse)
+        assert result.content == "Hello from DeepSeek"
+        assert result.model == "deepseek-v4-flash"
+        assert result.usage["prompt_tokens"] == 5
+        assert result.usage["completion_tokens"] == 10
+        assert result.finish_reason == "stop"
+
+    def test_deepseek_streaming(self):
+        """OpenAIClient with DeepSeek streaming yields incremental chunks."""
+        client = OpenAIClient(
+            api_key="sk-deepseek-test",
+            model="deepseek-v4-flash",
+            api_url="https://api.deepseek.com/v1",
+            max_retries=1,
+        )
+
+        chunks = [
+            _make_chunk(content=None, role="assistant"),
+            _make_chunk(content="Deep"),
+            _make_chunk(content="Seek"),
+            _make_chunk(content=None, finish_reason="stop"),
+        ]
+        client._client = MagicMock()
+        client._client.chat.completions.create.return_value = chunks
+
+        results = list(client.chat(
+            messages=[{"role": "user", "content": "Hi"}],
+            stream=True,
+        ))
+
+        assert len(results) > 0
+        content_parts = [r.content for r in results if r.content]
+        combined = "".join(content_parts)
+        assert "Deep" in combined
+        assert "Seek" in combined
+
+    def test_deepseek_tool_calling(self):
+        """OpenAIClient with DeepSeek handles tool calls correctly."""
+        client = OpenAIClient(
+            api_key="sk-deepseek-test",
+            model="deepseek-v4-flash",
+            api_url="https://api.deepseek.com/v1",
+            max_retries=1,
+        )
+
+        fake_tool_call = MagicMock()
+        fake_tool_call.id = "call_ds_123"
+        fake_tool_call.type = "function"
+        fake_tool_call.function = MagicMock()
+        fake_tool_call.function.name = "get_weather"
+        fake_tool_call.function.arguments = '{"city": "Beijing"}'
+
+        fake_choice = MagicMock()
+        fake_message = MagicMock()
+        fake_message.content = None
+        fake_message.tool_calls = [fake_tool_call]
+        fake_choice.message = fake_message
+        fake_choice.finish_reason = "tool_calls"
+
+        fake_response = MagicMock()
+        fake_response.choices = [fake_choice]
+        fake_response.model = "deepseek-v4-flash"
+        fake_response.usage = MagicMock(prompt_tokens=20, completion_tokens=30, total_tokens=50)
+
+        client._client = MagicMock()
+        client._client.chat.completions.create.return_value = fake_response
+
+        result = client.chat(
+            messages=[{"role": "user", "content": "What is the weather in Beijing?"}],
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get weather",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"city": {"type": "string"}},
+                        "required": ["city"],
+                    },
+                },
+            }],
+        )
+
+        assert result.finish_reason == "tool_calls"
+        assert len(result.tool_calls) == 1
+        assert result.tool_calls[0]["name"] == "get_weather"
+        assert result.tool_calls[0]["arguments"] == '{"city": "Beijing"}'
+
+
+# ---------------------------------------------------------------------------
+# Model switching tests
+# ---------------------------------------------------------------------------
+
+class TestModelSwitching:
+    """Verify runtime model switching between DeepSeek and other providers."""
+
+    def test_switch_deepseek_to_openai(self):
+        """Switching provider from deepseek to openai changes the API base URL."""
+        from datamind.engine.project import _create_llm_client
+
+        deepseek_client = _create_llm_client({
+            "provider": "deepseek",
+            "model": "deepseek-v4-flash",
+            "api_key": "sk-deepseek-test",
+        })
+        assert deepseek_client.api_url == "https://api.deepseek.com/v1"
+        assert isinstance(deepseek_client, OpenAIClient)
+
+        openai_client = _create_llm_client({
+            "provider": "openai",
+            "model": "gpt-4o",
+            "api_key": "sk-openai-test",
+        })
+        assert openai_client.api_url == "https://api.openai.com/v1"
+        assert isinstance(openai_client, OpenAIClient)
+
+    def test_switch_deepseek_to_ollama(self):
+        """Switching provider from deepseek to ollama creates correct client type."""
+        from datamind.engine.project import _create_llm_client
+
+        deepseek_client = _create_llm_client({
+            "provider": "deepseek",
+            "model": "deepseek-v4-flash",
+            "api_key": "sk-deepseek-test",
+        })
+        assert isinstance(deepseek_client, OpenAIClient)
+        assert deepseek_client.api_url == "https://api.deepseek.com/v1"
+
+        ollama_client = _create_llm_client({
+            "provider": "ollama",
+            "model": "llama3",
+            "api_base": "http://localhost:11434/v1",
+        })
+        assert isinstance(ollama_client, OllamaClient)
+        assert ollama_client.api_url == "http://localhost:11434/v1"
+
+    def test_switch_openai_to_deepseek_same_client_type(self):
+        """Both openai and deepseek use OpenAIClient, only base_url differs."""
+        from datamind.engine.project import _create_llm_client
+
+        deepseek_client = _create_llm_client({
+            "provider": "deepseek",
+            "model": "deepseek-v4-flash",
+            "api_key": "sk-ds",
+        })
+        openai_client = _create_llm_client({
+            "provider": "openai",
+            "model": "gpt-4o",
+            "api_key": "sk-oai",
+        })
+
+        assert type(deepseek_client) is type(openai_client)  # Both OpenAIClient
+        assert deepseek_client.api_url != openai_client.api_url

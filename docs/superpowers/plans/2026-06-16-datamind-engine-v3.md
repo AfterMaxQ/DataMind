@@ -1,4 +1,4 @@
----
+﻿---
 change: datamind-engine-v3
 design-doc: docs/superpowers/specs/2026-06-15-datamind-engine-v3-design.md
 base-ref: dee4855333ce62712699ba7a84f05d2fac09fb25
@@ -64,26 +64,26 @@ base-ref: dee4855333ce62712699ba7a84f05d2fac09fb25
 - Modify: `pyproject.toml`
 - No test files (infrastructure only)
 
-- [ ] **Step 1.1: Add langgraph to dependencies**
+- [x] **Step 1.1: Add langgraph to dependencies**
 
 ```toml
 # In pyproject.toml, add to [project].dependencies:
     "langgraph>=0.2.0",
 ```
 
-- [ ] **Step 1.2: Install updated dependencies**
+- [x] **Step 1.2: Install updated dependencies**
 
 Run: `pip install -e ".[dev]"`
 
 Expected: langgraph and all dependencies install successfully.
 
-- [ ] **Step 1.3: Verify existing tests still pass**
+- [x] **Step 1.3: Verify existing tests still pass**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: 185 tests PASS. No regressions.
 
-- [ ] **Step 1.4: Commit**
+- [x] **Step 1.4: Commit**
 
 ```bash
 git add pyproject.toml
@@ -211,13 +211,13 @@ class TestToolRegistry:
         assert definitions[0]["function"]["name"] == "test"
 ```
 
-- [ ] **Step 2.2: Run test to verify it fails**
+- [x] **Step 2.2: Run test to verify it fails**
 
 Run: `pytest tests/unit/test_tools.py::TestToolRegistry -v`
 
 Expected: FAIL with "ModuleNotFoundError: No module named 'datamind.engine.tools'"
 
-- [ ] **Step 2.3: Implement ToolRegistry class**
+- [x] **Step 2.3: Implement ToolRegistry class**
 
 ```python
 # datamind/engine/tools.py
@@ -272,13 +272,13 @@ class ToolRegistry:
         return self._tools.get(name)
 ```
 
-- [ ] **Step 2.4: Run test to verify it passes**
+- [x] **Step 2.4: Run test to verify it passes**
 
 Run: `pytest tests/unit/test_tools.py::TestToolRegistry -v`
 
 Expected: 4 tests PASS
 
-- [ ] **Step 2.5: Commit**
+- [x] **Step 2.5: Commit**
 
 ```bash
 git add datamind/engine/tools.py tests/unit/test_tools.py
@@ -287,7 +287,7 @@ git commit -m "feat: add ToolRegistry with register/get_definitions/execute"
 
 ### Task 2.2-2.7: Implement 7 Data Tools (TDD per tool)
 
-- [ ] **Step 2.6: Write failing tests for read_csv**
+- [x] **Step 2.6: Write failing tests for read_csv**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -336,13 +336,13 @@ class TestReadCsv:
             read_csv(path="/nonexistent/file.csv")
 ```
 
-- [ ] **Step 2.7: Run tests to verify they fail**
+- [x] **Step 2.7: Run tests to verify they fail**
 
 Run: `pytest tests/unit/test_tools.py::TestReadCsv -v`
 
 Expected: FAIL with "NameError: name 'read_csv' is not defined"
 
-- [ ] **Step 2.8: Implement read_csv**
+- [x] **Step 2.8: Implement read_csv**
 
 ```python
 # Append to datamind/engine/tools.py
@@ -394,13 +394,13 @@ def read_csv(path: str, nrows: int = 10) -> dict:
     }
 ```
 
-- [ ] **Step 2.9: Run tests to verify they pass**
+- [x] **Step 2.9: Run tests to verify they pass**
 
 Run: `pytest tests/unit/test_tools.py::TestReadCsv -v`
 
 Expected: 3 tests PASS
 
-- [ ] **Step 2.10-2.11: TDD read_parquet and read_excel (same pattern)**
+- [x] **Step 2.10-2.11: TDD read_parquet and read_excel (same pattern)**
 
 Write failing tests for `read_parquet` and `read_excel`, then implement:
 
@@ -497,7 +497,7 @@ Run: `pytest tests/unit/test_tools.py::TestReadParquet tests/unit/test_tools.py:
 
 Expected: 4 tests PASS
 
-- [ ] **Step 2.12: TDD describe_dataset tool**
+- [x] **Step 2.12: TDD describe_dataset tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -549,7 +549,7 @@ Run: `pytest tests/unit/test_tools.py::TestDescribeDataset -v`
 
 Expected: 1 test PASS
 
-- [ ] **Step 2.13: TDD generate_script tool**
+- [x] **Step 2.13: TDD generate_script tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -638,7 +638,7 @@ Run: `pytest tests/unit/test_tools.py::TestGenerateScript -v`
 
 Expected: 2 tests PASS
 
-- [ ] **Step 2.14: TDD execute_script tool**
+- [x] **Step 2.14: TDD execute_script tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -767,7 +767,7 @@ Run: `pytest tests/unit/test_tools.py::TestExecuteScript -v`
 
 Expected: 4 tests PASS
 
-- [ ] **Step 2.15: TDD list_files tool**
+- [x] **Step 2.15: TDD list_files tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -844,7 +844,7 @@ Run: `pytest tests/unit/test_tools.py::TestListFiles -v`
 
 Expected: 3 tests PASS
 
-- [ ] **Step 2.16: Write integration test for full ToolRegistry with all tools**
+- [x] **Step 2.16: Write integration test for full ToolRegistry with all tools**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -930,13 +930,13 @@ class TestToolRegistryIntegration:
         assert registry.get_definitions() == []
 ```
 
-- [ ] **Step 2.17: Run all tool tests**
+- [x] **Step 2.17: Run all tool tests**
 
 Run: `pytest tests/unit/test_tools.py -v`
 
 Expected: All ~18 tests PASS
 
-- [ ] **Step 2.18: Commit**
+- [x] **Step 2.18: Commit**
 
 ```bash
 git add datamind/engine/tools.py tests/unit/test_tools.py
@@ -1018,13 +1018,13 @@ class TestSkillState:
         assert set(state.keys()) == required_keys
 ```
 
-- [ ] **Step 3.2: Run test to verify it fails**
+- [x] **Step 3.2: Run test to verify it fails**
 
 Run: `pytest tests/unit/test_langgraph_agent.py::TestSkillState -v`
 
 Expected: FAIL -- "ModuleNotFoundError: No module named 'datamind.engine.langgraph_agent'"
 
-- [ ] **Step 3.3: Implement SkillState + SkillGraphBuilder**
+- [x] **Step 3.3: Implement SkillState + SkillGraphBuilder**
 
 ```python
 # datamind/engine/langgraph_agent.py
@@ -1704,7 +1704,7 @@ class LangGraphAgent:
             _log.warning("Failed to update .skill.yaml", exc_info=True)
 ```
 
-- [ ] **Step 3.4: Write and run build + state transition tests**
+- [x] **Step 3.4: Write and run build + state transition tests**
 
 ```python
 # Append to tests/unit/test_langgraph_agent.py
@@ -1856,13 +1856,13 @@ class TestLangGraphAgent:
             assert event is not None
 ```
 
-- [ ] **Step 3.5: Run all LangGraph tests**
+- [x] **Step 3.5: Run all LangGraph tests**
 
 Run: `pytest tests/unit/test_langgraph_agent.py -v`
 
 Expected: All tests PASS
 
-- [ ] **Step 3.6: Commit**
+- [x] **Step 3.6: Commit**
 
 ```bash
 git add datamind/engine/langgraph_agent.py tests/unit/test_langgraph_agent.py
@@ -2217,7 +2217,7 @@ Note: The key changes from the original `agent.py`:
 2. `_get_tool_defs()` delegates to `ToolRegistry.get_definitions()` instead of returning `[]`
 3. `_execute_tools()` delegates to `ToolRegistry.execute()` with JSON arg parsing
 
-- [ ] **Step 4.3: Update Project.create_agent() to pass ToolRegistry**
+- [x] **Step 4.3: Update Project.create_agent() to pass ToolRegistry**
 
 ```python
 # In datamind/engine/project.py, modify create_agent():
@@ -2347,19 +2347,19 @@ Note: The key changes from the original `agent.py`:
         )
 ```
 
-- [ ] **Step 4.4: Verify all existing agent tests still pass**
+- [x] **Step 4.4: Verify all existing agent tests still pass**
 
 Run: `pytest tests/integration/test_agent.py tests/e2e/test_full_skill_execution.py tests/e2e/test_interrupt_resume.py -v`
 
 Expected: All ~20 tests PASS. The thin wrapper preserves the full public API.
 
-- [ ] **Step 4.5: Run full test suite**
+- [x] **Step 4.5: Run full test suite**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: 185+ tests PASS (all original + new tool + LangGraph tests)
 
-- [ ] **Step 4.6: Commit**
+- [x] **Step 4.6: Commit**
 
 ```bash
 git add datamind/engine/agent.py datamind/engine/project.py
@@ -2619,7 +2619,7 @@ version: 2
 ---
 ```
 
-- [ ] **Step 5.3: Extend SkillParser to parse YAML frontmatter**
+- [x] **Step 5.3: Extend SkillParser to parse YAML frontmatter**
 
 ```python
 # In datamind/engine/skills.py, extend SkillParser.parse():
@@ -2658,19 +2658,19 @@ class SkillDefinition:
     frontmatter: dict = field(default_factory=dict)
 ```
 
-- [ ] **Step 5.4: Run skill migration tests**
+- [x] **Step 5.4: Run skill migration tests**
 
 Run: `pytest tests/integration/test_skill_migration.py -v`
 
 Expected: All 8 tests PASS. All 7 skills parse correctly with frontmatter, all build valid StateGraphs.
 
-- [ ] **Step 5.5: Run full test suite**
+- [x] **Step 5.5: Run full test suite**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: All tests PASS. No regressions.
 
-- [ ] **Step 5.6: Commit**
+- [x] **Step 5.6: Commit**
 
 ```bash
 git add skills/*.md datamind/engine/skills.py tests/integration/test_skill_migration.py
@@ -2829,13 +2829,13 @@ class TestDeepSeekChat:
         assert r2 is not None
 ```
 
-- [ ] **Step 6.3: Run DeepSeek integration test**
+- [x] **Step 6.3: Run DeepSeek integration test**
 
 Run: `DEEPSEEK_API_KEY=$env:DEEPSEEK_API_KEY pytest tests/integration/test_deepseek.py -v`
 
 Expected: If `DEEPSEEK_API_KEY` is set, 4 tests PASS. Otherwise, 4 tests SKIP.
 
-- [ ] **Step 6.4: Commit**
+- [x] **Step 6.4: Commit**
 
 ```bash
 git add datamind/config.py tests/integration/test_deepseek.py
@@ -2941,13 +2941,13 @@ class TestFileUpload:
         assert response.status_code == 422
 ```
 
-- [ ] **Step 7.2: Run test to verify it fails**
+- [x] **Step 7.2: Run test to verify it fails**
 
 Run: `pytest tests/integration/test_websocket.py -v`
 
 Expected: FAIL -- WebSocket endpoint not yet implemented.
 
-- [ ] **Step 7.3: Implement WebSocket endpoint in api/app.py**
+- [x] **Step 7.3: Implement WebSocket endpoint in api/app.py**
 
 Add to `create_app()` in `datamind/api/app.py`:
 
@@ -3099,19 +3099,19 @@ Add to `create_app()` in `datamind/api/app.py`:
             raise HTTPException(status_code=400, detail=str(e))
 ```
 
-- [ ] **Step 7.4: Run WebSocket integration tests**
+- [x] **Step 7.4: Run WebSocket integration tests**
 
 Run: `pytest tests/integration/test_websocket.py -v`
 
 Expected: All tests PASS.
 
-- [ ] **Step 7.5: Run full test suite**
+- [x] **Step 7.5: Run full test suite**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: All tests PASS.
 
-- [ ] **Step 7.6: Commit**
+- [x] **Step 7.6: Commit**
 
 ```bash
 git add datamind/api/app.py tests/integration/test_websocket.py
@@ -3136,13 +3136,13 @@ npm install element-plus pinia @element-plus/icons-vue
 npm install -D @playwright/test
 ```
 
-- [ ] **Step 8.1: Verify scaffolded project runs**
+- [x] **Step 8.1: Verify scaffolded project runs**
 
 Run: `cd web-ui && npm run dev`
 
 Expected: Vite dev server starts on localhost:5173.
 
-- [ ] **Step 8.2: Configure Vite proxy to FastAPI**
+- [x] **Step 8.2: Configure Vite proxy to FastAPI**
 
 ```typescript
 // web-ui/vite.config.ts
@@ -3621,7 +3621,7 @@ class TestWebUIFullFlow:
         app.mount("/", StaticFiles(directory=str(web_ui_dist), html=True), name="static")
 ```
 
-- [ ] **Step 8.8: Commit**
+- [x] **Step 8.8: Commit**
 
 ```bash
 git add web-ui/ tests/e2e/test_web_ui.py
@@ -3634,13 +3634,13 @@ git commit -m "feat: scaffold Vue 3 SPA with three-panel layout, WebSocket, SSE 
 
 **Files:** None new -- verification and validation only.
 
-- [ ] **Step 9.1: Run full test suite -- all unit, integration, and E2E tests**
+- [x] **Step 9.1: Run full test suite -- all unit, integration, and E2E tests**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: All tests PASS. Total should be 185+ (existing) + new tests from tools, LangGraph, API, etc.
 
-- [ ] **Step 9.2: Verify each spec file exists and is non-empty**
+- [x] **Step 9.2: Verify each spec file exists and is non-empty**
 
 Run:
 ```bash
@@ -3650,13 +3650,13 @@ ls -la openspec/changes/datamind-engine-v3/*.md
 
 Expected: All spec files present and non-empty.
 
-- [ ] **Step 9.3: Confirm DeepSeek integration test passes**
+- [x] **Step 9.3: Confirm DeepSeek integration test passes**
 
 Run: `DEEPSEEK_API_KEY=$env:DEEPSEEK_API_KEY pytest tests/integration/test_deepseek.py -v`
 
 Expected: 4 PASS or 4 SKIP (if no key).
 
-- [ ] **Step 9.4: Confirm Web UI builds**
+- [x] **Step 9.4: Confirm Web UI builds**
 
 Run:
 ```bash
@@ -3665,13 +3665,13 @@ cd web-ui && npm run build
 
 Expected: Build succeeds, `web-ui/dist/` directory created.
 
-- [ ] **Step 9.5: Run comet-state check**
+- [x] **Step 9.5: Run comet-state check**
 
 Run: `comet-state check datamind-engine-v3 build`
 
 Expected: State check passes without errors.
 
-- [ ] **Step 9.6: Commit final verification results**
+- [x] **Step 9.6: Commit final verification results**
 
 ```bash
 git add -u

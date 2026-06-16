@@ -18,7 +18,7 @@ def test_resolve_dot_datamind():
 def test_resolve_component_paths_returns_all_keys():
     paths = resolve_component_paths("/tmp/test_project")
     expected_keys = {
-        "graph_db", "context_dir", "config_file",
+        "graph_db", "checkpoints_db", "context_dir", "config_file",
         "data_dir", "raw_data", "processed_data",
         "scripts_dir", "describe_dir", "executions_dir",
         "skills_dir", "prompts_dir",

@@ -2,13 +2,21 @@
 
 import json
 import logging
-from fastapi import FastAPI, HTTPException, Query
+import os
+from pathlib import Path
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File as FastAPIFile
+from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
+from datamind.api.websocket import ConnectionManager
 from datamind.engine.project import Project
 
 _log = logging.getLogger(__name__)
+
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 class RegisterDatasetRequest(BaseModel):
@@ -37,6 +45,9 @@ def create_app(project_root: str) -> FastAPI:
     # Singleton Project instance — cached on app.state so mutations
     # (e.g. model switch) persist across requests.
     app.state.project = Project(project_root)
+
+    # WebSocket connection manager — shared across all endpoints
+    app.state.ws_manager = ConnectionManager()
 
     def _proj():
         """Return the cached Project singleton from app state."""
@@ -167,7 +178,6 @@ def create_app(project_root: str) -> FastAPI:
         sessions_dir = proj.paths["data_dir"]
         if sessions_dir is None:
             return {"sessions": []}
-        import os
         sessions: list[dict] = []
         if os.path.isdir(sessions_dir):
             for entry in os.listdir(sessions_dir):
@@ -188,18 +198,42 @@ def create_app(project_root: str) -> FastAPI:
         return {"sessions": sessions}
 
     @app.post("/skill/gate")
-    def gate_decision(req: GateDecisionRequest):
+    async def gate_decision(req: GateDecisionRequest):
         try:
             from datamind.engine.skill_state import SkillStateMachine
             from datamind.engine.agent import DataMindAgent, WaitForApproval, SkillComplete, AgentError
 
             yaml_path = req.session_dir + "/.skill.yaml" if not req.session_dir.endswith(".skill.yaml") else req.session_dir
             sm = SkillStateMachine.load(yaml_path)
-            next_phase = sm.approve_gate(sm.state.phase, req.decision)
 
-            # If the next phase is AUTO, resume agent execution through it
+            # Capture the phase being approved *before* the transition,
+            # because approve_gate mutates sm.state.phase.
+            approved_phase = sm.state.phase
+            next_phase = sm.approve_gate(approved_phase, req.decision)
+
+            # Broadcast decision update to all WebSocket clients
+            manager = app.state.ws_manager
+            await manager.broadcast_to_all("decision_update", {
+                "approved": req.decision.get("approved", False),
+                "phase": approved_phase,
+                "next_phase": next_phase,
+                "session": sm.state.session,
+                "skill": sm.state.skill,
+                "comment": req.decision.get("comment", ""),
+            })
+
+            # If the next phase is AUTO, resume agent execution through it.
+            # Prefer LangGraph resume when checkpoints exist; fall back to
+            # DataMindAgent for sessions that predate LangGraph.
             if next_phase and sm.get_current_phase().type == "AUTO":
                 proj = _proj()
+
+                # Attempt LangGraph resume first
+                langgraph_result = _try_langgraph_resume(proj, sm, yaml_path, req.decision)
+                if langgraph_result is not None:
+                    return langgraph_result
+
+                # Fall back to legacy DataMindAgent
                 agent = proj.create_agent()
                 result = agent.run(sm)
                 if isinstance(result, AgentError):
@@ -225,4 +259,148 @@ def create_app(project_root: str) -> FastAPI:
         proj = _proj()
         return proj.usage_tracker.export()
 
+    # ------------------------------------------------------------------
+    # v3 endpoints — WebSocket, upload
+    # ------------------------------------------------------------------
+
+    @app.websocket("/ws")
+    async def websocket_endpoint(
+        websocket: WebSocket,
+        session_id: str = Query("global"),
+    ):
+        manager = app.state.ws_manager
+        await manager.connect(websocket, session_id)
+        try:
+            while True:
+                await websocket.receive_text()
+        except WebSocketDisconnect:
+            manager.disconnect(websocket, session_id)
+
+    @app.post("/upload")
+    async def upload_file(file: UploadFile = FastAPIFile(...)):
+        proj = _proj()
+        upload_dir = Path(project_root) / "uploads"
+        upload_dir.mkdir(parents=True, exist_ok=True)
+
+        # I1: Read up to MAX_UPLOAD_SIZE + 1 to detect oversized uploads
+        content = await file.read()
+        if len(content) > MAX_UPLOAD_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds maximum upload size of {MAX_UPLOAD_SIZE} bytes",
+            )
+
+        # C1: Use Path(...).name to strip directory traversal components
+        filename = Path(file.filename or "untitled").name
+        file_path = upload_dir / filename
+
+        with open(file_path, "wb") as f:
+            f.write(content)
+
+        # Try to register as a dataset in the lineage graph
+        try:
+            proj.lineage.register_dataset(str(file_path))
+        except Exception:
+            _log.debug("Failed to register uploaded file as dataset", exc_info=True)
+
+        # Broadcast lineage update to all WebSocket clients
+        manager = app.state.ws_manager
+        await manager.broadcast_to_all("lineage_update", {
+            "filename": filename,
+            "path": str(file_path),
+            "size": len(content),
+        })
+
+        return {
+            "filename": filename,
+            "path": str(file_path),
+            "size": len(content),
+        }
+
+    # -- Static file serving for production Vue build --
+    web_ui_dist = Path(project_root) / "web-ui" / "dist"
+    if web_ui_dist.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(web_ui_dist / "assets")), name="assets")
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def serve_spa(full_path: str = ""):
+            """Serve Vue SPA index.html for any non-API route."""
+            index_path = web_ui_dist / "index.html"
+            if index_path.is_file():
+                return FileResponse(str(index_path))
+            return {"detail": "SPA not found"}
+
     return app
+
+
+# ===========================================================================
+# Helpers
+# ===========================================================================
+
+
+def _try_langgraph_resume(proj, sm, yaml_path: str, decision: dict) -> dict | None:
+    """Attempt to resume LangGraph agent from checkpoint.
+
+    Returns an API response dict on success, or ``None`` if no checkpoint
+    exists for this session (caller should fall back to DataMindAgent).
+    """
+    try:
+        from datamind.engine.langgraph_agent import (
+            SkillGraphBuilder, LangGraphAgent,
+            LangGraphWaitForApproval, LangGraphComplete, LangGraphError,
+        )
+
+        # Load skill definition to rebuild the graph
+        skill_def = proj.skills.load_skill(sm.state.skill)
+
+        # Build graph with checkpoint support
+        from langgraph.checkpoint.sqlite import SqliteSaver
+        checkpoints_path = str(proj.paths.get("checkpoints_db", ""))
+        if not checkpoints_path or not os.path.exists(checkpoints_path):
+            return None
+
+        checkpointer = SqliteSaver.from_conn_string(checkpoints_path)
+        builder = SkillGraphBuilder(skill_def)
+        agent = LangGraphAgent(
+            graph_builder=builder,
+            skill_yaml_path=yaml_path,
+            checkpointer=checkpointer,
+        )
+
+        # C2: Isolate checkpoint namespace per session
+        agent.config["configurable"]["thread_id"] = sm.state.session
+
+        # Resume from checkpoint using session_id as thread_id
+        result = agent.resume(decision)
+
+        # Convert LangGraphEvent to API response dict
+        if isinstance(result, LangGraphWaitForApproval):
+            return {
+                "phase": result.phase_id,
+                "result": sm.state.result,
+                "gate": {
+                    "phase_id": result.phase_id,
+                    "phase_name": result.phase_name,
+                    "context": result.interrupt_value.get("description", "awaiting decision"),
+                },
+            }
+        if isinstance(result, LangGraphComplete):
+            return {
+                "phase": "",
+                "result": result.state.get("result", "pass"),
+            }
+        if isinstance(result, LangGraphError):
+            return {
+                "phase": sm.state.phase,
+                "result": sm.state.result,
+                "error": result.error_message,
+            }
+
+        return {"phase": sm.state.phase, "result": sm.state.result}
+
+    except FileNotFoundError:
+        _log.debug("Skill not found for LangGraph resume", exc_info=True)
+        return None
+    except Exception:
+        _log.debug("LangGraph resume failed, falling back to DataMindAgent", exc_info=True)
+        return None

@@ -18,15 +18,26 @@ _log = logging.getLogger(__name__)
 
 
 def _create_llm_client(config: dict):
-    """Create an LLM client (OpenAI or Ollama) from a config dict."""
+    """Create an LLM client (OpenAI, Ollama, or DeepSeek) from a config dict."""
     provider = config.get("provider", "openai")
-    model = config.get("model", "gpt-4o")
+    model = config.get("model")
     api_key = config.get("api_key") or ""
-    api_base = config.get("api_base", "https://api.openai.com/v1")
     max_retries = config.get("max_retries", 3)
 
     if provider == "ollama":
+        api_base = config.get("api_base", "http://localhost:11434/v1")
+        if model is None:
+            model = "llama3"
         return OllamaClient(model=model, api_url=api_base)
+
+    if provider == "deepseek":
+        api_base = config.get("api_base", "https://api.deepseek.com/v1")
+        if model is None:
+            model = "deepseek-v4-flash"
+    else:
+        api_base = config.get("api_base", "https://api.openai.com/v1")
+        if model is None:
+            model = "gpt-4o"
 
     return OpenAIClient(
         api_key=api_key,
@@ -92,6 +103,7 @@ class Project:
 
     def create_agent(self) -> "DataMindAgent":
         from datamind.engine.agent import DataMindAgent
+        from datamind.engine.tools import create_default_registry
         return DataMindAgent(
             llm_client=self.llm_client,
             prompt_manager=self.prompt_manager,
@@ -99,4 +111,5 @@ class Project:
             lineage_service=self.lineage,
             cognition_service=self.cognition,
             assembly_service=self.assembly,
+            tool_registry=create_default_registry(),
         )
