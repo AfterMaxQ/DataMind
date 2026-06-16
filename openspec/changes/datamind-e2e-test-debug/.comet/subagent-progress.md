@@ -50,7 +50,13 @@
 - 7 tests: connect, reload-reconnect, UI-interaction, sidebar datasets/skills, message reception, connection close
 - Uses page.routeWebSocket() for advanced WS interception tests
 
+### Task 10 — Playwright E2E SSE Streaming Tests (streaming.spec.ts) ✅
+- Commit: 4f94ade | Spec: ✅ | Code: ✅ Approved
+- 3 tests: SSE token rendering (needs API key), /skill command, stream-complete lifecycle
+- Adapted selectors: .assistant-bubble→.ai-bubble, .send-btn→.stop-btn state check
+- Added page.route() bridge for /api/chat/stream prefix mismatch
+
 ## Current Task
 
-- Plan task: Task 10 — Playwright E2E SSE Streaming Tests (streaming.spec.ts)
+- Plan task: Task 11 — Playwright E2E File Upload Tests (file-upload.spec.ts)
 - Stage: dispatching

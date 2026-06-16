@@ -27,7 +27,7 @@
 ## 5. Playwright E2E — 核心交互
 
 - [x] 5.1 编写 `websocket.spec.ts`：WebSocket 连接建立、消息接收、断线重连、UI 状态同步
-- [ ] 5.2 编写 `streaming.spec.ts`：SSE 流式对话 token-by-token 渲染、`/skill` 命令高亮、流完成后状态重置
+- [x] 5.2 编写 `streaming.spec.ts`：SSE 流式对话 token-by-token 渲染、`/skill` 命令高亮、流完成后状态重置
 - [ ] 5.3 扩展 `app.spec.ts`：验证三栏联动（选数据集 → 聊天引用 → 上下文更新）
 
 ## 6. Playwright E2E — 业务流程
