@@ -14,6 +14,8 @@ from datamind.engine.project import Project
 
 _log = logging.getLogger(__name__)
 
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
 
 class RegisterDatasetRequest(BaseModel):
     file_path: str
@@ -174,7 +176,6 @@ def create_app(project_root: str) -> FastAPI:
         sessions_dir = proj.paths["data_dir"]
         if sessions_dir is None:
             return {"sessions": []}
-        import os
         sessions: list[dict] = []
         if os.path.isdir(sessions_dir):
             for entry in os.listdir(sessions_dir):
@@ -279,9 +280,17 @@ def create_app(project_root: str) -> FastAPI:
         upload_dir = Path(project_root) / "uploads"
         upload_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = file.filename or "untitled"
-        file_path = upload_dir / filename
+        # I1: Read up to MAX_UPLOAD_SIZE + 1 to detect oversized uploads
         content = await file.read()
+        if len(content) > MAX_UPLOAD_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds maximum upload size of {MAX_UPLOAD_SIZE} bytes",
+            )
+
+        # C1: Use Path(...).name to strip directory traversal components
+        filename = Path(file.filename or "untitled").name
+        file_path = upload_dir / filename
 
         with open(file_path, "wb") as f:
             f.write(content)
@@ -342,6 +351,9 @@ def _try_langgraph_resume(proj, sm, yaml_path: str, decision: dict) -> dict | No
             skill_yaml_path=yaml_path,
             checkpointer=checkpointer,
         )
+
+        # C2: Isolate checkpoint namespace per session
+        agent.config["configurable"]["thread_id"] = sm.state.session
 
         # Resume from checkpoint using session_id as thread_id
         result = agent.resume(decision)

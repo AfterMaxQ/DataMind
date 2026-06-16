@@ -529,7 +529,7 @@ class LangGraphAgent:
         checkpointer: Optional LangGraph checkpointer (e.g.
             :class:`~langgraph.checkpoint.sqlite.SqliteSaver`). When
             provided, it is passed to :meth:`SkillGraphBuilder.build`.
-        on_event: Optional async callable ``(event_type, data)`` invoked
+        on_event: Optional sync callable ``(event_type, data)`` invoked
             on every phase transition for WebSocket broadcast.
         on_phase_transition: Deprecated alias for *on_event*.
     """

@@ -249,6 +249,42 @@ class TestUploadEndpoint:
             except Exception:
                 pass  # Timing-dependent, don't fail the test
 
+    def test_upload_prevents_path_traversal_on_filename(self, api_client, tmp_project):
+        """C1: Path traversal via filename like '../../../etc/passwd' is blocked.
+
+        Path(filename).name strips all directory components, so only the
+        basename is used. The file must be saved inside upload_dir.
+        """
+        csv_content = b"data\n1\n2\n"
+        resp = api_client.post(
+            "/upload",
+            files={"file": ("../../../etc/passwd", BytesIO(csv_content), "text/csv")},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        # The filename must be the basename only, not the traversal path
+        assert data["filename"] == "passwd", (
+            f"Expected 'passwd' (basename only), got {data['filename']!r}"
+        )
+        # The file must be saved inside the uploads directory
+        saved_path = Path(data["path"])
+        upload_dir = Path(tmp_project) / "uploads"
+        assert upload_dir in saved_path.parents or saved_path.parent == upload_dir, (
+            f"File saved outside upload_dir: {saved_path}"
+        )
+
+    def test_upload_large_file_is_rejected(self, api_client):
+        """I1: Uploads exceeding MAX_UPLOAD_SIZE should be rejected."""
+        from datamind.api.app import MAX_UPLOAD_SIZE
+        big_content = b"x" * (MAX_UPLOAD_SIZE + 1)
+        resp = api_client.post(
+            "/upload",
+            files={"file": ("big.csv", BytesIO(big_content), "text/csv")},
+        )
+        assert resp.status_code == 413, (
+            f"Expected 413 for oversized upload, got {resp.status_code}"
+        )
+
 
 # ===========================================================================
 # Gate approval endpoint tests

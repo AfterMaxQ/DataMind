@@ -22,7 +22,8 @@ class ConnectionManager:
     - ``lineage_update`` — a dataset or script node was added/changed.
     - ``decision_update`` — a new decision was recorded.
     - ``phase_transition`` — a skill phase changed state.
-    - ``token_stream`` — LLM tokens are arriving in real time.
+    - ``token_stream`` — reserved for future WebSocket-based streaming
+      (currently handled via SSE ``/chat/stream`` endpoint).
     """
 
     def __init__(self):
