@@ -116,8 +116,9 @@ test.describe('File Upload', () => {
       mimeType: 'text/plain',
       buffer: Buffer.from('this is not a valid data file'),
     })
-    await page.waitForTimeout(3_000)
-    // Page should still be functional after attempted invalid upload
-    await expect(page.locator('.app-title')).toBeVisible()
+    // Verify the upload error UI appears with the error detail from the API
+    const errorEl = page.locator('.upload-error')
+    await expect(errorEl).toBeVisible({ timeout: 10_000 })
+    await expect(errorEl).toContainText('Unsupported file format: .txt')
   })
 })
