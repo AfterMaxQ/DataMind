@@ -27,10 +27,9 @@ export default defineConfig({
     env: {
       DATAMIND_PROVIDER: 'deepseek',
       DATAMIND_MODEL: 'deepseek-v4-flash',
-      DATAMIND_API_KEY: process.env.DATAMIND_API_KEY,
-      DATAMIND_API_BASE: 'https://api.deepseek.com',
-      DATAMIND_LOG_LEVEL: 'INFO',
+      DATAMIND_API_KEY: process.env.DEEPSEEK_API_KEY,
+      DATAMIND_API_BASE: 'https://api.deepseek.com'
     },
-    cwd: '.',
+    cwd: '..',
   },
 })
