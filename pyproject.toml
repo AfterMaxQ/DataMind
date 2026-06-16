@@ -18,6 +18,8 @@ dependencies = [
     "httpx>=0.25",
     "openai>=1.0",
     "sse-starlette>=1.8",
+    "langgraph==1.2.5",
+    "langgraph-checkpoint-sqlite",
 ]
 
 [project.optional-dependencies]
