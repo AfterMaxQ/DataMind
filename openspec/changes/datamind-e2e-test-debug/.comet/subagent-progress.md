@@ -10,9 +10,14 @@
 - Spec review: ✅ Passed (exact plan match)
 - Code quality review: ✅ Passed (Ready to merge)
 
+### Task 2.1 — Write the JsonFormatter test (RED phase) ✅
+- Commit: 4f8f713
+- Spec review: ✅ Passed (exact plan match, all 3 tests present)
+- Code quality review: ✅ Passed (Ready to merge, minor hygiene notes deferred to GREEN)
+
 ## Current Task
 
-- Plan task: Task 2.1 — Write the JsonFormatter test
-- OpenSpec task: 2.1 (JsonFormatter TDD — failing test first)
+- Plan task: Task 2.2 — Implement datamind/logging_setup.py (GREEN phase)
+- OpenSpec task: 2.1 (JsonFormatter implementation)
 - Stage: implementing
 - Round: 1/3
