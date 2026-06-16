@@ -66,21 +66,21 @@
 
 ## 8. Web UI — Vue 3 SPA
 
-- [ ] 8.1 Scaffold `web-ui/` project with Vite + Vue 3 + TypeScript + Pinia
-- [ ] 8.2 Implement three-panel layout (`App.vue` with `DataSidebar`, `ChatPanel`, `ContextPanel`)
-- [ ] 8.3 Implement Dark mode toggle with persisted preference (Pinia store + CSS variables)
-- [ ] 8.4 Implement `DataSidebar.vue`: dataset listing with raw/processed grouping, drag-drop upload zone
-- [ ] 8.5 Implement `ChatPanel.vue`: message display, input box, `/skill` command parsing, SSE token streaming
-- [ ] 8.6 Implement `CodeBlock.vue`: syntax-highlighted code display with "View in Scripts" link
-- [ ] 8.7 Implement `GateApproval.vue`: interactive Approve/Reject buttons embedded in chat
-- [ ] 8.8 Implement `ContextPanel.vue`: lineage graph, decisions list, parameters display
-- [ ] 8.9 Implement `LineageGraph.vue`: D3.js or Cytoscape.js lineage graph visualization with real-time updates
-- [ ] 8.10 Implement `useWebSocket.ts` composable for WebSocket connection lifecycle
-- [ ] 8.11 Implement `useChat.ts` composable for chat state and SSE streaming
-- [ ] 8.12 Implement Pinia `session` store for global state management
-- [ ] 8.13 Configure Vite dev server proxy to FastAPI backend
-- [ ] 8.14 Configure FastAPI to serve built Vue static files in production
-- [ ] 8.15 Write E2E test: full flow — upload CSV → invoke /skill data-cleaning → approve gate → see lineage update
+- [x] 8.1 Scaffold `web-ui/` project with Vite + Vue 3 + TypeScript + Pinia
+- [x] 8.2 Implement three-panel layout (`App.vue` with `DataSidebar`, `ChatPanel`, `ContextPanel`)
+- [x] 8.3 Implement Dark mode toggle with persisted preference (Pinia store + CSS variables)
+- [x] 8.4 Implement `DataSidebar.vue`: dataset listing with raw/processed grouping, drag-drop upload zone
+- [x] 8.5 Implement `ChatPanel.vue`: message display, input box, `/skill` command parsing, SSE token streaming
+- [x] 8.6 Implement `CodeBlock.vue`: syntax-highlighted code display with "View in Scripts" link
+- [x] 8.7 Implement `GateApproval.vue`: interactive Approve/Reject buttons embedded in chat
+- [x] 8.8 Implement `ContextPanel.vue`: lineage graph, decisions list, parameters display
+- [x] 8.9 Implement `LineageGraph.vue`: D3.js or Cytoscape.js lineage graph visualization with real-time updates
+- [x] 8.10 Implement `useWebSocket.ts` composable for WebSocket connection lifecycle
+- [x] 8.11 Implement `useChat.ts` composable for chat state and SSE streaming
+- [x] 8.12 Implement Pinia `session` store for global state management
+- [x] 8.13 Configure Vite dev server proxy to FastAPI backend
+- [x] 8.14 Configure FastAPI to serve built Vue static files in production
+- [x] 8.15 Write E2E test: full flow — upload CSV → invoke /skill data-cleaning → approve gate → see lineage update
 
 ## 9. Final Integration and Verification
 
