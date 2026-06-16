@@ -1,3 +1,7 @@
+---
+skill: requirement-discussion
+version: 2
+---
 # Requirement Discussion
 
 **Purpose:** Facilitate structured discussion to clarify project requirements, success criteria, and scope before starting data work.

@@ -234,7 +234,7 @@ class SkillGraphBuilder:
             current = self.phases[i]
             next_phase = self.phases[i + 1]
             if current.type == "GATE":
-                routing_key = f"gate-{i}"
+                routing_key = f"gate-{i + 1}"
                 route_info = routing.get(routing_key, {})
                 reject_target = route_info.get("reject", END)
                 builder.add_conditional_edges(

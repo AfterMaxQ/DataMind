@@ -245,7 +245,7 @@ class TestSkillGraphBuilder:
 
         frontmatter = {
             "routing": {
-                "gate-1": {"reject": "analyze"}
+                "gate-2": {"reject": "analyze"}
             }
         }
         skill_def = MockSkillDef(phases=AUTO_GATE_PHASES, frontmatter=frontmatter)

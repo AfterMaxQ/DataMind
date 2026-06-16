@@ -1,3 +1,11 @@
+---
+skill: feature-engineering
+version: 2
+routing:
+  gate-3: { approve: execute, reject: select-features }
+tools:
+  phase-1: [read_csv, read_parquet, describe_dataset]
+---
 # Feature Engineering
 
 **Purpose:** Create and select features from a cleaned dataset for model training.

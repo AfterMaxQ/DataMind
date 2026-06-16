@@ -22,6 +22,7 @@ class SkillDefinition:
     steps: list[SkillStep] = field(default_factory=list)
     phases: list[SkillPhase] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+    frontmatter: dict = field(default_factory=dict)
 
 
 class SkillParser:
@@ -35,6 +36,20 @@ class SkillParser:
 
     def parse(self, content: str) -> SkillDefinition:
         skill = SkillDefinition()
+
+        # Parse YAML frontmatter if present
+        frontmatter = {}
+        if content.startswith("---"):
+            parts = content.split("---", 2)
+            if len(parts) >= 3:
+                try:
+                    import yaml
+                    frontmatter = yaml.safe_load(parts[1]) or {}
+                except Exception:
+                    frontmatter = {}
+                content = parts[2]  # Use only the markdown portion
+
+        skill.frontmatter = frontmatter
 
         name_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
         if name_match:

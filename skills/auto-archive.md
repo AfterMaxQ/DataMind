@@ -1,3 +1,7 @@
+---
+skill: auto-archive
+version: 2
+---
 # Auto Archive
 
 **Purpose:** Automatically organize and archive completed skill session outputs for long-term traceability.

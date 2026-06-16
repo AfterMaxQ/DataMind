@@ -1,3 +1,13 @@
+---
+skill: data-cleaning
+version: 2
+routing:
+  gate-3: { approve: execute, reject: propose-strategy }
+  gate-6: { approve: archive, reject: execute }
+tools:
+  phase-1: [read_csv, read_parquet, read_excel, describe_dataset]
+  phase-4: [generate_script, execute_script]
+---
 # Data Cleaning
 
 **Purpose:** Clean raw data files by detecting and fixing common issues: missing values, outliers, type mismatches, duplicates.
