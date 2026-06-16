@@ -114,6 +114,7 @@ def initialize_project(project_root: str | Path, config: dict | None = None) -> 
 # ---------------------------------------------------------------------------
 
 LLM_DEFAULT_MODEL = "gpt-4o"
+DEEPSEEK_DEFAULT_MODEL = "deepseek-v4-flash"
 LLM_DEFAULT_PROVIDER = "openai"
 LLM_MAX_RETRIES = 3
 LLM_DEFAULT_TIMEOUT = 60
@@ -220,15 +221,17 @@ def load_llm_config(config_path: str) -> dict:
         except ValueError:
             pass
 
-    # Determine provider-specific api_base default
+    # Determine provider-specific defaults
     provider = config.get("provider", LLM_DEFAULT_PROVIDER)
     if provider == "deepseek":
         default_api_base = DEEPSEEK_DEFAULT_API_BASE
+        default_model = DEEPSEEK_DEFAULT_MODEL
     else:
         default_api_base = LLM_DEFAULT_API_BASE
+        default_model = LLM_DEFAULT_MODEL
 
     # Fill in defaults for missing keys
-    config.setdefault("model", LLM_DEFAULT_MODEL)
+    config.setdefault("model", default_model)
     config.setdefault("provider", LLM_DEFAULT_PROVIDER)
     config.setdefault("api_key", None)
     config.setdefault("api_base", default_api_base)
