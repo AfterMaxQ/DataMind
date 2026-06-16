@@ -347,6 +347,13 @@ def create_app(project_root: str) -> FastAPI:
             "size": len(content),
         }
 
+    # -- Debug endpoints (D3, D8) --
+    # Must be registered BEFORE the SPA catch-all so /debug/* routes
+    # are matched by the router, not served as index.html.
+    if not os.environ.get("DATAMIND_DEBUG_DISABLE"):
+        from datamind.api.debug import debug_router
+        app.include_router(debug_router)
+
     # -- Static file serving for production Vue build --
     web_ui_dist = Path(project_root) / "web-ui" / "dist"
     if web_ui_dist.is_dir():
@@ -359,11 +366,6 @@ def create_app(project_root: str) -> FastAPI:
             if index_path.is_file():
                 return FileResponse(str(index_path))
             return {"detail": "SPA not found"}
-
-    # -- Debug endpoints (D3, D8) --
-    if not os.environ.get("DATAMIND_DEBUG_DISABLE"):
-        from datamind.api.debug import debug_router
-        app.include_router(debug_router)
 
     return app
 
