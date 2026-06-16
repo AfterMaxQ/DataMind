@@ -6,9 +6,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  timeout: 120_000,
+  expect: { timeout: 15_000 },
+  reporter: [['html'], ['list']],
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL: 'http://127.0.0.1:9000',
     trace: 'on-first-retry',
   },
   projects: [
@@ -18,9 +20,17 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://127.0.0.1:5173',
+    command: 'python -m uvicorn serve:app --host 127.0.0.1 --port 9000',
+    url: 'http://127.0.0.1:9000/health',
     reuseExistingServer: !process.env.CI,
+    timeout: 30_000,
+    env: {
+      DATAMIND_PROVIDER: 'deepseek',
+      DATAMIND_MODEL: 'deepseek-v4-flash',
+      DATAMIND_API_KEY: process.env.DATAMIND_API_KEY,
+      DATAMIND_API_BASE: 'https://api.deepseek.com',
+      DATAMIND_LOG_LEVEL: 'INFO',
+    },
     cwd: '.',
   },
 })
