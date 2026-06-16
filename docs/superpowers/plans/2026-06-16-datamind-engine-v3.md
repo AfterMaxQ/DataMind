@@ -1,4 +1,4 @@
----
+﻿---
 change: datamind-engine-v3
 design-doc: docs/superpowers/specs/2026-06-15-datamind-engine-v3-design.md
 base-ref: dee4855333ce62712699ba7a84f05d2fac09fb25
@@ -211,13 +211,13 @@ class TestToolRegistry:
         assert definitions[0]["function"]["name"] == "test"
 ```
 
-- [ ] **Step 2.2: Run test to verify it fails**
+- [x] **Step 2.2: Run test to verify it fails**
 
 Run: `pytest tests/unit/test_tools.py::TestToolRegistry -v`
 
 Expected: FAIL with "ModuleNotFoundError: No module named 'datamind.engine.tools'"
 
-- [ ] **Step 2.3: Implement ToolRegistry class**
+- [x] **Step 2.3: Implement ToolRegistry class**
 
 ```python
 # datamind/engine/tools.py
@@ -272,13 +272,13 @@ class ToolRegistry:
         return self._tools.get(name)
 ```
 
-- [ ] **Step 2.4: Run test to verify it passes**
+- [x] **Step 2.4: Run test to verify it passes**
 
 Run: `pytest tests/unit/test_tools.py::TestToolRegistry -v`
 
 Expected: 4 tests PASS
 
-- [ ] **Step 2.5: Commit**
+- [x] **Step 2.5: Commit**
 
 ```bash
 git add datamind/engine/tools.py tests/unit/test_tools.py
@@ -287,7 +287,7 @@ git commit -m "feat: add ToolRegistry with register/get_definitions/execute"
 
 ### Task 2.2-2.7: Implement 7 Data Tools (TDD per tool)
 
-- [ ] **Step 2.6: Write failing tests for read_csv**
+- [x] **Step 2.6: Write failing tests for read_csv**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -336,13 +336,13 @@ class TestReadCsv:
             read_csv(path="/nonexistent/file.csv")
 ```
 
-- [ ] **Step 2.7: Run tests to verify they fail**
+- [x] **Step 2.7: Run tests to verify they fail**
 
 Run: `pytest tests/unit/test_tools.py::TestReadCsv -v`
 
 Expected: FAIL with "NameError: name 'read_csv' is not defined"
 
-- [ ] **Step 2.8: Implement read_csv**
+- [x] **Step 2.8: Implement read_csv**
 
 ```python
 # Append to datamind/engine/tools.py
@@ -394,13 +394,13 @@ def read_csv(path: str, nrows: int = 10) -> dict:
     }
 ```
 
-- [ ] **Step 2.9: Run tests to verify they pass**
+- [x] **Step 2.9: Run tests to verify they pass**
 
 Run: `pytest tests/unit/test_tools.py::TestReadCsv -v`
 
 Expected: 3 tests PASS
 
-- [ ] **Step 2.10-2.11: TDD read_parquet and read_excel (same pattern)**
+- [x] **Step 2.10-2.11: TDD read_parquet and read_excel (same pattern)**
 
 Write failing tests for `read_parquet` and `read_excel`, then implement:
 
@@ -497,7 +497,7 @@ Run: `pytest tests/unit/test_tools.py::TestReadParquet tests/unit/test_tools.py:
 
 Expected: 4 tests PASS
 
-- [ ] **Step 2.12: TDD describe_dataset tool**
+- [x] **Step 2.12: TDD describe_dataset tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -549,7 +549,7 @@ Run: `pytest tests/unit/test_tools.py::TestDescribeDataset -v`
 
 Expected: 1 test PASS
 
-- [ ] **Step 2.13: TDD generate_script tool**
+- [x] **Step 2.13: TDD generate_script tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -638,7 +638,7 @@ Run: `pytest tests/unit/test_tools.py::TestGenerateScript -v`
 
 Expected: 2 tests PASS
 
-- [ ] **Step 2.14: TDD execute_script tool**
+- [x] **Step 2.14: TDD execute_script tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -767,7 +767,7 @@ Run: `pytest tests/unit/test_tools.py::TestExecuteScript -v`
 
 Expected: 4 tests PASS
 
-- [ ] **Step 2.15: TDD list_files tool**
+- [x] **Step 2.15: TDD list_files tool**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -844,7 +844,7 @@ Run: `pytest tests/unit/test_tools.py::TestListFiles -v`
 
 Expected: 3 tests PASS
 
-- [ ] **Step 2.16: Write integration test for full ToolRegistry with all tools**
+- [x] **Step 2.16: Write integration test for full ToolRegistry with all tools**
 
 ```python
 # Append to tests/unit/test_tools.py
@@ -930,13 +930,13 @@ class TestToolRegistryIntegration:
         assert registry.get_definitions() == []
 ```
 
-- [ ] **Step 2.17: Run all tool tests**
+- [x] **Step 2.17: Run all tool tests**
 
 Run: `pytest tests/unit/test_tools.py -v`
 
 Expected: All ~18 tests PASS
 
-- [ ] **Step 2.18: Commit**
+- [x] **Step 2.18: Commit**
 
 ```bash
 git add datamind/engine/tools.py tests/unit/test_tools.py

@@ -6,15 +6,15 @@
 
 ## 2. Tool System
 
-- [ ] 2.1 Implement `ToolRegistry` class in `engine/tools.py` with `register()`, `get_definitions()`, `execute()` methods
-- [ ] 2.2 Implement `read_csv` tool with encoding auto-detect, schema inference, and sample output
-- [ ] 2.3 Implement `read_parquet` and `read_excel` tools
-- [ ] 2.4 Implement `describe_dataset` tool using existing `DescribeEngine`
-- [ ] 2.5 Implement `generate_script` tool with template rendering
-- [ ] 2.6 Implement `execute_script` tool with subprocess sandbox (timeout, output limit)
-- [ ] 2.7 Implement `list_files` tool for directory listing
-- [ ] 2.8 Write unit tests for ToolRegistry and each tool
-- [ ] 2.9 Write TDD test for ToolRegistry — verify RED then implement to GREEN
+- [x] 2.1 Implement `ToolRegistry` class in `engine/tools.py` with `register()`, `get_definitions()`, `execute()` methods
+- [x] 2.2 Implement `read_csv` tool with encoding auto-detect, schema inference, and sample output
+- [x] 2.3 Implement `read_parquet` and `read_excel` tools
+- [x] 2.4 Implement `describe_dataset` tool using existing `DescribeEngine`
+- [x] 2.5 Implement `generate_script` tool with template rendering
+- [x] 2.6 Implement `execute_script` tool with subprocess sandbox (timeout, output limit)
+- [x] 2.7 Implement `list_files` tool for directory listing
+- [x] 2.8 Write unit tests for ToolRegistry and each tool
+- [x] 2.9 Write TDD test for ToolRegistry — verify RED then implement to GREEN
 
 ## 3. LangGraph Agent Engine
 
