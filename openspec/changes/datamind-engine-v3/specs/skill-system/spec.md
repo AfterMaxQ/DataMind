@@ -1,7 +1,5 @@
 ﻿## MODIFIED Requirements
 
-## MODIFIED Requirements
-
 ### Requirement: Skill Execution Context
 The system SHALL provide skills with access to a shared execution context that includes the project`s `ToolRegistry`. Skills SHALL be able to invoke registered tools (data I/O, describe, script generation, script execution) during AUTO phases. Tool definitions SHALL be dynamically injected into LLM context for each AUTO phase.
 
@@ -16,6 +14,8 @@ The system SHALL provide skills with access to a shared execution context that i
 #### Scenario: Skill generates and executes a script
 - **WHEN** a data-cleaning skill`s "Execute" phase needs to run a cleaning script
 - **THEN** the LLM calls `generate_script` to create the script, then `execute_script` to run it in the sandbox, and captures the output
+
+## ADDED Requirements
 
 ### Requirement: Tool-Aware Phase Definitions
 The system SHALL support skill phase definitions that declare which tools are available during that phase. Tool availability SHALL be scoped per-phase: a "Generate" phase may have `generate_script` and `execute_script`, while an "Analyze" phase may have `read_csv`, `read_parquet`, and `describe_dataset`.
