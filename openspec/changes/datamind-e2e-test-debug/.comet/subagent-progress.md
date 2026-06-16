@@ -81,7 +81,27 @@
 - Commit: fix commit | `route.continue()` replaces `route.fetch()`+`route.fulfill()` for SSE streaming
 - All 3 tests pass with real DeepSeek API (5.9s)
 
-## Current Task
+### Task 15 — Documentation (testing-runbook.md + debugging-runbook.md) ✅
+- Commit: e9e92a3 | Spec: ✅ | Code: ✅
+- Files: docs/testing-runbook.md, docs/debugging-runbook.md
+- Content: testing handbook (Python + Playwright commands, CI yaml, troubleshooting table),
+  debugging decision tree (6 symptom branches, debug endpoint curl examples, local log
+  inspection bash+PowerShell, state machine + checkpoint debugging, 3 common workflows)
 
-- Plan task: Task 15 — Documentation (testing-runbook.md + debugging-runbook.md)
-- Stage: dispatching
+### Task 16 — Final Verification ✅
+- Commits: e9e92a3 (docs), ef41f98 (debug router fix)
+- Python tests: 321 passed, 0 failures
+- Playwright E2E: 35 passed (7 spec files, all with real DeepSeek API, 1.6m)
+- Debug endpoints: /debug/sessions ✅, /debug/logs ✅, /debug/state/{id} ✅
+- Debug disable guard: verified (DATAMIND_DEBUG_DISABLE=1 → routes not mounted)
+- Fix applied: moved debug_router include before SPA catch-all in app.py
+
+### Task 2.4 — Session ID injection in langgraph_agent.py ✅
+- Commit: 7e6dbe0 | Spec: ✅ | Code: ✅
+- 321 tests pass. Injects _current_session_id ContextVar in run() and resume()
+  with finally-block reset. Uses initial_state["session_id"] (run) and config
+  thread_id (resume) as session identifiers.
+
+## Build Phase Complete
+
+All 22 tasks.md items checked off. Ready for build exit guard.

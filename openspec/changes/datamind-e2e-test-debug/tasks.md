@@ -9,7 +9,7 @@
 - [x] 2.1 实现 `JsonFormatter(logging.Formatter)` 子类，输出 JSON Lines 格式日志（ts、level、module、event、session_id、data 字段）
 - [x] 2.2 修改 `datamind/__init__.py` 或 `config.py`，在应用启动时配置 root logger 使用 `JsonFormatter`
 - [x] 2.3 添加日志文件轮转（`RotatingFileHandler`，10MB/文件，保留 7 天），写入 `.datamind/logs/`
-- [ ] 2.4 在 `langgraph_agent.py` 中注入 session_id 到日志上下文（`LoggerAdapter` 或 `extra` 参数）
+- [x] 2.4 在 `langgraph_agent.py` 中注入 session_id 到日志上下文（`LoggerAdapter` 或 `extra` 参数）
 
 ## 3. 工具调用追踪
 
@@ -39,11 +39,11 @@
 
 ## 7. 流程文档
 
-- [ ] 7.1 编写测试运行手册（`docs/testing-runbook.md`）：环境准备、运行命令、结果解读、CI 集成指南
-- [ ] 7.2 编写故障排查决策树（`docs/debugging-runbook.md`）：按症状分类 → 定位方法 → 修复验证步骤
+- [x] 7.1 编写测试运行手册（`docs/testing-runbook.md`）：环境准备、运行命令、结果解读、CI 集成指南
+- [x] 7.2 编写故障排查决策树（`docs/debugging-runbook.md`）：按症状分类 → 定位方法 → 修复验证步骤
 
 ## 8. 最终验证
 
-- [ ] 8.1 全量 Python 测试通过（310 tests → pass）
-- [ ] 8.2 Playwright E2E 全部通过（使用真实 DeepSeek API）
-- [ ] 8.3 Debug 端点功能验证（curl 测试全部端点）
+- [x] 8.1 全量 Python 测试通过（321 tests → pass）
+- [x] 8.2 Playwright E2E 全部通过（35 tests, 7 spec files, 使用真实 DeepSeek API）
+- [x] 8.3 Debug 端点功能验证（curl 测试全部端点通过，SPA 路由修复）
