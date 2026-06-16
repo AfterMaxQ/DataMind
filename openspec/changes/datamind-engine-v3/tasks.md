@@ -84,8 +84,8 @@
 
 ## 9. Final Integration and Verification
 
-- [ ] 9.1 Run full test suite (unit + integration + e2e), ensure all 185+ tests pass
-- [ ] 9.2 Run `comet-state check datamind-engine-v3 build` to verify state before guard transition
-- [ ] 9.3 Verify all 6 spec files exist and are non-empty
-- [ ] 9.4 Confirm DeepSeek V4 Flash integration passes the dedicated test
-- [ ] 9.5 Confirm Web UI builds and serves correctly from FastAPI
+- [x] 9.1 Run full test suite (unit + integration + e2e), ensure all 185+ tests pass
+- [x] 9.2 Run `comet-state check datamind-engine-v3 build` to verify state before guard transition
+- [x] 9.3 Verify all 6 spec files exist and are non-empty
+- [x] 9.4 Confirm DeepSeek V4 Flash integration passes the dedicated test
+- [x] 9.5 Confirm Web UI builds and serves correctly from FastAPI
