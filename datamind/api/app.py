@@ -195,14 +195,29 @@ def create_app(project_root: str) -> FastAPI:
         return {"sessions": sessions}
 
     @app.post("/skill/gate")
-    def gate_decision(req: GateDecisionRequest):
+    async def gate_decision(req: GateDecisionRequest):
         try:
             from datamind.engine.skill_state import SkillStateMachine
             from datamind.engine.agent import DataMindAgent, WaitForApproval, SkillComplete, AgentError
 
             yaml_path = req.session_dir + "/.skill.yaml" if not req.session_dir.endswith(".skill.yaml") else req.session_dir
             sm = SkillStateMachine.load(yaml_path)
-            next_phase = sm.approve_gate(sm.state.phase, req.decision)
+
+            # Capture the phase being approved *before* the transition,
+            # because approve_gate mutates sm.state.phase.
+            approved_phase = sm.state.phase
+            next_phase = sm.approve_gate(approved_phase, req.decision)
+
+            # Broadcast decision update to all WebSocket clients
+            manager = app.state.ws_manager
+            await manager.broadcast_to_all("decision_update", {
+                "approved": req.decision.get("approved", False),
+                "phase": approved_phase,
+                "next_phase": next_phase,
+                "session": sm.state.session,
+                "skill": sm.state.skill,
+                "comment": req.decision.get("comment", ""),
+            })
 
             # If the next phase is AUTO, resume agent execution through it.
             # Prefer LangGraph resume when checkpoints exist; fall back to

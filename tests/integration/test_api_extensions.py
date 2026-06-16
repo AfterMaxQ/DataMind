@@ -428,6 +428,50 @@ class TestGateApprovalEndpoint:
             mock_instance.resume.assert_called_once()
 
 
+    def test_gate_decision_broadcasts_decision_update(self, api_client, tmp_project):
+        """POST /skill/gate should broadcast decision_update via WebSocket manager."""
+        from datamind.engine.skill_state import (
+            SkillPhase, SkillStateMachine,
+        )
+
+        phases = [
+            SkillPhase(id="gate-review", name="Gate Review", type="GATE"),
+            SkillPhase(id="gate-final", name="Gate Final", type="GATE"),
+        ]
+
+        from datamind.config import initialize_project
+        initialize_project(tmp_project)
+        sessions_dir = str(tmp_project / "data")
+        Path(sessions_dir).mkdir(parents=True, exist_ok=True)
+        sm = SkillStateMachine.create_session(
+            "test-skill", "target.csv", phases, sessions_dir
+        )
+
+        session_subdir = str(Path(sessions_dir) / sm.state.session)
+        yaml_path = session_subdir + "/.skill.yaml"
+
+        from datamind.api.app import create_app
+        app = create_app(str(tmp_project))
+        client = TestClient(app)
+
+        with mock.patch.object(
+            app.state.ws_manager, "broadcast_to_all", new_callable=mock.AsyncMock
+        ) as mock_broadcast:
+            resp = client.post("/skill/gate", json={
+                "session_dir": yaml_path,
+                "decision": {"approved": True, "comment": "Looks good"},
+            })
+            assert resp.status_code == 200
+
+            # Verify decision_update was broadcast
+            mock_broadcast.assert_called_once()
+            call_args, _call_kwargs = mock_broadcast.call_args
+            assert call_args[0] == "decision_update"
+            assert call_args[1]["approved"] is True
+            assert call_args[1]["comment"] == "Looks good"
+            assert call_args[1]["phase"] == "gate-review"
+
+
 # ===========================================================================
 # LangGraphAgent phase transition broadcast tests
 # ===========================================================================
