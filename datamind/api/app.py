@@ -42,6 +42,21 @@ def create_app(project_root: str) -> FastAPI:
     app = FastAPI(title="DataMind Studio API", version="0.1.0")
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+    # -- Session context middleware (D6) --
+    from datamind.session_context import _current_session_id
+
+    @app.middleware("http")
+    async def session_context_middleware(request, call_next):
+        """Set session_id in contextvars for the duration of this request."""
+        import uuid
+        sid = request.headers.get("X-Session-ID") or str(uuid.uuid4())
+        token = _current_session_id.set(sid)
+        try:
+            response = await call_next(request)
+            return response
+        finally:
+            _current_session_id.reset(token)
+
     # Singleton Project instance — cached on app.state so mutations
     # (e.g. model switch) persist across requests.
     app.state.project = Project(project_root)
