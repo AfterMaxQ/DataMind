@@ -27,7 +27,8 @@ class JsonFormatter(logging.Formatter):
     """
 
     def format(self, record: logging.LogRecord) -> str:
-        ts = self.formatTime(record, datefmt="%Y-%m-%dT%H:%M:%S.000Z")
+        from datetime import datetime, timezone
+        ts = datetime.fromtimestamp(record.created, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
         data = getattr(record, "data", {})
         if not isinstance(data, dict):
             data = {"value": str(data)}
@@ -79,7 +80,9 @@ def setup_logging(
     root.setLevel(getattr(logging, level, logging.INFO))
 
     # Clear existing handlers to avoid duplicates on reload
-    root.handlers.clear()
+    for handler in list(root.handlers):
+        root.removeHandler(handler)
+        handler.close()
 
     # -- Stdout: human-readable --
     stdout_handler = logging.StreamHandler(sys.stdout)
@@ -93,7 +96,7 @@ def setup_logging(
 
     # -- File: JSON Lines --
     if log_dir is None:
-        log_dir = os.path.join(os.getcwd(), ".datamind", "logs")
+        log_dir = str(Path(__file__).resolve().parent.parent / ".datamind" / "logs")
     Path(log_dir).mkdir(parents=True, exist_ok=True)
 
     file_handler = logging.handlers.TimedRotatingFileHandler(
