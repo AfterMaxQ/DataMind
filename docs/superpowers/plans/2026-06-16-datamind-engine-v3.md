@@ -2217,7 +2217,7 @@ Note: The key changes from the original `agent.py`:
 2. `_get_tool_defs()` delegates to `ToolRegistry.get_definitions()` instead of returning `[]`
 3. `_execute_tools()` delegates to `ToolRegistry.execute()` with JSON arg parsing
 
-- [ ] **Step 4.3: Update Project.create_agent() to pass ToolRegistry**
+- [x] **Step 4.3: Update Project.create_agent() to pass ToolRegistry**
 
 ```python
 # In datamind/engine/project.py, modify create_agent():
@@ -2347,19 +2347,19 @@ Note: The key changes from the original `agent.py`:
         )
 ```
 
-- [ ] **Step 4.4: Verify all existing agent tests still pass**
+- [x] **Step 4.4: Verify all existing agent tests still pass**
 
 Run: `pytest tests/integration/test_agent.py tests/e2e/test_full_skill_execution.py tests/e2e/test_interrupt_resume.py -v`
 
 Expected: All ~20 tests PASS. The thin wrapper preserves the full public API.
 
-- [ ] **Step 4.5: Run full test suite**
+- [x] **Step 4.5: Run full test suite**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: 185+ tests PASS (all original + new tool + LangGraph tests)
 
-- [ ] **Step 4.6: Commit**
+- [x] **Step 4.6: Commit**
 
 ```bash
 git add datamind/engine/agent.py datamind/engine/project.py

@@ -33,10 +33,10 @@
 
 ## 4. Agent Wrapper Migration
 
-- [ ] 4.1 Rewrite `DataMindAgent` in `engine/agent.py` as thin wrapper delegating to `LangGraphAgent`
-- [ ] 4.2 Preserve `run()`, `approve_gate()`, `AgentResponse`, `WaitForApproval`, `AgentError`, `SkillComplete` public API
-- [ ] 4.3 Remove `_get_tool_defs()` and old `_tool_executor`; replace with `ToolRegistry` delegation
-- [ ] 4.4 Verify all existing agent tests pass through the wrapper
+- [x] 4.1 Rewrite `DataMindAgent` in `engine/agent.py` as thin wrapper delegating to `LangGraphAgent`
+- [x] 4.2 Preserve `run()`, `approve_gate()`, `AgentResponse`, `WaitForApproval`, `AgentError`, `SkillComplete` public API
+- [x] 4.3 Remove `_get_tool_defs()` and old `_tool_executor`; replace with `ToolRegistry` delegation
+- [x] 4.4 Verify all existing agent tests pass through the wrapper
 
 ## 5. Skill Migration to LangGraph
 
