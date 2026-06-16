@@ -360,6 +360,11 @@ def create_app(project_root: str) -> FastAPI:
                 return FileResponse(str(index_path))
             return {"detail": "SPA not found"}
 
+    # -- Debug endpoints (D3, D8) --
+    if not os.environ.get("DATAMIND_DEBUG_DISABLE"):
+        from datamind.api.debug import debug_router
+        app.include_router(debug_router)
+
     return app
 
 
