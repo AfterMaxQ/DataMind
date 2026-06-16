@@ -67,7 +67,13 @@
 - Uses page.evaluate() Pinia injection due to missing SSE gate-event path (documented)
 - Selectors: .gate-btn.approve/.reject, .gate-decided.approved/.rejected
 
+### Task 13 — Playwright E2E Skill Pipeline Full Flow (skill-pipeline.spec.ts) ✅
+- Commit: initial + comment fix | Spec: ✅ (scope limited to data-exploration, API key unavailable) | Code: ✅ Pass
+- 3 tests: upload→skill→gate→result, context preservation, completion summary
+- Mock SSE stream (self-contained), Pinia gate injection, comprehensive API mocking
+- Note: Plan template covers only data-exploration; full 4-skill chain limited by API key
+
 ## Current Task
 
-- Plan task: Task 13 — Playwright E2E Skill Pipeline Full Flow (skill-pipeline.spec.ts)
+- Plan task: Task 14 — Playwright E2E Error Scenario Tests (error-scenarios.spec.ts)
 - Stage: dispatching
