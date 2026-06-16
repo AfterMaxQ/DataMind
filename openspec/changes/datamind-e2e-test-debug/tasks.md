@@ -6,23 +6,23 @@
 
 ## 2. 结构化日志系统
 
-- [ ] 2.1 实现 `JsonFormatter(logging.Formatter)` 子类，输出 JSON Lines 格式日志（ts、level、module、event、session_id、data 字段）
-- [ ] 2.2 修改 `datamind/__init__.py` 或 `config.py`，在应用启动时配置 root logger 使用 `JsonFormatter`
-- [ ] 2.3 添加日志文件轮转（`RotatingFileHandler`，10MB/文件，保留 7 天），写入 `.datamind/logs/`
+- [x] 2.1 实现 `JsonFormatter(logging.Formatter)` 子类，输出 JSON Lines 格式日志（ts、level、module、event、session_id、data 字段）
+- [x] 2.2 修改 `datamind/__init__.py` 或 `config.py`，在应用启动时配置 root logger 使用 `JsonFormatter`
+- [x] 2.3 添加日志文件轮转（`RotatingFileHandler`，10MB/文件，保留 7 天），写入 `.datamind/logs/`
 - [ ] 2.4 在 `langgraph_agent.py` 中注入 session_id 到日志上下文（`LoggerAdapter` 或 `extra` 参数）
 
 ## 3. 工具调用追踪
 
-- [ ] 3.1 修改 `ToolRegistry.execute()`，在每次调用前后记录 `tool_call` 事件日志（工具名、参数、耗时、状态）
-- [ ] 3.2 编写工具追踪单元测试（成功/失败/超时三种场景）
+- [x] 3.1 修改 `ToolRegistry.execute()`，在每次调用前后记录 `tool_call` 事件日志（工具名、参数、耗时、状态）
+- [x] 3.2 编写工具追踪单元测试（成功/失败/超时三种场景）
 
 ## 4. Debug 端点
 
-- [ ] 4.1 实现 `GET /debug/state/{session_id}` 端点，返回 session 完整运行时状态
-- [ ] 4.2 实现 `GET /debug/sessions` 端点，返回活跃 session 摘要列表
-- [ ] 4.3 实现 `GET /debug/logs` 端点，支持 `?session_id=&level=&limit=` 查询过滤
-- [ ] 4.4 实现 Debug Guard：通过 `DATAMIND_DEBUG_DISABLE` 环境变量控制 `/debug/*` 可用性
-- [ ] 4.5 编写 Debug 端点单元测试（正常返回、404、禁用后返回 404）
+- [x] 4.1 实现 `GET /debug/state/{session_id}` 端点，返回 session 完整运行时状态
+- [x] 4.2 实现 `GET /debug/sessions` 端点，返回活跃 session 摘要列表
+- [x] 4.3 实现 `GET /debug/logs` 端点，支持 `?session_id=&level=&limit=` 查询过滤
+- [x] 4.4 实现 Debug Guard：通过 `DATAMIND_DEBUG_DISABLE` 环境变量控制 `/debug/*` 可用性
+- [x] 4.5 编写 Debug 端点单元测试（正常返回、404、禁用后返回 404）
 
 ## 5. Playwright E2E — 核心交互
 

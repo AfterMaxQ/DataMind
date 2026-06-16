@@ -28,7 +28,13 @@
 - Spec: ✅ | Code: ✅ (re-review passed after fix)
 - Note: C1 found by code quality review — `app` not in scope for module-level `_try_langgraph_resume`. Fixed by adding `app` parameter.
 
+### Task 5 — Debug Endpoints ✅
+- Commits: 2aed49b (RED tests), 7eb334f (GREEN router+mount), ecf9168 (fix I4/I5/M1/M2), c376b55 (fix off-by-one in log path)
+- Spec: ✅ | Code: ✅ (re-review passed after fixes)
+- Tests: 5/5 debug tests, 321/321 full suite
+- Deferred: I1/I2 (plan-vs-spec field naming), I3 (127.0.0.1 binding check), I6 (log filtering test structural only)
+
 ## Current Task
 
-- Plan task: Task 5.1 — Write debug endpoint tests (RED)
+- Plan task: Task 7 — Playwright E2E Infrastructure (fixtures + config)
 - Stage: dispatching
