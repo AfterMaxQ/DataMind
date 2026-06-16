@@ -51,9 +51,9 @@
 
 ## 6. DeepSeek Integration
 
-- [ ] 6.1 Add DeepSeek provider config template to `config.yaml` defaults
-- [ ] 6.2 Write integration test: OpenAIClient against DeepSeek V4 Flash (chat + streaming + tool calling)
-- [ ] 6.3 Verify model switching between DeepSeek and other providers at runtime
+- [x] 6.1 Add DeepSeek provider config template to `config.yaml` defaults
+- [x] 6.2 Write integration test: OpenAIClient against DeepSeek V4 Flash (chat + streaming + tool calling)
+- [x] 6.3 Verify model switching between DeepSeek and other providers at runtime
 
 ## 7. API Extensions
 
