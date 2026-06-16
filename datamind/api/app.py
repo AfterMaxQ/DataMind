@@ -247,7 +247,7 @@ def create_app(project_root: str) -> FastAPI:
                 proj = _proj()
 
                 # Attempt LangGraph resume first
-                langgraph_result = _try_langgraph_resume(proj, sm, yaml_path, req.decision)
+                langgraph_result = _try_langgraph_resume(app, proj, sm, yaml_path, req.decision)
                 if langgraph_result is not None:
                     return langgraph_result
 
@@ -368,7 +368,7 @@ def create_app(project_root: str) -> FastAPI:
 # ===========================================================================
 
 
-def _try_langgraph_resume(proj, sm, yaml_path: str, decision: dict) -> dict | None:
+def _try_langgraph_resume(app, proj, sm, yaml_path: str, decision: dict) -> dict | None:
     """Attempt to resume LangGraph agent from checkpoint.
 
     Returns an API response dict on success, or ``None`` if no checkpoint

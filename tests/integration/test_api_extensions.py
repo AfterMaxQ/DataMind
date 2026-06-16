@@ -462,6 +462,12 @@ class TestGateApprovalEndpoint:
             assert "phase" in data
             # Verify LangGraphAgent.resume was called with the decision
             mock_instance.resume.assert_called_once()
+            # Verify session was registered
+            session_id = sm.state.session
+            assert session_id in app.state.session_registry
+            entry = app.state.session_registry[session_id]
+            assert "agent" in entry
+            assert "state_machine" in entry
 
 
     def test_gate_decision_broadcasts_decision_update(self, api_client, tmp_project):
