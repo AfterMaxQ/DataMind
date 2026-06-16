@@ -74,7 +74,7 @@ async def query_logs(
 
     Supports optional filtering by session_id and log level.
     """
-    log_dir = str(Path(__file__).resolve().parent.parent / ".datamind" / "logs")
+    log_dir = str(Path(__file__).resolve().parent.parent.parent / ".datamind" / "logs")
     log_file = os.path.join(log_dir, "app.jsonl")
 
     entries: list[dict] = []
