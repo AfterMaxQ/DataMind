@@ -293,11 +293,13 @@ class MockLLMClient:
         self.responses = responses or []
         self.call_count = 0
         self.last_messages = None
+        self.all_messages: list = []  # N1: capture all call messages for inspection
 
     def chat(self, messages=None, tools=None):
         from datamind.engine.llm import LLMResponse
         self.call_count += 1
         self.last_messages = messages
+        self.all_messages.append(messages or [])  # N1: capture every call
         if self.call_count <= len(self.responses):
             return self.responses[self.call_count - 1]
         return LLMResponse(
@@ -643,3 +645,93 @@ class TestLangGraphAgent:
         assert llm.call_count == 2, (
             f"Expected 2 LLM calls (initial + follow-up), got {llm.call_count}"
         )
+
+    # ------------------------------------------------------------------
+    # N1: Tool result messages reach the LLM with actual results
+    # ------------------------------------------------------------------
+
+    def test_tool_result_messages_contain_actual_results(self):
+        """N1: Tool result messages in follow-up LLM calls contain actual execution
+        output, not empty ``{}``.
+
+        The existing tool execution loop stores results in the ``tool_calls`` list
+        but the message-building loop reads ``tc.get("result", {})`` from raw call
+        dicts (which never have a ``result`` key). This test verifies that the
+        follow-up LLM call receives tool messages with real content.
+        """
+        from datamind.engine.llm import LLMResponse
+        from datamind.engine.langgraph_agent import (
+            LangGraphAgent, LangGraphComplete, SkillGraphBuilder,
+        )
+        from datamind.engine.tools import ToolRegistry
+
+        # LLM returns 2 tool calls, then finishes
+        tool_call1 = {
+            "id": "tc-1",
+            "type": "function",
+            "name": "echo",
+            "arguments": '{"msg": "hello"}',
+        }
+        tool_call2 = {
+            "id": "tc-2",
+            "type": "function",
+            "name": "double",
+            "arguments": '{"n": 21}',
+        }
+        llm = MockLLMClient(responses=[
+            LLMResponse(content="Calling tools", tool_calls=[tool_call1, tool_call2]),
+            LLMResponse(content="All done", tool_calls=[]),
+        ])
+
+        reg = ToolRegistry()
+        reg.register(
+            "echo",
+            {"type": "function", "function": {
+                "name": "echo", "description": "Echo",
+                "parameters": {"type": "object", "properties": {"msg": {"type": "string"}}},
+            }},
+            lambda msg="": {"echo": msg},
+        )
+        reg.register(
+            "double",
+            {"type": "function", "function": {
+                "name": "double", "description": "Double a number",
+                "parameters": {"type": "object", "properties": {"n": {"type": "number"}}},
+            }},
+            lambda n=0: {"double": n * 2},
+        )
+
+        single_auto = [SkillPhase(id="step1", name="Step1", type="AUTO", description="Step 1")]
+        skill_def = MockSkillDef(phases=single_auto)
+        builder = SkillGraphBuilder(
+            skill_def=skill_def, llm_client=llm, tool_registry=reg,
+        )
+        agent = LangGraphAgent(builder)
+
+        state = self._initial_state()
+        event = agent.run(state)
+
+        assert isinstance(event, LangGraphComplete)
+
+        # The follow-up LLM call (call 2) must contain tool result messages
+        assert len(llm.all_messages) >= 2, (
+            f"Expected at least 2 LLM calls, got {len(llm.all_messages)}"
+        )
+        follow_up_messages = llm.all_messages[1]  # second call
+
+        # Find tool messages in the follow-up call
+        tool_msgs = [m for m in follow_up_messages if m.get("role") == "tool"]
+        assert len(tool_msgs) == 2, (
+            f"Expected 2 tool messages in follow-up call, got {len(tool_msgs)}: {tool_msgs}"
+        )
+
+        # Parse the content of each tool message
+        for msg in tool_msgs:
+            content = msg.get("content", "")
+            parsed = __import__("json").loads(content)
+            assert parsed != {}, (
+                f"Tool message content must NOT be empty dict, got: {content}"
+            )
+            assert "tool_call_id" in msg, (
+                f"Tool message must have tool_call_id: {msg}"
+            )

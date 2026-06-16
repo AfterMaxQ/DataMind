@@ -351,11 +351,19 @@ class SkillGraphBuilder:
                         phase_messages.append(assistant_msg)
 
                         for tc in response.tool_calls:
+                            # Look up the actual execution result from
+                            # accumulated tool_calls (not the raw call
+                            # dict, which has no "result" key).
+                            matched = next(
+                                (t for t in tool_calls if t.get("id") == tc.get("id")),
+                                None,
+                            )
+                            tc_result = matched.get("result", {}) if matched else {}
                             phase_messages.append({
                                 "role": "tool",
                                 "tool_call_id": tc.get("id", ""),
                                 "content": json.dumps(
-                                    tc.get("result", {}), ensure_ascii=False
+                                    tc_result, ensure_ascii=False
                                 ),
                             })
 
