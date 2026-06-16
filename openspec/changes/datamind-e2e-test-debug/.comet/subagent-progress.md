@@ -18,11 +18,13 @@
 - Commit: 0e5e691 | Spec: ✅ | Code: ✅
 
 ### Task 3.1 — Write tool tracing tests (RED) ✅
-- Commits: 545aa7c, c3677a2 (fixes) | Spec: ✅ | Code: ✅ (fixes verified)
+- Commits: 545aa7c, c3677a2 | Spec: ✅ | Code: ✅
+
+### Task 3.2 — Implement tool call tracing (GREEN) ✅
+- Commit: 0d4c56a | Spec: ✅ | Code: ✅
 
 ## Current Task
 
-- Plan task: Task 3.2 — Implement tool call tracing in ToolRegistry.execute() (GREEN)
-- OpenSpec task: 3.1, 3.2
+- Plan task: Task 4 — Session Registry
 - Stage: implementing
 - Round: 1/3
