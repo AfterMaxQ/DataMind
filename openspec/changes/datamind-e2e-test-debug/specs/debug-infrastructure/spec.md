@@ -1,4 +1,4 @@
-﻿## ADDED Requirements
+## ADDED Requirements
 
 ### Requirement: JSON Structured Logging
 系统 SHALL 提供 JSON Lines 格式的结构化日志输出，每条日志包含时间戳、级别、模块、session_id、事件类型和事件数据。

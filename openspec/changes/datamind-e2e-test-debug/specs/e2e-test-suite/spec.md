@@ -1,4 +1,4 @@
-﻿## ADDED Requirements
+## ADDED Requirements
 
 ### Requirement: WebSocket Connection Lifecycle
 系统 SHALL 通过 Playwright 自动化测试验证 WebSocket 连接的完整生命周期：连接建立、消息收发、断线重连、连接关闭。
