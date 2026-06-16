@@ -1,8 +1,8 @@
 ﻿## 1. Setup and Dependencies
 
-- [ ] 1.1 Add `langgraph` to pyproject.toml dependencies
-- [ ] 1.2 Run `pip install -e ".[dev]"` to install langgraph
-- [ ] 1.3 Verify all 185 existing tests pass on current master
+- [x] 1.1 Add `langgraph` to pyproject.toml dependencies
+- [x] 1.2 Run `pip install -e ".[dev]"` to install langgraph
+- [x] 1.3 Verify all 185 existing tests pass on current master
 
 ## 2. Tool System
 

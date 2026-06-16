@@ -64,26 +64,26 @@ base-ref: dee4855333ce62712699ba7a84f05d2fac09fb25
 - Modify: `pyproject.toml`
 - No test files (infrastructure only)
 
-- [ ] **Step 1.1: Add langgraph to dependencies**
+- [x] **Step 1.1: Add langgraph to dependencies**
 
 ```toml
 # In pyproject.toml, add to [project].dependencies:
     "langgraph>=0.2.0",
 ```
 
-- [ ] **Step 1.2: Install updated dependencies**
+- [x] **Step 1.2: Install updated dependencies**
 
 Run: `pip install -e ".[dev]"`
 
 Expected: langgraph and all dependencies install successfully.
 
-- [ ] **Step 1.3: Verify existing tests still pass**
+- [x] **Step 1.3: Verify existing tests still pass**
 
 Run: `pytest tests/ -v --tb=short`
 
 Expected: 185 tests PASS. No regressions.
 
-- [ ] **Step 1.4: Commit**
+- [x] **Step 1.4: Commit**
 
 ```bash
 git add pyproject.toml
