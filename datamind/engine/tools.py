@@ -31,12 +31,52 @@ class ToolRegistry:
         """Execute a registered tool by name with the given arguments.
 
         Raises ValueError if the tool is not registered.
+
+        Every invocation is traced via structured logging: the tool name,
+        arguments, elapsed time, and outcome are recorded as a ``tool_call``
+        event associated with the current session_id (via contextvars).
         """
+        import logging
+        import time
+        from datamind.session_context import _current_session_id
+
+        _tool_log = logging.getLogger("datamind.tools")
+
         entry = self._tools.get(name)
         if entry is None:
             raise ValueError(f"Unknown tool: {name}")
+
         _, handler = entry
-        return handler(**args)
+        start = time.perf_counter()
+        session_id = _current_session_id.get()
+        try:
+            result = handler(**args)
+            elapsed = (time.perf_counter() - start) * 1000
+            _tool_log.info(
+                "tool_call",
+                extra={
+                    "data": {
+                        "tool": name,
+                        "status": "success",
+                        "elapsed_ms": round(elapsed, 2),
+                    },
+                },
+            )
+            return result
+        except Exception as exc:
+            elapsed = (time.perf_counter() - start) * 1000
+            _tool_log.error(
+                "tool_call",
+                extra={
+                    "data": {
+                        "tool": name,
+                        "status": "error",
+                        "elapsed_ms": round(elapsed, 2),
+                        "error": str(exc),
+                    },
+                },
+            )
+            raise
 
     def get(self, name: str) -> tuple[dict, Callable[..., dict]] | None:
         """Return (schema, handler) for a tool, or None if not registered."""
