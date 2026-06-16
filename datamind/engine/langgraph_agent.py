@@ -526,13 +526,26 @@ class LangGraphAgent:
             ``build()`` returns a compiled graph.
         skill_yaml_path: Optional path to a ``.skill.yaml`` file for
             persisting state on phase transitions.
+        checkpointer: Optional LangGraph checkpointer (e.g.
+            :class:`~langgraph.checkpoint.sqlite.SqliteSaver`). When
+            provided, it is passed to :meth:`SkillGraphBuilder.build`.
+        on_event: Optional async callable ``(event_type, data)`` invoked
+            on every phase transition for WebSocket broadcast.
+        on_phase_transition: Deprecated alias for *on_event*.
     """
 
-    def __init__(self, graph_builder: SkillGraphBuilder, skill_yaml_path=None):
+    def __init__(
+        self,
+        graph_builder: SkillGraphBuilder,
+        skill_yaml_path=None,
+        checkpointer=None,
+        on_event=None,
+    ):
         self.graph_builder = graph_builder
-        self.graph = graph_builder.build()
+        self.graph = graph_builder.build(checkpointer=checkpointer)
         self.config: dict = {"configurable": {"thread_id": "default"}}
         self.skill_yaml_path = skill_yaml_path
+        self.on_event = on_event
 
     # ------------------------------------------------------------------
     # Public API
@@ -595,6 +608,10 @@ class LangGraphAgent:
         # Persist on every transition (D4)
         self._update_skill_yaml(state)
 
+        # Broadcast phase transition event if callback is registered
+        if self.on_event:
+            self._broadcast_phase_transition(state)
+
         # Check for pending interrupts (GATE phases paused)
         pending_interrupts = state.get("__interrupt__", [])
         if pending_interrupts and not state.get("result"):
@@ -622,6 +639,30 @@ class LangGraphAgent:
             if 0 <= phase_idx < len(self.graph_builder.phases):
                 phase_id = self.graph_builder.phases[phase_idx].id
         return LangGraphPhaseComplete(phase_id=phase_id, state=dict(state))
+
+    def _broadcast_phase_transition(self, state: SkillState) -> None:
+        """Invoke ``self.on_event`` with the current phase transition."""
+        if self.on_event is None:
+            return
+        phase_idx = state.get("current_phase", 0)
+        phase_id = ""
+        phase_name = ""
+        phase_type = "AUTO"
+        if self.graph_builder.phases and 0 <= phase_idx < len(self.graph_builder.phases):
+            phase = self.graph_builder.phases[phase_idx]
+            phase_id = phase.id
+            phase_name = phase.name
+            phase_type = phase.type
+        try:
+            self.on_event("phase_transition", {
+                "phase_id": phase_id,
+                "phase_name": phase_name,
+                "phase_type": phase_type,
+                "session_id": state.get("session_id", ""),
+                "result": state.get("result"),
+            })
+        except Exception:
+            _log.debug("on_event callback failed", exc_info=True)
 
     def _update_skill_yaml(self, state: SkillState) -> None:
         """Persist the current state to ``.skill.yaml`` if a path is configured."""

@@ -4,6 +4,7 @@ from pathlib import Path
 
 # Default directory names inside .datamind/
 GRAPH_DB_NAME = "graph.db"
+CHECKPOINTS_DB_NAME = "checkpoints.db"
 CONTEXT_DIR = "context"
 CONFIG_FILE = "config.yaml"
 
@@ -64,6 +65,7 @@ def resolve_component_paths(project_root: str | Path) -> dict[str, Path]:
     root = Path(project_root).resolve()
     return {
         "graph_db": base / GRAPH_DB_NAME,
+        "checkpoints_db": base / CHECKPOINTS_DB_NAME,
         "context_dir": base / CONTEXT_DIR,
         "config_file": base / CONFIG_FILE,
         "data_dir": root / DATA_DIR,
