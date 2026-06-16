@@ -90,7 +90,7 @@ def read_csv(path: str, nrows: int = 10) -> dict:
             df = pd.read_csv(path, encoding=enc, nrows=None)
             result = _read_dataframe(path, nrows, df)
             return result
-        except (UnicodeDecodeError, UnicodeError) as e:
+        except UnicodeError as e:
             last_error = e
             continue
     raise ValueError(f"Failed to decode CSV with any encoding: {last_error}")
