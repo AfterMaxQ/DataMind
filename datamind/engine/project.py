@@ -92,6 +92,7 @@ class Project:
 
     def create_agent(self) -> "DataMindAgent":
         from datamind.engine.agent import DataMindAgent
+        from datamind.engine.tools import create_default_registry
         return DataMindAgent(
             llm_client=self.llm_client,
             prompt_manager=self.prompt_manager,
@@ -99,4 +100,5 @@ class Project:
             lineage_service=self.lineage,
             cognition_service=self.cognition,
             assembly_service=self.assembly,
+            tool_registry=create_default_registry(),
         )

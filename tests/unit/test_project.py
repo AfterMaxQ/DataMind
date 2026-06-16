@@ -56,6 +56,7 @@ def test_project_paths_includes_prompts_dir(tmp_project):
 def test_project_create_agent_returns_datamind_agent(tmp_project):
     """create_agent() returns a DataMindAgent wired with Project services."""
     from datamind.engine.agent import DataMindAgent
+    from datamind.engine.tools import ToolRegistry
     initialize_project(tmp_project)
     proj = Project(str(tmp_project))
     agent = proj.create_agent()
@@ -66,3 +67,6 @@ def test_project_create_agent_returns_datamind_agent(tmp_project):
     assert agent.lineage_service is proj.lineage
     assert agent.cognition_service is proj.cognition
     assert agent.assembly_service is proj.assembly
+    # v3: tool_registry is wired via create_agent()
+    assert isinstance(agent._tool_registry, ToolRegistry)
+    assert len(agent._tool_registry.get_definitions()) == 7

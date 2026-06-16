@@ -108,9 +108,9 @@ class DataMindAgent:
             Optional cognition service for recording decisions.
         assembly_service:
             Optional assembly service for context assembly.
-        tool_executor:
-            Optional callable ``(tool_call: dict) -> dict`` that executes a
-            single tool call and returns a result with ``id`` and ``content`` keys.
+        tool_registry:
+            Optional :class:`~datamind.engine.tools.ToolRegistry` for tool
+            definition lookup and execution.
     """
 
     def __init__(
@@ -121,7 +121,7 @@ class DataMindAgent:
         lineage_service=None,
         cognition_service=None,
         assembly_service=None,
-        tool_executor=None,
+        tool_registry=None,
     ):
         self.llm_client = llm_client
         self.prompt_manager = prompt_manager
@@ -129,7 +129,7 @@ class DataMindAgent:
         self.lineage_service = lineage_service
         self.cognition_service = cognition_service
         self.assembly_service = assembly_service
-        self._tool_executor = tool_executor
+        self._tool_registry = tool_registry
         self._state_machine: SkillStateMachine | None = None
 
     # ------------------------------------------------------------------
@@ -310,9 +310,11 @@ class DataMindAgent:
     def _get_tool_defs(self) -> list[dict]:
         """Return the list of tool definitions available to the LLM.
 
-        Override in subclasses or configure via *assembly_service* to
-        provide real tool schemas.
+        Delegates to ``self._tool_registry.get_definitions()`` if a
+        ToolRegistry is configured; otherwise returns an empty list.
         """
+        if self._tool_registry is not None:
+            return self._tool_registry.get_definitions()
         return []
 
     def _execute_tools(self, tool_calls: list[dict]) -> list[dict]:
@@ -320,13 +322,24 @@ class DataMindAgent:
 
         Each result must have ``id`` and ``content`` keys so it can be
         appended as a ``role: "tool"`` message.
+
+        Delegates to ``self._tool_registry.execute()`` with JSON argument
+        parsing when a ToolRegistry is configured.
         """
+        import json
+
         results: list[dict] = []
         for tc in tool_calls:
-            if self._tool_executor is not None:
+            if self._tool_registry is not None:
                 try:
-                    result = self._tool_executor(tc)
-                    results.append(result)
+                    name = tc.get("name", "")
+                    args_str = tc.get("arguments", "{}")
+                    args = json.loads(args_str) if isinstance(args_str, str) else args_str
+                    result = self._tool_registry.execute(name, args)
+                    results.append({
+                        "id": tc.get("id", ""),
+                        "content": json.dumps(result) if not isinstance(result, str) else result,
+                    })
                 except Exception as exc:
                     results.append({
                         "id": tc.get("id", ""),

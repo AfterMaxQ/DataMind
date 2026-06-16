@@ -205,12 +205,13 @@ class TestApproveGate:
 
 class TestToolCalls:
     def test_llm_tool_calls_are_executed(self):
-        """Tool calls in the LLM response are dispatched and returned.
+        """Tool calls in the LLM response are dispatched via ToolRegistry.
 
         Uses [AUTO, GATE, AUTO] phases so the first AUTO phase processes
         tool calls, then the loop pauses at the GATE.
         """
         from datamind.engine.agent import DataMindAgent, WaitForApproval
+        from datamind.engine.tools import ToolRegistry
 
         sm = _make_sm(AUTO_GATE_AUTO_PHASES)
         mock_llm = MockLLMClient(responses=[
@@ -233,18 +234,29 @@ class TestToolCalls:
 
         tool_calls_executed = []
 
-        def tool_executor(tool_call):
-            tool_calls_executed.append(tool_call)
-            return {
-                "id": tool_call.get("id", ""),
-                "content": f"Result for {tool_call.get('name', 'unknown')}: found 3 items",
-            }
+        def search_handler(q=None):
+            tool_calls_executed.append({"name": "search", "q": q})
+            return {"content": "Result for search: found 3 items"}
+
+        registry = ToolRegistry()
+        registry.register("search", {
+            "type": "function",
+            "function": {
+                "name": "search",
+                "description": "Search tool",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"q": {"type": "string"}},
+                    "required": ["q"],
+                },
+            },
+        }, search_handler)
 
         agent = DataMindAgent(
             llm_client=mock_llm,
             prompt_manager=_make_prompt_manager(),
             usage_tracker=_make_usage_tracker(),
-            tool_executor=tool_executor,
+            tool_registry=registry,
         )
 
         result = agent.run(sm)
@@ -269,6 +281,7 @@ class TestMaxToolTurns:
         completes, and execution pauses at the GATE.
         """
         from datamind.engine.agent import DataMindAgent, WaitForApproval
+        from datamind.engine.tools import ToolRegistry
 
         sm = _make_sm(AUTO_GATE_AUTO_PHASES)
 
@@ -285,11 +298,22 @@ class TestMaxToolTurns:
             ))
 
         mock_llm = MockLLMClient(responses=responses)
+
+        registry = ToolRegistry()
+        registry.register("search", {
+            "type": "function",
+            "function": {
+                "name": "search",
+                "description": "Search tool",
+                "parameters": {"type": "object", "properties": {}, "required": []},
+            },
+        }, lambda: {"content": "mock result"})
+
         agent = DataMindAgent(
             llm_client=mock_llm,
             prompt_manager=_make_prompt_manager(),
             usage_tracker=_make_usage_tracker(),
-            tool_executor=lambda tc: {"id": tc.get("id", ""), "content": "mock result"},
+            tool_registry=registry,
         )
 
         result = agent.run(sm)
