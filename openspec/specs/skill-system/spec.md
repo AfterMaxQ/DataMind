@@ -87,3 +87,14 @@ All SKILL.md files SHALL define workflow steps as named phases. Each phase SHALL
 - **WHEN** a SKILL.md is loaded
 - **THEN** the parser validates that all phase IDs are unique, at least one phase exists, and no GATE phase is the final phase
 
+### Requirement: Tool-Aware Phase Definitions
+The system SHALL support skill phase definitions that declare which tools are available during that phase. Tool availability SHALL be scoped per-phase: a "Generate" phase may have `generate_script` and `execute_script`, while an "Analyze" phase may have `read_csv`, `read_parquet`, and `describe_dataset`.
+
+#### Scenario: Phase-scoped tool availability
+- **WHEN** a SKILL.md phase definition includes `tools: [read_csv, describe_dataset]`
+- **THEN** only those tools are injected into the LLM context for that phase
+
+#### Scenario: Phase without explicit tools gets all
+- **WHEN** a SKILL.md phase definition does not specify tools
+- **THEN** all registered tools are available during that phase
+

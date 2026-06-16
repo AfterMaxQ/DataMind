@@ -4,23 +4,15 @@
 TBD - created by archiving change datamind-engine-v2. Update Purpose after archive.
 ## Requirements
 ### Requirement: LLM Client Abstraction
-The system SHALL provide a unified LLM client interface (`BaseLLMClient`) with concrete implementations for OpenAI-compatible APIs (`OpenAIClient`) and Ollama local models (`OllamaClient`). All clients SHALL support chat completion, streaming responses, and tool calling through a common interface.
+The system SHALL provide a unified `BaseLLMClient` interface with concrete implementations for OpenAI-compatible APIs (`OpenAIClient`) and Ollama local models (`OllamaClient`). The `OpenAIClient` SHALL be verified against DeepSeek`s OpenAI-compatible API as a supported provider. All implementations SHALL support chat completion, streaming, and tool calling with retry on transient errors (429, 502, 503).
 
-#### Scenario: OpenAI chat completion
-- **WHEN** agent calls `llm.chat(messages=[...], tools=[...])` with provider configured as `openai`
-- **THEN** the request is sent to the configured OpenAI-compatible endpoint and the response is returned with text content and any tool calls
+#### Scenario: DeepSeek V4 Flash via OpenAIClient
+- **WHEN** the LLM client is configured with `provider: openai`, `api_base: https://api.deepseek.com`, `model: deepseek-v4-flash`
+- **THEN** chat completion, streaming, and tool calling all work correctly via the `OpenAIClient`
 
-#### Scenario: Ollama chat completion
-- **WHEN** agent calls `llm.chat(messages=[...])` with provider configured as `ollama`
-- **THEN** the request is sent to the local Ollama endpoint (`http://localhost:11434/v1`) and the response is returned
-
-#### Scenario: Streaming response
-- **WHEN** agent calls `llm.chat(messages=[...], stream=True)`
-- **THEN** the method yields response chunks as they arrive, enabling real-time display
-
-#### Scenario: API error retry
-- **WHEN** an API call fails with a transient error (429, 502, 503)
-- **THEN** the client retries up to 3 times with exponential backoff before raising an error
+#### Scenario: OpenAIClient works with any OpenAI-compatible provider
+- **WHEN** the LLM client is configured with any OpenAI-compatible `api_base` and `model`
+- **THEN** the `OpenAIClient` sends correctly formatted requests and parses responses, regardless of the specific provider
 
 ### Requirement: Multi-Model Switching
 The system SHALL support switching between configured LLM models at runtime without restarting. The active model SHALL be specifiable per request or per session.
@@ -45,19 +37,15 @@ When the Ollama provider is configured, the system SHALL automatically discover 
 - **THEN** the system falls back to manually configured model names in `config.yaml`
 
 ### Requirement: LLM Configuration
-The system SHALL load LLM configuration from `.datamind/config.yaml` with support for `${ENV_VAR}` environment variable injection. Environment variables SHALL take precedence over file values.
+The system SHALL load LLM configuration from `.datamind/config.yaml` with `${ENV_VAR}` environment variable injection. The configuration template SHALL include pre-configured provider entries for DeepSeek, OpenAI, and Ollama with their default `api_base` URLs and model lists.
 
-#### Scenario: Config with env var
-- **WHEN** config contains `api_key: ${OPENAI_API_KEY}` and the environment variable is set
-- **THEN** the resolved value uses the environment variable
+#### Scenario: DeepSeek configured via config.yaml
+- **WHEN** `.datamind/config.yaml` contains a `deepseek` provider entry with `api_base`, `api_key`, and `models`
+- **THEN** the system creates an `OpenAIClient` pointed at the DeepSeek API
 
-#### Scenario: Config file only
-- **WHEN** config contains a plain value like `api_url: https://api.openai.com/v1`
-- **THEN** the value is used as-is from the config file
-
-#### Scenario: Env var override
-- **WHEN** both config file and environment variable specify the same key
-- **THEN** the environment variable value takes precedence
+#### Scenario: Env var injection for API key
+- **WHEN** the config contains `api_key: "${DEEPSEEK_API_KEY}"`
+- **THEN** the value is resolved from the `DEEPSEEK_API_KEY` environment variable at load time
 
 ### Requirement: System Prompt Templates
 The system SHALL load system prompt templates from a directory as markdown files with YAML frontmatter metadata. Templates SHALL support `{{ variable }}` injection for dynamic content including context manifest, skills list, datasets, and parameters.

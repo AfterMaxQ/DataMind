@@ -4,66 +4,65 @@
 TBD - created by archiving change datamind-engine-v2. Update Purpose after archive.
 ## Requirements
 ### Requirement: Agent Loop
-The system SHALL provide an agent loop that executes: assemble context → render system prompt → call LLM with tools → execute tool calls → record decisions → repeat. The loop SHALL continue until the task completes or a GATE step requires human input.
+The system SHALL provide an agent execution loop powered by LangGraph state graphs. Each skill invocation SHALL construct a `StateGraph` from the skill`s phase definitions. AUTO phases SHALL be executed via LLM-tool interaction loops. GATE phases SHALL pause execution using LangGraph`s `interrupt()` primitive and resume on human approval. The execution loop SHALL support conditional branching (REJECT routes to a designated fallback node), parallel execution of independent nodes, and map-reduce fan-out patterns.
 
-#### Scenario: Agent executes AUTO step
-- **WHEN** the current skill step is AUTO
-- **THEN** the agent assembles context, renders the prompt, calls the LLM, executes any tool calls, records the result, and advances to the next step
+#### Scenario: AUTO phase executes
+- **WHEN** a skill execution reaches an AUTO phase
+- **THEN** the LangGraph agent assembles context, renders the system prompt, calls the LLM with tool definitions, executes tool calls in a loop, and records decisions before advancing to the next node
 
-#### Scenario: Agent pauses at GATE step
-- **WHEN** the current skill step is GATE
-- **THEN** the agent pauses execution and yields a `WaitForApproval` response with the proposal content, waiting for human input (APPROVE/REJECT/MODIFY)
+#### Scenario: GATE phase pauses execution
+- **WHEN** a skill execution reaches a GATE phase
+- **THEN** LangGraph`s `interrupt()` pauses execution and returns a `WaitForApproval` event with the phase ID, name, and context message
 
-#### Scenario: Agent resumes after gate
-- **WHEN** human provides approval at a GATE step
-- **THEN** the agent records the gate decision and advances to the next AUTO step
+#### Scenario: Gate approval resumes execution
+- **WHEN** the human approves the GATE with a decision
+- **THEN** LangGraph resumes from the interrupt point and routes to the next node based on the decision
 
-#### Scenario: Tool execution
-- **WHEN** the LLM returns a tool call (e.g., `read_describe`, `execute_script`)
-- **THEN** the agent executes the tool with provided arguments and returns the result to the LLM for the next turn
+#### Scenario: Gate rejection routes back
+- **WHEN** the human rejects the GATE with action "reject"
+- **THEN** the graph routes to the designated fallback phase (e.g., back to proposal) via a conditional edge
+
+#### Scenario: Parallel phase execution
+- **WHEN** a skill phase specifies parallel candidate execution
+- **THEN** LangGraph spawns independent sub-graphs for each candidate, executes them concurrently, and merges results before continuing
+
+#### Scenario: Tool calls execute during AUTO phases
+- **WHEN** the LLM requests tool execution during an AUTO phase
+- **THEN** the LangGraph agent dispatches to ToolRegistry, collects results, and feeds them back to the LLM for up to 5 tool turns
 
 ### Requirement: Skill State Machine
-The system SHALL manage skill execution through a `SkillStateMachine` that tracks phases, validates transitions, and persists state to `.skill.yaml`. Each skill invocation SHALL create a timestamped session directory under `.datamind/skill-sessions/`.
+The system SHALL provide a `SkillStateMachine` that tracks skill execution phases, their status (pending, in_progress, completed, rejected), and their artifacts. The state machine SHALL persist to `.skill.yaml` and integrate with LangGraph checkpoints via `SqliteSaver`.
 
-#### Scenario: Session initialization
-- **WHEN** a skill is invoked with `/skill data-cleaning sales.csv`
-- **THEN** a session directory is created at `.datamind/skill-sessions/<timestamp>-sales-cleaning/` containing `.skill.yaml` with `phase: analyze` and all phase statuses `pending`
+#### Scenario: Skill state machine manages phases
+- **WHEN** a new skill session is created
+- **THEN** the state machine initializes all phases as pending and persists the initial state to `.skill.yaml`
 
-#### Scenario: Phase transition
-- **WHEN** the analyze phase completes successfully
-- **THEN** `.skill.yaml` updates to `phase: propose-strategy`, with `analyze: complete` and the artifact path recorded
-
-#### Scenario: Phase transition validation
-- **WHEN** code attempts to advance to `execute` while `gate-approve` is still `awaiting_human`
-- **THEN** the state machine rejects the transition with an error
+#### Scenario: Phase completion updates state
+- **WHEN** an AUTO phase completes execution
+- **THEN** the phase status is set to completed in `.skill.yaml` and a LangGraph checkpoint is written to `checkpoints.db`
 
 ### Requirement: Interrupt and Resume
-The system SHALL support interrupting skill execution at any point and resuming from the exact phase without re-executing completed steps. AI SHALL be able to read `.skill.yaml` and understand: current phase, completed phases, artifact locations, and what the next step requires.
+The system SHALL support interrupt and resume of skill execution via LangGraph checkpoints. On interruption, LangGraph`s `SqliteSaver` SHALL persist the full graph state. On resume, the agent SHALL restore from the checkpoint and continue from the interrupted node. Additionally, `.skill.yaml` SHALL provide a lightweight summary for discovery without loading LangGraph.
 
-#### Scenario: Resume after interruption
-- **WHEN** a skill session was interrupted during `execute` phase
-- **THEN** reading `.skill.yaml` shows `phase: execute`, `propose-strategy: complete` with artifact path `phase-2-strategy.md`
-- **THEN** AI reads `phase-2-strategy.md` to understand the approved strategy and continues from `execute`
+#### Scenario: Resume after interruption via LangGraph
+- **WHEN** a skill execution is interrupted (process restart, crash)
+- **THEN** the agent loads the graph from `checkpoints.db`, restores the full state including messages and tool results, and continues from the interrupted node
 
-#### Scenario: Fast context recovery
-- **WHEN** AI context was lost and needs to resume a skill session
-- **THEN** AI reads `.skill.yaml` (~200 bytes) and knows the exact phase, completed phases, artifact paths, and pending statuses — without re-reading SKILL.md or execution logs
+#### Scenario: Fast status check via .skill.yaml
+- **WHEN** the API needs to display session status without loading LangGraph
+- **THEN** it reads `.skill.yaml` (~200 bytes) to get skill name, current phase, phase statuses, and result
 
 ### Requirement: Skill Session Artifact Tracking
-The system SHALL track all phase artifacts in `.skill.yaml` under an `artifacts` map. Each completed phase SHALL record the path to its output artifact. The result field SHALL be set to `pass` or `fail` upon skill completion.
+The system SHALL track artifacts created during skill execution. Phase outputs SHALL be stored as markdown or JSON files in the session directory. LangGraph checkpoints SHALL reference artifact paths in the graph state.
 
-#### Scenario: Artifact recording
-- **WHEN** the `analyze` phase generates an analysis output
-- **THEN** `.skill.yaml` records `artifacts.analyze: phase-1-analyze.md`
-
-#### Scenario: Final result
-- **WHEN** all phases complete successfully
-- **THEN** `.skill.yaml` records `result: pass` and `completed_at: <timestamp>`
+#### Scenario: Artifacts tracked in session directory
+- **WHEN** an AUTO phase produces output
+- **THEN** the output is written to the session directory and the artifact path is stored in both the LangGraph state and `.skill.yaml`
 
 ### Requirement: Framework-Agnostic Design
-The LLM client layer (`engine/llm.py`) SHALL expose a framework-agnostic interface. The agent loop (`engine/agent.py`) SHALL be replaceable without modifying the LLM client, prompt manager, or usage tracker. This SHALL reserve a migration path to LangGraph for v3.
+The system SHALL use LangGraph as the agent execution framework. The LLM client layer (`engine/llm.py`) SHALL remain framework-agnostic, exposing a chat completion interface that LangGraph can call. This preserves the ability to swap LLM providers independently of the graph framework.
 
-#### Scenario: Client independence
-- **WHEN** `engine/agent.py` is replaced with a LangGraph-based implementation in v3
-- **THEN** `engine/llm.py`, `engine/prompt.py`, and `engine/usage.py` require zero changes
+#### Scenario: LLM client used by LangGraph agent
+- **WHEN** the LangGraph agent needs to call the LLM
+- **THEN** it invokes `llm_client.chat(messages, tools)` — the same interface used by v2`s custom agent loop
 
