@@ -64,6 +64,9 @@ def create_app(project_root: str) -> FastAPI:
     # WebSocket connection manager — shared across all endpoints
     app.state.ws_manager = ConnectionManager()
 
+    # Session registry for debug introspection (D7)
+    app.state.session_registry: dict[str, dict] = {}
+
     def _proj():
         """Return the cached Project singleton from app state."""
         return app.state.project
@@ -250,7 +253,19 @@ def create_app(project_root: str) -> FastAPI:
 
                 # Fall back to legacy DataMindAgent
                 agent = proj.create_agent()
+                app.state.session_registry[sm.state.session] = {
+                    "agent": agent,
+                    "state_machine": sm,
+                    "started_at": sm.state.started_at,
+                    "skill_name": sm.state.skill,
+                    "updated_at": sm.state.completed_at or sm.state.started_at,
+                }
                 result = agent.run(sm)
+                # Update registry with latest state
+                app.state.session_registry[sm.state.session]["state_machine"] = sm
+                app.state.session_registry[sm.state.session]["updated_at"] = (
+                    sm.state.completed_at or sm.state.started_at
+                )
                 if isinstance(result, AgentError):
                     return {"phase": sm.state.phase, "result": sm.state.result,
                             "error": result.error_message}
@@ -387,6 +402,15 @@ def _try_langgraph_resume(proj, sm, yaml_path: str, decision: dict) -> dict | No
 
         # Resume from checkpoint using session_id as thread_id
         result = agent.resume(decision)
+
+        # Register LangGraph agent in session registry
+        app.state.session_registry[sm.state.session] = {
+            "agent": agent,
+            "state_machine": sm,
+            "started_at": sm.state.started_at,
+            "skill_name": sm.state.skill,
+            "updated_at": sm.state.completed_at or sm.state.started_at,
+        }
 
         # Convert LangGraphEvent to API response dict
         if isinstance(result, LangGraphWaitForApproval):
