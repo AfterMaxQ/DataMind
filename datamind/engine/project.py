@@ -18,7 +18,7 @@ _log = logging.getLogger(__name__)
 
 
 def _create_llm_client(config: dict):
-    """Create an LLM client (OpenAI or Ollama) from a config dict."""
+    """Create an LLM client (OpenAI, Ollama, or DeepSeek) from a config dict."""
     provider = config.get("provider", "openai")
     model = config.get("model", "gpt-4o")
     api_key = config.get("api_key") or ""
@@ -27,6 +27,9 @@ def _create_llm_client(config: dict):
 
     if provider == "ollama":
         return OllamaClient(model=model, api_url=api_base)
+
+    if provider == "deepseek":
+        api_base = config.get("api_base", "https://api.deepseek.com/v1")
 
     return OpenAIClient(
         api_key=api_key,
