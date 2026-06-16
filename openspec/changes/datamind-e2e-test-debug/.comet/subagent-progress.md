@@ -61,7 +61,13 @@
 - 4 tests: CSV/Excel/Parquet upload, invalid file error display
 - Adapted: mockUploadApi() helper for dataset list patching, ES module path handling
 
+### Task 12 — Playwright E2E Gate Approval Tests (gate-approval.spec.ts) ✅
+- Commit: d93d20e | Spec: ✅ (injection approach justified) | Code: ✅ Pass
+- 6 tests: gate render, approve/reject transitions, decision record, multiple gates, comment input
+- Uses page.evaluate() Pinia injection due to missing SSE gate-event path (documented)
+- Selectors: .gate-btn.approve/.reject, .gate-decided.approved/.rejected
+
 ## Current Task
 
-- Plan task: Task 12 — Playwright E2E Gate Approval Tests (gate-approval.spec.ts)
+- Plan task: Task 13 — Playwright E2E Skill Pipeline Full Flow (skill-pipeline.spec.ts)
 - Stage: dispatching
