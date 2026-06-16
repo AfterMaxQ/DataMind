@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, watch, onMounted } from 'vue'
+import { ref, computed, nextTick, watch, onMounted } from 'vue'
 import { useSessionStore } from '@/stores/session'
 import { useChat } from '@/composables/useChat'
 import CodeBlock from './CodeBlock.vue'
@@ -20,8 +20,6 @@ const inputRef = ref<HTMLInputElement | null>(null)
 const skillCandidates = ['data-exploration', 'data-cleaning', 'feature-engineering', 'model-training', 'report-generation']
 const showSkillSuggestions = ref(false)
 const filteredSkills = ref<string[]>([])
-const cursorPosition = ref(0)
-
 function scrollToBottom() {
   nextTick(() => {
     if (chatContainer.value) {
@@ -88,6 +86,13 @@ function handleStop() {
   stopStreaming()
 }
 
+const viewScriptPath = ref<string | null>(null)
+
+function handleViewScripts(path: string) {
+  viewScriptPath.value = path
+  console.log('View scripts:', path)
+}
+
 async function onGateApprove(sessionDir: string, phaseId: string, comment: string) {
   await approveGate(sessionDir, phaseId, true, comment)
 }
@@ -123,6 +128,10 @@ function parseCodeBlocks(content: string): Array<{ type: 'text' | 'code'; conten
 
   return blocks
 }
+
+const parsedMessages = computed(() => {
+  return new Map(store.messages.map(msg => [msg.id, parseCodeBlocks(msg.content)]))
+})
 
 onMounted(() => {
   inputRef.value?.focus()
@@ -163,14 +172,14 @@ onMounted(() => {
         </div>
 
         <div v-else class="message-bubble ai-bubble">
-          <template v-for="(block, idx) in parseCodeBlocks(msg.content)" :key="idx">
+          <template v-for="(block, idx) in parsedMessages.get(msg.id)" :key="idx">
             <span v-if="block.type === 'text'" class="message-text" v-html="highlightSkillCommands(block.content)"></span>
             <CodeBlock
               v-else
               :code="block.content"
               :language="block.language"
               :scriptPath="block.language === 'python' ? `scripts/${msg.skill_name || 'script'}_${idx}.py` : undefined"
-              @view-scripts="(path: string) => {}"
+              @view-scripts="handleViewScripts"
             />
           </template>
 
